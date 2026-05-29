@@ -5636,4 +5636,19 @@ document.addEventListener('keydown',     boot, { once: true });
     if(subEl){
       const slotLabel = selBill==='right'&&selSlot ? selSlot.label : '';
       const dur = selBill==='right' ? slotLabel : (selHours===1?'1 hour':selHours+' hours');
-     
+     subEl.innerHTML = '<b>'+biz.trim()+'</b> is now booked on the '
+          +(selBill==='left'?'Community':'Premium')+' billboard.<br>'
+          +(selBill==='right'?'Slot: '+dur:'Running for '+dur)
+          +'. Paid: $'+price+'.';
+      }
+      selSlot = null;
+      setTimeout(()=>{
+        const ov3 = overlay||document.getElementById('advert-overlay');
+        if(ov3) ov3.classList.remove('visible');
+      },4500);
+    });
+
+  })();
+</script>
+</body>body>
+</html>
