@@ -5780,8 +5780,8 @@ document.addEventListener('keydown',     boot, { once: true });
   if(payBtn) payBtn.addEventListener('click',()=>{
     const biz = (document.getElementById('advert-biz')||{}).value||'';
     const msg = msgInput ? msgInput.value.trim() : '';
-    if(!biz.trim()){ alert('Please enter your business name.'); return; }
-    if(!msg){ alert('Please enter a message or tagline.'); return; }
+    if(!biz.trim() && selBill !== 'message'){ alert('Please enter your business name.'); return; }
+    if(!msg){ alert('Please enter a message.'); return; }
     const url  = (document.getElementById('advert-url') ||{}).value||'';
     const logo = (document.getElementById('advert-logo')||{}).value||'';
     let price, startTime, endTime;
