@@ -4886,7 +4886,7 @@ const OracleQuery = (() => {
   if(dateInput){
     const todayStr = new Date().toISOString().slice(0,10);
     dateInput.value = todayStr;
-    dateInput.max   = todayStr;   /* can't buy the sky for 2046 */
+    dateInput.max   = todayStr;   /* future dates allowed for 2046 */
   }
 
   /* ── City search via Nominatim ── */
@@ -5236,7 +5236,7 @@ const OracleQuery = (() => {
     if(!city || isNaN(lat) || isNaN(lng)){ alert('Please select a city from the dropdown first.'); return; }
     if(!date){ alert('Please enter a date.'); return; }
     const todayMax = new Date().toISOString().slice(0,10);
-    if(date > todayMax){ alert('Star maps can only be generated for today or past dates.'); return; }
+    if(date > todayMax){ alert('renderMap(lat, lng, date, time, city, l1, l2); or past dates.'); return; }
     renderMap(lat, lng, date, time, city, l1, l2);
   });
 
