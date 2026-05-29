@@ -5,7 +5,6 @@
 */
 
 module.exports = async function handler(req, res) {
-  /* Only allow POST */
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -17,7 +16,6 @@ module.exports = async function handler(req, res) {
 
   const { question = '', sign = 'gemini', mode = 'oracle' } = req.body || {};
 
-  /* ── System prompt — Bob's voice and rules ── */
   const SIGN_CONTEXT = {
     aries:'ruled by Mars, fire sign, bold and impulsive',
     taurus:'ruled by Venus, earth sign, grounded and sensual',
@@ -36,25 +34,25 @@ module.exports = async function handler(req, res) {
   const signContext = SIGN_CONTEXT[sign.toLowerCase()] || '';
 
   const systemPrompt = mode === 'tarot'
-    ? `You are KozmoBob, a mystical tarot oracle. You speak with authority, depth, and mystery.
-Rules:
-- Respond in exactly 4 lines. Each line is a separate, complete thought.
-- Never use bullet points, numbers, or headers.
-- Speak as if you already know the answer — you are revealing, not guessing.
-- Be specific. No generic platitudes.
-- Use short, powerful sentences. Maximum 15 words per line.
-- Do not mention "tarot" or "cards" unless directly relevant.
-- Never start a line with "I" more than once.
-- End with something that lands hard.`
-    : `You are KozmoBob, a mystical oracle. The user is ${sign}${signContext ? ` (${signContext})` : ''}.
-Rules:
-- Respond in exactly 4 lines. Each line is a separate, complete thought.
-- Never use bullet points, numbers, or headers.
-- Speak as if you already know — you are revealing truth, not advising.
-- Be specific to their sign and question. No generic horoscope language.
-- Use short, powerful sentences. Maximum 15 words per line.
-- The last line should land like a gut punch — something they'll remember.
-- Never start a line with "I" more than once.`;
+    ? `You are KozmoBob — a brutally honest, deeply perceptive mystical oracle. You see what others miss.
+RULES (non-negotiable):
+- Write exactly 4 lines. Each line stands alone. No bullet points, no numbers.
+- Each line must be 10-20 words. Not shorter. Make them land.
+- Sound like a psychic who actually knows — not a horoscope. Be SPECIFIC to what they asked.
+- Speak directly to the person. Use "you" not "one".
+- No astrology cliches. No "the universe", no "energy", no "manifest".
+- The final line must be so specific and true it feels personal. Make them feel seen.
+- Never start two consecutive lines with the same word.`
+    : `You are KozmoBob — a brutally honest, deeply perceptive oracle. The person asking is ${sign} (${signContext}).
+RULES (non-negotiable):
+- Write exactly 4 lines. Each line stands alone. No bullet points, no numbers.
+- Each line must be 10-20 words. Not shorter. Make them land.
+- Respond DIRECTLY to what they asked. Not generic advice — speak to their specific situation.
+- Sound like you already know their life. You are revealing, not guessing.
+- No astrology cliches. No "the universe", no "energy", no "manifest", no "journey".
+- Use their sign traits subtly — never name the sign.
+- The final line must gut-punch them with truth they already know but haven't said out loud.
+- Never start two consecutive lines with the same word.`;
 
   try {
     const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -67,10 +65,10 @@ Rules:
         model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user',   content: question || 'What does the universe want me to know right now?' },
+          { role: 'user', content: question || 'What do I need to know right now?' },
         ],
-        max_tokens: 180,
-        temperature: 0.92,
+        max_tokens: 220,
+        temperature: 0.95,
         top_p: 0.95,
       }),
     });
@@ -84,7 +82,6 @@ Rules:
     const data = await groqRes.json();
     const raw  = data.choices?.[0]?.message?.content || '';
 
-    /* Split into lines, clean up, ensure 4 non-empty lines */
     const lines = raw
       .split('\n')
       .map(l => l.replace(/^[\d\.\-\*]+\s*/, '').trim())
