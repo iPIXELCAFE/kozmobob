@@ -1973,8 +1973,8 @@ const OracleQuery = (() => {
     const u = new SpeechSynthesisUtterance(text);
     const v = pickVoice();
     if (v) u.voice = v;
-    u.rate   = 0.72;
-    u.pitch  = 0.85;
+    u.rate   = 0.66;
+    u.pitch  = 0.76;
     u.volume = 0.97;
     speechSynthesis.speak(u);
   }
@@ -1986,10 +1986,10 @@ const OracleQuery = (() => {
     const u = new SpeechSynthesisUtterance(text);
     const v = pickVoice();
     if (v) u.voice = v;
-    u.rate   = 0.72;
-    u.pitch  = 0.85;
+    u.rate   = 0.66;
+    u.pitch  = 0.76;
     u.volume = 0.97;
-    speechSynthesis.speak(u);   /* no cancel — browser queues it behind previous lines */
+    speechSynthesis.speak(u);
   }
 
   /* ── Smart response engine ── */
@@ -2559,9 +2559,12 @@ const OracleQuery = (() => {
         try {
           const u = new SpeechSynthesisUtterance(line);
           const isTarot = /^tarot/i.test(q);
-          const v = isTarot ? pickMaleVoice() : pickVoice();
+          const onMobile = window.innerWidth <= 900;
+          /* Mobile: always female. Desktop: male for tarot, female for horoscope */
+          const useMale = isTarot && !onMobile;
+          const v = useMale ? pickMaleVoice() : pickVoice();
           if(v) u.voice = v;
-          u.rate = 0.72; u.pitch = isTarot ? 0.65 : 0.88; u.volume = 0.97;
+          u.rate = 0.66; u.pitch = useMale ? 0.55 : 0.76; u.volume = 0.97;
           u.onend  = () => setTimeout(showLine, 280);
           u.onerror= () => setTimeout(showLine, 750);
           speechSynthesis.speak(u);
@@ -2631,7 +2634,9 @@ const OracleQuery = (() => {
         const u = new SpeechSynthesisUtterance(
           'The vault recognizes you. Your connection is now sealed. Bob awaits your question.'
         );
-        u.rate = 0.80; u.pitch = 0.85; u.volume = 0.97;
+        const vaultV = window.__pickVoice ? window.__pickVoice() : null;
+        if (vaultV) u.voice = vaultV;
+        u.rate = 0.66; u.pitch = 0.76; u.volume = 0.97;
         speechSynthesis.speak(u);
       }
     }, 900);
@@ -3499,10 +3504,11 @@ const OracleQuery = (() => {
                 .replace(/NovEllaLV\.com/gi,'Novella LV dot com')
                 .replace(/NovEllaLV/gi,'Novella LV');
               const u = new SpeechSynthesisUtterance(ttsMsg);
-              /* Male voice reads tarot sponsor */
-              const pv = window.__pickMaleVoice ? window.__pickMaleVoice() : (window.__pickVoice ? window.__pickVoice() : null);
+              /* Mobile: female. Desktop: male reads tarot sponsor */
+              const spMob = window.innerWidth <= 900;
+              const pv = (!spMob && window.__pickMaleVoice) ? window.__pickMaleVoice() : (window.__pickVoice ? window.__pickVoice() : null);
               if (pv) u.voice = pv;
-              u.rate = 0.82; u.pitch = 0.65; u.volume = 0.7;
+              u.rate = 0.78; u.pitch = spMob ? 0.76 : 0.55; u.volume = 0.7;
               u.onend  = () => { cooldown = false; };
               u.onerror= () => { cooldown = false; };
               speechSynthesis.speak(u);
@@ -3535,9 +3541,10 @@ const OracleQuery = (() => {
         if (window.speechSynthesis) {
           try {
             const u = new SpeechSynthesisUtterance(line);
-            const pv = window.__pickMaleVoice ? window.__pickMaleVoice() : (window.__pickVoice ? window.__pickVoice() : null);
-            if (pv) u.voice = pv;
-            u.rate = 0.72; u.pitch = 0.65; u.volume = 0.97;
+            const cardMob = window.innerWidth <= 900;
+            const cpv = (!cardMob && window.__pickMaleVoice) ? window.__pickMaleVoice() : (window.__pickVoice ? window.__pickVoice() : null);
+            if (cpv) u.voice = cpv;
+            u.rate = 0.66; u.pitch = cardMob ? 0.76 : 0.55; u.volume = 0.97;
             u.onend  = () => setTimeout(speakCardLine, 300);
             u.onerror= () => setTimeout(speakCardLine, 800);
             speechSynthesis.speak(u);
