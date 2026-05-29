@@ -8,137 +8,112 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Georgia',serif;}
-
-#canvas-bg{position:fixed;inset:0;z-index:0;}
-
-#msg-wrap{
-  position:fixed;inset:0;z-index:10;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  padding:24px;
-  opacity:0;
-  transition:opacity 1.2s ease;
-}
-#msg-wrap.visible{opacity:1;}
+html,body{width:100%;height:100%;background:#000;overflow:hidden;}
+#canvas-container{position:fixed;inset:0;z-index:0;}
 
 #msg-card{
-  background:rgba(0,0,0,.82);
-  border:1px solid rgba(255,200,40,.28);
-  border-radius:20px;
-  padding:40px 36px;
-  max-width:480px;
-  width:100%;
+  position:fixed;inset:0;z-index:10;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;pointer-events:none;
+  opacity:0;transition:opacity 1.4s ease;
+}
+#msg-card.visible{opacity:1;pointer-events:all;}
+
+#msg-inner{
   text-align:center;
-  box-shadow:0 0 60px rgba(255,150,20,.12),0 0 120px rgba(255,100,10,.06);
-  backdrop-filter:blur(12px);
+  max-width:380px;width:100%;
 }
 
 #msg-sym{
-  font-size:5rem;
-  line-height:1;
-  margin-bottom:20px;
-  animation:symPulse 2.5s ease-in-out infinite;
+  font-size:5rem;line-height:1;
+  margin-bottom:20px;display:block;
+  filter:drop-shadow(0 0 24px rgba(255,200,60,.8));
+  animation:symFloat 3s ease-in-out infinite;
 }
-@keyframes symPulse{
-  0%,100%{filter:drop-shadow(0 0 12px rgba(255,200,40,.4));}
-  50%{filter:drop-shadow(0 0 32px rgba(255,200,40,.8)) drop-shadow(0 0 60px rgba(255,150,20,.3));}
+@keyframes symFloat{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-10px);}
 }
 
 #msg-text{
   font-family:'Georgia',serif;
-  font-size:clamp(1.4rem,5vw,2rem);
+  font-size:clamp(1.5rem,5vw,2.1rem);
   line-height:1.4;
   color:rgba(255,222,105,.97);
-  text-shadow:0 0 20px rgba(255,150,20,.5);
-  margin-bottom:16px;
+  text-shadow:0 0 28px rgba(255,150,20,.6),0 0 60px rgba(255,100,10,.3);
+  margin-bottom:14px;
 }
 
 #msg-from{
   font-family:'Courier New',monospace;
-  font-size:.80rem;
-  letter-spacing:.15em;
-  color:rgba(255,200,40,.50);
-  margin-bottom:28px;
+  font-size:.80rem;letter-spacing:.18em;
+  color:rgba(255,200,40,.45);
+  margin-bottom:36px;
 }
 
 #msg-divider{
-  width:60%;height:1px;
-  background:linear-gradient(to right,transparent,rgba(255,200,40,.40),transparent);
-  margin:0 auto 28px;
+  width:50%;height:1px;
+  background:linear-gradient(to right,transparent,rgba(255,200,40,.35),transparent);
+  margin:0 auto 24px;
 }
 
 #msg-source{
   font-family:'Courier New',monospace;
-  font-size:.55rem;
-  letter-spacing:.20em;
-  color:rgba(255,200,40,.30);
-  text-transform:uppercase;
-  margin-bottom:20px;
+  font-size:.52rem;letter-spacing:.22em;
+  color:rgba(255,200,40,.25);
+  text-transform:uppercase;margin-bottom:22px;
 }
 
 #msg-link-btn{
   display:none;
-  font-family:'Courier New',monospace;
-  font-size:.65rem;
-  letter-spacing:.12em;
-  color:rgba(0,207,255,.90);
-  border:1px solid rgba(0,207,255,.35);
-  border-radius:20px;
-  padding:10px 24px;
-  text-decoration:none;
-  margin-bottom:20px;
-  transition:border-color .2s,color .2s,box-shadow .2s;
+  font-family:'Courier New',monospace;font-size:.65rem;letter-spacing:.12em;
+  color:rgba(0,207,255,.90);border:1px solid rgba(0,207,255,.35);
+  border-radius:20px;padding:10px 24px;text-decoration:none;
+  margin-bottom:20px;transition:border-color .2s,box-shadow .2s;
 }
-#msg-link-btn:hover{
-  border-color:rgba(0,207,255,.8);
-  color:rgba(0,207,255,1);
-  box-shadow:0 0 18px rgba(0,207,255,.25);
-}
+#msg-link-btn:hover{border-color:rgba(0,207,255,.8);box-shadow:0 0 18px rgba(0,207,255,.25);}
 
-#share-row{
-  display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px;
-}
+#share-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
 .share-btn{
-  font-family:'Courier New',monospace;
-  font-size:.58rem;letter-spacing:1.5px;
-  border-radius:20px;padding:8px 16px;
-  text-decoration:none;cursor:pointer;border:1px solid;
-  transition:opacity .2s;
+  font-family:'Courier New',monospace;font-size:.58rem;letter-spacing:1.5px;
+  border-radius:20px;padding:8px 16px;text-decoration:none;cursor:pointer;
+  border:1px solid;background:none;transition:opacity .2s;
 }
-.share-btn:hover{opacity:.75;}
+.share-btn:hover{opacity:.7;}
 .share-wa{color:rgba(37,211,102,.9);border-color:rgba(37,211,102,.4);}
 .share-sms{color:rgba(0,207,255,.9);border-color:rgba(0,207,255,.4);}
-.share-copy{color:rgba(255,200,40,.9);border-color:rgba(255,200,40,.4);background:none;}
+.share-copy{color:rgba(255,200,40,.9);border-color:rgba(255,200,40,.4);}
 
 #kozmo-link{
-  margin-top:28px;
-  font-family:'Courier New',monospace;
-  font-size:.50rem;letter-spacing:.22em;
-  color:rgba(255,200,40,.22);
-  text-decoration:none;
-  text-transform:uppercase;
+  display:block;margin-top:28px;
+  font-family:'Courier New',monospace;font-size:.50rem;letter-spacing:.22em;
+  color:rgba(255,200,40,.20);text-decoration:none;text-transform:uppercase;
   transition:color .2s;
 }
-#kozmo-link:hover{color:rgba(255,200,40,.55);}
+#kozmo-link:hover{color:rgba(255,200,40,.5);}
 
 #not-found{
-  display:none;
-  color:rgba(255,200,40,.6);
-  font-family:'Courier New',monospace;
-  font-size:.75rem;letter-spacing:.15em;
-  text-align:center;
-  padding:40px;
+  position:fixed;inset:0;z-index:20;
+  display:none;align-items:center;justify-content:center;
+  color:rgba(255,200,40,.6);font-family:'Courier New',monospace;
+  font-size:.75rem;letter-spacing:.15em;text-align:center;
+}
+
+#phase-label{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+  font-family:'Courier New',monospace;font-size:.50rem;letter-spacing:.22em;
+  color:rgba(255,200,40,.22);z-index:20;text-align:center;
+  transition:opacity .5s;
 }
 </style>
 </head>
 <body>
 
-<canvas id="canvas-bg"></canvas>
+<div id="canvas-container"></div>
 
-<div id="msg-wrap">
-  <div id="msg-card">
-    <div id="msg-sym">✨</div>
+<div id="msg-card">
+  <div id="msg-inner">
+    <span id="msg-sym">✨</span>
     <div id="msg-text"></div>
     <div id="msg-from"></div>
     <div id="msg-divider"></div>
@@ -151,8 +126,14 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Ge
     </div>
     <a href="https://kozmobob.com" id="kozmo-link">Ask KozmoBob →</a>
   </div>
-  <div id="not-found">No message found. <a href="https://kozmobob.com" style="color:rgba(255,200,40,.6);">Go to KozmoBob</a></div>
 </div>
+
+<div id="not-found">
+  No message found.<br><br>
+  <a href="https://kozmobob.com" style="color:rgba(255,200,40,.6);">Go to KozmoBob</a>
+</div>
+
+<div id="phase-label">BOB IS RECEIVING A MESSAGE FROM THE COSMOS</div>
 
 <script>
 /* ── Read URL params ── */
@@ -163,8 +144,7 @@ const from   = params.get('f') || '';
 const link   = params.get('l') || '';
 
 if(!text){
-  document.getElementById('msg-card').style.display = 'none';
-  document.getElementById('not-found').style.display = 'block';
+  document.getElementById('not-found').style.display = 'flex';
 } else {
   document.getElementById('msg-sym').textContent  = emoji;
   document.getElementById('msg-text').textContent = text;
@@ -174,8 +154,6 @@ if(!text){
     lb.href = link.startsWith('http') ? link : 'https://'+link;
     lb.style.display = 'inline-block';
   }
-
-  /* Share buttons */
   const pageUrl = window.location.href;
   document.getElementById('share-wa').href  = 'https://wa.me/?text='+encodeURIComponent(pageUrl);
   document.getElementById('share-sms').href = 'sms:?body='+encodeURIComponent(pageUrl);
@@ -190,52 +168,148 @@ function copyLink(){
   });
 }
 
-/* ── Animated star background ── */
+/* ── Real Bob — same shader as main page ── */
 (function(){
-  const canvas = document.getElementById('canvas-bg');
-  const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+  const mob = window.innerWidth <= 768;
+  const renderer = new THREE.WebGLRenderer({ antialias:!mob, powerPreference:'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  renderer.setSize(innerWidth, innerHeight);
+  renderer.setSize(innerWidth,innerHeight);
   renderer.setClearColor(0x000000,1);
+  document.getElementById('canvas-container').appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  const cam   = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
-  cam.position.z = 3;
+  const cam   = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, .1, 100);
+  cam.position.z = mob ? 5.8 : 4;
 
-  /* Stars */
-  const geo = new THREE.BufferGeometry();
-  const N = 1200;
-  const pos = new Float32Array(N*3);
-  for(let i=0;i<N*3;i++) pos[i]=(Math.random()-0.5)*20;
-  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
-  const stars = new THREE.Points(geo, new THREE.PointsMaterial({color:0xffd080,size:0.04,transparent:true,opacity:0.7}));
-  scene.add(stars);
+  /* ── Bob material — exact same shader as main page ── */
+  const mat = new THREE.ShaderMaterial({
+    uniforms:{
+      uTime:           {value:0},
+      uCameraPos:      {value:cam.position},
+      uInteraction:    {value:new THREE.Vector3()},
+      uRippleTime:     {value:0},
+      uRippleStrength: {value:0},
+      uLightningFlash: {value:0},
+      uFrozen:         {value:0},
+      uStateColorMix:  {value:0},
+      uStateColor:     {value:new THREE.Vector3(.28,.28,.32)},
+      uGlowColor:      {value:new THREE.Vector3(1.,.62,.08)},
+      uPortalOpen:     {value:0},
+    },
+    vertexShader:`
+      uniform float uTime,uRippleTime,uRippleStrength,uFrozen,uPortalOpen;
+      uniform vec3  uInteraction;
+      varying vec3  vN,vWP;
+      float sn(vec3 p){
+        return sin(p.x*3.1+uTime*.6)*sin(p.y*2.7+uTime*.45)*sin(p.z*3.4+uTime*.55);
+      }
+      void main(){
+        vN=normalize(normalMatrix*normal);
+        float b=sin(uTime*.75)*.5+.5;
+        float d=distance(position,uInteraction);
+        float w=sin(d*9.-uRippleTime*5.)*exp(-d*2.8)*exp(-uRippleTime*1.8);
+        float portalWarp=uPortalOpen*sin(uTime*8.+position.y*6.)*.18;
+        vec3 dp=position+normal*(sn(position)*.06+b*.035+w*.09*uRippleStrength+portalWarp)*(1.-uFrozen*.5);
+        vec4 wp=modelMatrix*vec4(dp,1.);
+        vWP=wp.xyz;
+        gl_Position=projectionMatrix*viewMatrix*wp;
+      }
+    `,
+    fragmentShader:`
+      uniform float uTime,uLightningFlash,uStateColorMix,uPortalOpen;
+      uniform vec3  uCameraPos,uStateColor,uGlowColor;
+      varying vec3  vN,vWP;
+      void main(){
+        vec3  v=normalize(uCameraPos-vWP);
+        float f=pow(1.-max(dot(vN,v),0.),3.5);
+        float bp=sin(uTime*.75)*.5+.5;
+        vec3  c=mix(vec3(.02,.01,.06)+uGlowColor*.18*bp*.12,uGlowColor,f*.85);
+        c+=uGlowColor*f*bp*.08;
+        c+=uGlowColor*uLightningFlash*.9+vec3(.1,.1,.05)*uLightningFlash;
+        c+=vec3(.8,.7,.3)*uPortalOpen*f*.6;
+        c=mix(c,uStateColor,uStateColorMix);
+        gl_FragColor=vec4(c,1.-uPortalOpen*.85);
+      }
+    `,
+    transparent:true,
+  });
 
-  /* Soft glow sphere */
-  const sphere = new THREE.Mesh(
-    new THREE.SphereGeometry(0.9,32,32),
-    new THREE.MeshBasicMaterial({color:0xff9010,transparent:true,opacity:0.06,wireframe:false})
-  );
-  scene.add(sphere);
+  const ball = new THREE.Mesh(new THREE.SphereGeometry(1.2, mob?32:64, mob?32:64), mat);
+  scene.add(ball);
+
+  /* Aura */
+  const auraMat = new THREE.ShaderMaterial({
+    transparent:true, side:THREE.BackSide, depthWrite:false, blending:THREE.AdditiveBlending,
+    uniforms:{uTime:{value:0}, uGlowColor:{value:new THREE.Vector3(1.,.55,.05)}, uPortalOpen:{value:0}},
+    vertexShader:`varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`uniform float uTime,uPortalOpen;uniform vec3 uGlowColor;varying vec3 vN;void main(){float r=pow(1.-abs(dot(vN,vec3(0,0,1))),2.2);float p=sin(uTime*.75)*.5+.5;float a=r*(.28+p*.12)*(1.-uPortalOpen*.7);gl_FragColor=vec4(uGlowColor*.95*a,a);}`,
+  });
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.55,32,32), auraMat));
 
   window.addEventListener('resize',()=>{
-    cam.aspect = innerWidth/innerHeight;
-    cam.updateProjectionMatrix();
+    cam.aspect=innerWidth/innerHeight; cam.updateProjectionMatrix();
     renderer.setSize(innerWidth,innerHeight);
   });
 
-  let t = 0;
+  /* ── Portal animation sequence ── */
+  let phase = 'idle'; // idle → distort → flash → reveal → done
+  let phaseStart = 0;
+  const PHASE = { distort:2.5, flash:3.8, reveal:5.5 };
+  const label = document.getElementById('phase-label');
+  const card  = document.getElementById('msg-card');
+
+  const clk = new THREE.Clock();
   (function tick(){
     requestAnimationFrame(tick);
-    t += 0.003;
-    stars.rotation.y = t * 0.08;
-    stars.rotation.x = t * 0.03;
-    sphere.material.opacity = 0.05 + Math.sin(t*2)*0.03;
-    renderer.render(scene, cam);
-  })();
+    const t = clk.getElapsedTime();
+    mat.uniforms.uTime.value = t;
+    auraMat.uniforms.uTime.value = t;
 
-  /* Fade in message after short delay */
-  setTimeout(()=>{ document.getElementById('msg-wrap').classList.add('visible'); }, 800);
+    ball.rotation.y = t * .08;
+    ball.rotation.x = Math.sin(t*.12)*.06;
+
+    if(phase==='idle' && t > 1.2){
+      phase='distort'; phaseStart=t;
+      label.textContent = 'SOMETHING IS COMING THROUGH…';
+    }
+
+    if(phase==='distort'){
+      const p = Math.min(1,(t-phaseStart)/2.5);
+      mat.uniforms.uRippleStrength.value = p*2.8;
+      mat.uniforms.uRippleTime.value = t*3;
+      mat.uniforms.uPortalOpen.value = p*.3;
+      auraMat.uniforms.uPortalOpen.value = p*.3;
+      ball.scale.setScalar(1+p*.12*Math.sin(t*6));
+      if(t-phaseStart > 2.5){ phase='flash'; phaseStart=t; label.textContent='THE PORTAL OPENS…'; }
+    }
+
+    if(phase==='flash'){
+      const p = Math.min(1,(t-phaseStart)/1.3);
+      mat.uniforms.uLightningFlash.value = Math.sin(p*Math.PI)*1.2;
+      mat.uniforms.uPortalOpen.value = p;
+      auraMat.uniforms.uPortalOpen.value = p;
+      ball.scale.setScalar(1+p*.4);
+      if(t-phaseStart > 1.3){ phase='reveal'; phaseStart=t; label.textContent=''; card.classList.add('visible'); }
+    }
+
+    if(phase==='reveal'){
+      const p = Math.min(1,(t-phaseStart)/1.5);
+      mat.uniforms.uLightningFlash.value = (1-p)*.3;
+      mat.uniforms.uPortalOpen.value = 1-p*.4;
+      auraMat.uniforms.uPortalOpen.value = 1-p*.4;
+      ball.scale.setScalar(1+(.4*(1-p)));
+      if(t-phaseStart > 1.5){ phase='done'; }
+    }
+
+    if(phase==='done'){
+      ball.scale.setScalar(1);
+      mat.uniforms.uPortalOpen.value = 0;
+      mat.uniforms.uLightningFlash.value = 0;
+      mat.uniforms.uRippleStrength.value = Math.sin(t*.3)*.1;
+    }
+
+    renderer.render(scene,cam);
+  })();
 })();
 </script>
 </body>
