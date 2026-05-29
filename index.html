@@ -1330,75 +1330,60 @@ select.adv-input option{background:#111;}
     </div>
 
     <div id="advert-form-body">
+
+      <!-- How it works -->
+      <div style="font-family:'Courier New',monospace;font-size:.62rem;letter-spacing:.08em;color:rgba(255,200,40,.55);text-align:center;padding:10px 0 16px;line-height:1.9;border-bottom:1px solid rgba(255,200,40,.10);margin-bottom:16px;">
+        Pay → join the queue → go live when it's your turn.<br>
+        First come, first served. 1 hour. No scheduling.
+      </div>
+
       <!-- Billboard selector -->
       <div id="advert-bill-cards">
         <div class="ab-card selected" data-bill="left" onclick="selectBillboard('left')">
           <div class="ab-card-name">COMMUNITY</div>
           <div class="ab-card-price">$55/HR</div>
-          <div class="ab-card-desc">2126 LED mega-screen · rotating spots</div>
+          <div class="ab-card-desc">Left billboard · rotating with others</div>
         </div>
         <div class="ab-card" data-bill="right" onclick="selectBillboard('right')">
           <div class="ab-card-name">PREMIUM</div>
           <div class="ab-card-price">$250/HR</div>
-          <div class="ab-card-desc">iPIXEL CAFE · exclusive full-screen</div>
+          <div class="ab-card-desc">Right billboard · yours alone, full screen</div>
+        </div>
+        <div class="ab-card" data-bill="message" onclick="selectBillboard('message')">
+          <div class="ab-card-name">PERSONAL</div>
+          <div class="ab-card-price">$35</div>
+          <div class="ab-card-desc">Birthday · proposal · anniversary · stays as a star forever</div>
         </div>
       </div>
 
-      <!-- Business details -->
-      <div class="adv-field">
-        <label class="adv-label">Business Name</label>
-        <input class="adv-input" id="advert-biz" type="text" placeholder="KozmoBob Studios" maxlength="40"/>
+      <!-- Details -->
+      <div class="adv-field" id="advert-biz-field">
+        <label class="adv-label">Brand / Name</label>
+        <input class="adv-input" id="advert-biz" type="text" placeholder="Your business or name" maxlength="40"/>
       </div>
       <div class="adv-field">
-        <label class="adv-label">Message / Tagline <span id="advert-msg-count">0</span>/80</label>
-        <textarea class="adv-input" id="advert-msg" maxlength="80" rows="2" placeholder="Your message to the cosmos..."></textarea>
+        <label class="adv-label">Message <span id="advert-msg-count">0</span>/80</label>
+        <textarea class="adv-input" id="advert-msg" maxlength="80" rows="2" placeholder="Your message..."></textarea>
+      </div>
+      <div class="adv-field" id="advert-emoji-field" style="display:none;">
+        <label class="adv-label">Emoji / Symbol</label>
+        <input class="adv-input" id="advert-emoji" type="text" placeholder="🎂 💍 ❤️ ✨" maxlength="4"/>
+      </div>
+      <div class="adv-field" id="advert-from-field" style="display:none;">
+        <label class="adv-label">From (optional)</label>
+        <input class="adv-input" id="advert-from" type="text" placeholder="— Love, James" maxlength="40"/>
       </div>
       <div class="adv-field">
-        <label class="adv-label">URL (optional)</label>
+        <label class="adv-label">Link (optional)</label>
         <input class="adv-input" id="advert-url" type="url" placeholder="https://"/>
-      </div>
-      <div class="adv-field">
-        <label class="adv-label">Logo URL (optional)</label>
-        <input class="adv-input" id="advert-logo" type="url" placeholder="https://"/>
-      </div>
-
-      <!-- COMMUNITY: date picker + slot table + duration buttons -->
-      <div id="advert-dur-section">
-        <div class="adv-field" style="margin-bottom:12px;">
-          <label class="adv-label">Book Date</label>
-          <select class="adv-input" id="advert-comm-date" onchange="selectCommDate(this.value)" style="cursor:pointer;"></select>
-        </div>
-        <div class="adv-label" style="margin-bottom:7px;">Select Time Slot</div>
-        <div id="advert-comm-slot-table"></div>
-        <div class="adv-label" style="margin-bottom:7px;margin-top:13px;">Duration</div>
-        <div id="advert-dur-wrap">
-          <div id="advert-comm-hrs-btns"></div>
-        </div>
-        <!-- Priority Flash (community only) -->
-        <div id="advert-priority-wrap" onclick="togglePriority()">
-          <div class="adv-priority-title">🔥 PRIORITY FLASH — +$9.99</div>
-          <div class="adv-priority-desc">Your ad runs 2× longer per slot (~22s) + gold border highlight</div>
-        </div>
-      </div>
-
-      <!-- PREMIUM: date picker + schedule table + hours -->
-      <div id="advert-schedule" style="display:none;">
-        <div class="adv-field" style="margin-bottom:12px;">
-          <label class="adv-label">Book Date</label>
-          <select class="adv-input" id="advert-prem-date" onchange="selectPremDate(this.value)" style="cursor:pointer;"></select>
-        </div>
-        <div class="adv-label" style="margin-bottom:7px;">Select Time Slot</div>
-        <div id="advert-schedule-table"></div>
-        <div class="adv-label" style="margin-bottom:7px;margin-top:13px;">Hours in Slot</div>
-        <div id="advert-prem-hrs-btns"></div>
       </div>
 
       <!-- Price -->
       <div id="advert-price-wrap">
-        <div id="advert-price-amount">$38</div>
-        <div id="advert-price-desc">1 hour · Community billboard · starts immediately</div>
+        <div id="advert-price-amount">$55</div>
+        <div id="advert-price-desc">1 hour · Community billboard · first come first served</div>
       </div>
-      <button id="advert-pay-btn">❆ BOOK NOW — $38</button>
+      <button id="advert-pay-btn">❆ BOOK NOW — $55</button>
     </div>
 
     <!-- Success state -->
@@ -5655,37 +5640,35 @@ document.addEventListener('keydown',     boot, { once: true });
     });
     formBody.style.display  = 'block';
     successEl.style.display = 'none';
-    const dur = document.getElementById('advert-dur-section');
-    const sch = document.getElementById('advert-schedule');
-    if(selBill==='right'){
-      if(dur) dur.style.display = 'none';
-      if(sch) sch.style.display = 'block';
-      buildDatePicker(); buildScheduleTable(); buildHoursButtons();
-    } else {
-      if(dur) dur.style.display = '';
-      if(sch) sch.style.display = 'none';
-      buildCommDatePicker(); buildCommSlotTable(); updatePriceDurations();
-    }
-    updatePriceDisplay();
+    window.selectBillboard(selBill);
     overlay.classList.add('visible');
   };
 
   window.selectBillboard = function(bill){
     selBill = bill;
     document.querySelectorAll('.ab-card').forEach(el=>el.classList.toggle('selected',el.dataset.bill===bill));
-    const pw  = document.getElementById('advert-priority-wrap');
-    const dur = document.getElementById('advert-dur-section');
-    const sch = document.getElementById('advert-schedule');
-    if(pw)  pw.style.display  = bill==='left' ? 'flex' : 'none';
-    if(dur) dur.style.display = bill==='right' ? 'none' : '';
-    if(sch) sch.style.display = bill==='right' ? 'block' : 'none';
-    if(bill==='right'){
-      selSlot=null; selPremDate=null; selPremHours=1;
-      buildDatePicker(); buildScheduleTable(); buildHoursButtons();
-    } else {
-      buildCommDatePicker(); buildCommSlotTable(); updatePriceDurations();
-    }
-    updatePriceDisplay();
+
+    /* Show/hide personal message fields */
+    const emojiField = document.getElementById('advert-emoji-field');
+    const fromField  = document.getElementById('advert-from-field');
+    const bizField   = document.getElementById('advert-biz-field');
+    if(emojiField) emojiField.style.display = bill==='message' ? '' : 'none';
+    if(fromField)  fromField.style.display  = bill==='message' ? '' : 'none';
+    if(bizField)   bizField.style.display   = bill==='message' ? 'none' : '';
+
+    /* Update price + button */
+    const prices = { left:'$55', right:'$250', message:'$35' };
+    const descs  = {
+      left:    '1 hour · Community billboard · first come first served',
+      right:   '1 hour · Premium billboard · yours alone',
+      message: '1 hour on Bob · becomes a star on the site forever'
+    };
+    const amt = document.getElementById('advert-price-amount');
+    const desc = document.getElementById('advert-price-desc');
+    const btn  = document.getElementById('advert-pay-btn');
+    if(amt)  amt.textContent  = prices[bill] || '$55';
+    if(desc) desc.textContent = descs[bill]  || '';
+    if(btn)  btn.textContent  = '❆ BOOK NOW — ' + (prices[bill] || '$55');
   };
 
   window.selectDuration = function(hrs){
