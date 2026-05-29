@@ -2540,8 +2540,8 @@ const OracleQuery = (() => {
     function showLine() {
       if (li >= lines.length) {
         onDone();
-        /* Hook — tease paid reading for free users */
-        if (!window.__KB.isPaid()) {
+        /* Hook — tease paid reading for free users, oracle/horoscope only, not tarot */
+        if (!window.__KB.isPaid() && !/^tarot/i.test(q) && !SIGN_NAMES.has((q||'').toLowerCase().trim())) {
           setTimeout(() => {
             const hook = document.createElement('span');
             hook.className = 'oracle-line';
