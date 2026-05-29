@@ -761,6 +761,25 @@ html,body{
   }
 }
 
+/* ── Personal message mobile takeover ── */
+#mob-msg-takeover{
+  display:none;
+  position:fixed;bottom:52px;left:0;right:0;
+  z-index:35;
+  flex-direction:column;align-items:center;justify-content:center;
+  padding:18px 20px 20px;
+  background:rgba(0,0,0,.97);
+  border-top:1px solid rgba(255,215,0,.40);
+  border-bottom:1px solid rgba(255,215,0,.20);
+  text-align:center;
+  animation:takeoverIn .45s cubic-bezier(.22,1,.36,1);
+}
+#mob-msg-takeover.visible{display:flex;}
+@keyframes takeoverIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+#mob-msg-sym{font-size:3.2rem;line-height:1;margin-bottom:8px;}
+#mob-msg-text{font-family:'Georgia',serif;font-size:1.25rem;line-height:1.35;letter-spacing:.02em;margin-bottom:6px;}
+#mob-msg-from{font-family:'Courier New',monospace;font-size:.65rem;letter-spacing:.18em;opacity:.55;}
+
 @media(max-width:768px){
   /* Zodiac ring: smaller signs on mobile */
   .zs{width:42px;height:42px;}
@@ -1213,6 +1232,11 @@ select.adv-input option{background:#111;}
   </div>
   <span id="mob-bot-url">ipixelcafe.com</span>
   <span id="mob-bot-tag" onclick="event.stopPropagation();openAdvertOverlay('bottom')" style="cursor:pointer;letter-spacing:1.5px;">✦ ADVERTISE</span>
+</div>
+<div id="mob-msg-takeover">
+  <div id="mob-msg-sym">🎂</div>
+  <div id="mob-msg-text" style="color:#FFD700"></div>
+  <div id="mob-msg-from"></div>
 </div>
 
 <!-- AD BILLBOARD — left side, 2126 LED mega-screen -->
@@ -4159,34 +4183,54 @@ const OracleQuery = (() => {
   if(!banner || !nameEl) return;
 
   const BRANDS = [
-    { name:'iPIXEL CAFE',    url:'ipixelcafe.com',     href:'https://www.ipixelcafe.com',    color:'rgba(255,215,0,.95)',  border:'rgba(255,215,0,.30)'  },
-    { name:'NOVELLA LV',     url:'novellalv.com',      href:'https://www.novellalv.com',      color:'rgba(255,80,40,.95)',  border:'rgba(255,80,40,.30)'  },
-    { name:'YOUR BRAND',     url:'kozmobob.com',       href:'https://kozmobob.com',           color:'rgba(170,136,255,.95)',border:'rgba(170,136,255,.30)'},
-    { name:'iPIXEL CAFE',    url:'ipixelcafe.com',     href:'https://ipixelcafe.com',         color:'rgba(255,215,0,.95)', border:'rgba(255,215,0,.30)'  },
-    { name:'NOVELLA',        url:'novellalv.com',      href:'https://novellalv.com',          color:'rgba(255,68,34,.95)',  border:'rgba(255,68,34,.30)'  },
+    { name:'iPIXEL CAFE',    url:'ipixelcafe.com',  href:'https://www.ipixelcafe.com', color:'rgba(255,215,0,.95)',  border:'rgba(255,215,0,.30)'  },
+    { name:'NOVELLA LV',     url:'novellalv.com',   href:'https://www.novellalv.com',  color:'rgba(255,80,40,.95)', border:'rgba(255,80,40,.30)'  },
+    { name:'YOUR BRAND',     url:'kozmobob.com',    href:'https://kozmobob.com',        color:'rgba(170,136,255,.95)',border:'rgba(170,136,255,.30)', msg:{sym:'✦',text:'Advertise Here',from:'kozmobob.com',color:'#AA88FF'} },
+    { name:'HAPPY BIRTHDAY', url:'kozmobob.com',    href:'https://kozmobob.com',        color:'rgba(255,215,0,.95)', border:'rgba(255,215,0,.40)',   msg:{sym:'🎂',text:'Happy Birthday Maria!',from:'— Love, James',color:'#FFD700'} },
+    { name:'WILL YOU MARRY', url:'kozmobob.com',    href:'https://kozmobob.com',        color:'rgba(255,105,180,.95)',border:'rgba(255,105,180,.40)', msg:{sym:'💍',text:'Will You Marry Me Sarah?',from:'— Your Person',color:'#FF88CC'} },
+    { name:'I LOVE YOU',     url:'kozmobob.com',    href:'https://kozmobob.com',        color:'rgba(255,80,80,.95)', border:'rgba(255,80,80,.40)',    msg:{sym:'❤️',text:'I Love You Mom',from:'— Always',color:'#FF5577'} },
+    { name:'ANNIVERSARY',    url:'kozmobob.com',    href:'https://kozmobob.com',        color:'rgba(192,160,96,.95)',border:'rgba(192,160,96,.40)',   msg:{sym:'✨',text:'Happy Anniversary — 10 Years!',from:'— Forever Yours',color:'#D4B870'} },
   ];
   let idx = 0;
   let currentHref = BRANDS[0].href;
+  const takeover   = document.getElementById('mob-msg-takeover');
+  const msgSym     = document.getElementById('mob-msg-sym');
+  const msgText    = document.getElementById('mob-msg-text');
+  const msgFrom    = document.getElementById('mob-msg-from');
+  let takeoverTimer = null;
+
+  function showTakeover(msg) {
+    if (!takeover || window.__KB.isPaid()) return;
+    if (msgSym)  msgSym.textContent  = msg.sym;
+    if (msgText) { msgText.textContent = msg.text; msgText.style.color = msg.color; }
+    if (msgFrom) msgFrom.textContent = msg.from || '';
+    takeover.style.borderTopColor = msg.color + '66';
+    takeover.classList.add('visible');
+    clearTimeout(takeoverTimer);
+    takeoverTimer = setTimeout(() => takeover.classList.remove('visible'), 6000);
+  }
 
   function show(b){
     nameEl.style.opacity = '0';
     setTimeout(()=>{
-      nameEl.textContent      = b.name;
-      nameEl.style.color      = b.color;
+      nameEl.textContent  = b.name;
+      nameEl.style.color  = b.color;
       if(urlEl){ urlEl.textContent = b.url; urlEl.style.color = b.color.replace('.95','.40'); }
       banner.style.borderTopColor = b.border;
       const tag = document.getElementById('mob-bot-tag');
       if(tag){ tag.style.color = b.color.replace('.95','.40'); tag.style.borderColor = b.border; }
       currentHref = b.href;
       nameEl.style.opacity = '1';
+      if (b.msg) showTakeover(b.msg);
     }, 350);
   }
 
   banner.addEventListener('click', ()=> window.open(currentHref,'_blank'));
+  if (takeover) takeover.addEventListener('click', ()=> window.open(currentHref,'_blank'));
 
   nameEl.style.transition = 'opacity .35s ease, color .35s ease';
   show(BRANDS[0]);
-  setInterval(()=>{ idx=(idx+1)%BRANDS.length; show(BRANDS[idx]); }, 9000);
+  setInterval(()=>{ idx=(idx+1)%BRANDS.length; show(BRANDS[idx]); }, 10000);
 })();
 
 /* ── 10. DOMAIN DETECTION — kozmobob vs kosmobob = different right billboard ── */
