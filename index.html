@@ -2828,11 +2828,61 @@ const OracleQuery = (() => {
   const tickerBrand = document.getElementById('lqb-ticker-brand');
   const tickerYear  = document.getElementById('lqb-ticker-year');
 
+  /* ── Personal message draw helper ── */
+  function drawMsg(t, msg) {
+    const [r,g,b] = msg.rgb;
+    ctx.fillStyle = msg.bg; ctx.fillRect(0,0,W,H);
+    /* glow bg */
+    const grd = ctx.createRadialGradient(W/2,H*0.38,0,W/2,H*0.38,130);
+    grd.addColorStop(0,`rgba(${r},${g},${b},${0.18+Math.sin(t*Math.PI*2)*0.06})`);
+    grd.addColorStop(1,'transparent');
+    ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
+    /* big symbol */
+    ctx.textAlign='center';
+    ctx.font=`${msg.symSize||72}px serif`;
+    ctx.fillStyle=msg.accent;
+    ctx.globalAlpha=0.85+Math.sin(t*Math.PI*3)*0.15;
+    ctx.fillText(msg.sym, W/2, H*0.36);
+    ctx.globalAlpha=1;
+    /* main message — word wrap */
+    const words = msg.text.split(' ');
+    const maxW = W - 24;
+    ctx.font=`bold ${msg.textSize||22}px 'Georgia',serif`;
+    ctx.fillStyle=msg.accent;
+    let line='', lines=[], y=H*0.52;
+    for(const w of words){
+      const test=line?line+' '+w:w;
+      if(ctx.measureText(test).width>maxW && line){ lines.push(line); line=w; }
+      else line=test;
+    }
+    if(line) lines.push(line);
+    const lh=(msg.textSize||22)*1.35;
+    lines.forEach((l,i)=>{ ctx.fillText(l, W/2, y+i*lh); });
+    /* from line */
+    if(msg.from){
+      ctx.font=`13px 'Courier New',monospace`;
+      ctx.fillStyle=`rgba(${r},${g},${b},.60)`;
+      ctx.fillText('— '+msg.from, W/2, y+lines.length*lh+18);
+    }
+    /* pulsing border */
+    ctx.strokeStyle=`rgba(${r},${g},${b},${0.35+Math.sin(t*Math.PI*2)*0.15})`;
+    ctx.lineWidth=1.5; ctx.strokeRect(4,4,W-8,H-8);
+    drawHUD(t, msg.accent, msg.rgb);
+  }
+
   /* ── Brand definitions ── */
   const BRANDS = [
     { id:'ipixel2',  name:'iPIXEL CAFE',   accent:'#00CFFF', rgb:[0,207,255],   bg:'#000408', url:'https://ipixelcafe.com',        draw:drawIPIXEL   },
-    { id:'novella2', name:'NOVELLA LV',    accent:'#CCFF00', rgb:[204,255,0],   bg:'#010200', url:'https://novellalv.com',         draw:drawNovella  },
-    { id:'yourad',   name:'YOUR BRAND',    accent:'#AA88FF', rgb:[170,136,255], bg:'#020008', url:'https://kozmobob.com/advertise', draw:drawYourAd   },
+    { id:'novella2', name:'NOVELLA LV',     accent:'#FF4422', rgb:[255,68,34],   bg:'#080100', url:'https://novellalv.com',         draw:drawNovella  },
+    { id:'yourad',   name:'YOUR BRAND',     accent:'#AA88FF', rgb:[170,136,255], bg:'#020008', url:'https://kozmobob.com',          draw:drawYourAd   },
+    { id:'bday1',    name:'HAPPY BIRTHDAY', accent:'#FFD700', rgb:[255,215,0],   bg:'#040200', url:'https://kozmobob.com',
+      draw:(t)=>drawMsg(t,{sym:'🎂',symSize:80,text:'Happy Birthday Maria!',from:'Love, James',accent:'#FFD700',rgb:[255,215,0],bg:'#040200',textSize:24}) },
+    { id:'marry1',   name:'WILL YOU MARRY ME', accent:'#FF69B4', rgb:[255,105,180], bg:'#04000a', url:'https://kozmobob.com',
+      draw:(t)=>drawMsg(t,{sym:'💍',symSize:80,text:'Will You Marry Me Sarah?',from:'— Your Person',accent:'#FF88CC',rgb:[255,105,180],bg:'#04000a',textSize:22}) },
+    { id:'love1',    name:'I LOVE YOU',     accent:'#FF3366', rgb:[255,51,102],  bg:'#050001', url:'https://kozmobob.com',
+      draw:(t)=>drawMsg(t,{sym:'❤️',symSize:80,text:'I Love You Mom',from:'— Always',accent:'#FF5577',rgb:[255,51,102],bg:'#050001',textSize:26}) },
+    { id:'anniv1',   name:'ANNIVERSARY',    accent:'#C0A060', rgb:[192,160,96],  bg:'#030200', url:'https://kozmobob.com',
+      draw:(t)=>drawMsg(t,{sym:'✨',symSize:72,text:'Happy Anniversary 10 Years!',from:'— Forever Yours',accent:'#D4B870',rgb:[192,160,96],bg:'#030200',textSize:21}) },
     { id:'ipixel',   name:'iPIXEL CAFE',   accent:'#FFD700', rgb:[255,215,0],   bg:'#040300', url:'https://ipixelcafe.com',        draw:drawIPIXEL   },
     { id:'novella',  name:'NOVELLA',       accent:'#FF4422', rgb:[255,68,34],   bg:'#080100', url:'https://novellalv.com',         draw:drawNovella  },
   ];
@@ -2879,38 +2929,46 @@ const OracleQuery = (() => {
     });
   }
 
-  /* ── YOUR AD — animated diamond, invite to advertise ── */
+  /* ── YOUR AD — big bold invite to advertise ── */
   function drawYourAd(t) {
-    const B = BRANDS[2];
-    const [r,g,b] = B.rgb;
-    ctx.fillStyle='#010004'; ctx.fillRect(0,0,W,H);
-    const cx=W/2, cy=H*0.40;
+    const [r,g,b] = [170,136,255];
+    ctx.fillStyle='#010008'; ctx.fillRect(0,0,W,H);
+    const cx=W/2, cy=H/2;
+    /* pulsing glow */
     const pulse=Math.sin(t*Math.PI*2)*0.08;
-    const grd=ctx.createRadialGradient(cx,cy,0,cx,cy,90);
-    grd.addColorStop(0,`rgba(${r},${g},${b},${0.12+pulse})`);
+    const grd=ctx.createRadialGradient(cx,cy,0,cx,cy,130);
+    grd.addColorStop(0,`rgba(${r},${g},${b},${0.15+pulse})`);
     grd.addColorStop(1,'transparent');
     ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
     /* rotating diamond */
-    const rot=t*Math.PI*0.5, ds=38+Math.sin(t*Math.PI*3)*4;
-    ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot);
+    const rot=t*Math.PI*0.4, ds=44+Math.sin(t*Math.PI*2)*5;
+    ctx.save(); ctx.translate(cx,H*0.28); ctx.rotate(rot);
     ctx.beginPath();
     ctx.moveTo(0,-ds); ctx.lineTo(ds,0); ctx.lineTo(0,ds); ctx.lineTo(-ds,0);
     ctx.closePath();
-    ctx.strokeStyle=B.accent; ctx.lineWidth=1.8; ctx.globalAlpha=0.75; ctx.stroke();
-    ctx.globalAlpha=1; ctx.restore();
+    ctx.strokeStyle=`rgba(${r},${g},${b},.85)`; ctx.lineWidth=2.5; ctx.stroke();
+    ctx.restore();
+    /* BIG text */
     ctx.textAlign='center';
-    ctx.fillStyle=B.accent; ctx.font=`bold 11px 'Courier New',monospace`;
-    ctx.fillText('YOUR BRAND',cx,cy+ds+22);
-    ctx.fillStyle=`rgba(${r},${g},${b},.55)`;
-    ctx.font=`7.5px 'Courier New',monospace`;
-    ctx.fillText('ADVERTISE HERE', cx, cy+ds+38);
-    ctx.fillText('KOZMOBOB.COM', cx, cy+ds+52);
-    drawHUD(t, B.accent, B.rgb);
+    ctx.fillStyle=`rgba(${r},${g},${b},.95)`;
+    ctx.font=`bold 28px 'Georgia',serif`;
+    ctx.fillText('YOUR', cx, H*0.56);
+    ctx.fillText('BRAND', cx, H*0.56+36);
+    ctx.font=`bold 16px 'Courier New',monospace`;
+    ctx.fillStyle=`rgba(${r},${g},${b},.70)`;
+    ctx.fillText('ADVERTISE HERE', cx, H*0.72);
+    ctx.font=`13px 'Courier New',monospace`;
+    ctx.fillStyle=`rgba(${r},${g},${b},.45)`;
+    ctx.fillText('kozmobob.com', cx, H*0.78);
+    /* border pulse */
+    ctx.strokeStyle=`rgba(${r},${g},${b},${0.3+Math.sin(t*Math.PI*2)*0.15})`;
+    ctx.lineWidth=1.5; ctx.strokeRect(4,4,W-8,H-8);
+    drawHUD(t, '#AA88FF', [r,g,b]);
   }
 
   /* ── iPIXEL CAFE — gold, pixel grid wave ── */
   function drawIPIXEL(t) {
-    const B = BRANDS[0];
+    const B = BRANDS.find(b=>b.id==='ipixel2') || BRANDS[0];
     const [r,g,b] = B.rgb;
     ctx.fillStyle=B.bg; ctx.fillRect(0,0,W,H);
 
@@ -2957,7 +3015,7 @@ const OracleQuery = (() => {
 
   /* ── NOVELLA — Italian red, steam & fork animation ── */
   function drawNovella(t) {
-    const B = BRANDS[1];
+    const B = BRANDS.find(b=>b.id==='novella2') || BRANDS[1];
     const [r,g,b] = B.rgb;
     ctx.fillStyle=B.bg; ctx.fillRect(0,0,W,H);
 
