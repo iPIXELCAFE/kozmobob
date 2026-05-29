@@ -4186,10 +4186,10 @@ const OracleQuery = (() => {
     { name:'iPIXEL CAFE',    url:'ipixelcafe.com',  href:'https://www.ipixelcafe.com', color:'rgba(255,215,0,.95)',  border:'rgba(255,215,0,.30)'  },
     { name:'NOVELLA LV',     url:'novellalv.com',   href:'https://www.novellalv.com',  color:'rgba(255,80,40,.95)', border:'rgba(255,80,40,.30)'  },
     { name:'YOUR BRAND',     url:'kozmobob.com',    href:'https://kozmobob.com',        color:'rgba(170,136,255,.95)',border:'rgba(170,136,255,.30)', msg:{sym:'✦',text:'Advertise Here',from:'kozmobob.com',color:'#AA88FF'} },
-    { name:'HAPPY BIRTHDAY', url:'kozmobob.com',    href:'https://kozmobob.com',        color:'rgba(255,215,0,.95)', border:'rgba(255,215,0,.40)',   msg:{sym:'🎂',text:'Happy Birthday Maria!',from:'— Love, James',color:'#FFD700'} },
-    { name:'WILL YOU MARRY', url:'kozmobob.com',    href:'https://kozmobob.com',        color:'rgba(255,105,180,.95)',border:'rgba(255,105,180,.40)', msg:{sym:'💍',text:'Will You Marry Me Sarah?',from:'— Your Person',color:'#FF88CC'} },
-    { name:'I LOVE YOU',     url:'kozmobob.com',    href:'https://kozmobob.com',        color:'rgba(255,80,80,.95)', border:'rgba(255,80,80,.40)',    msg:{sym:'❤️',text:'I Love You Mom',from:'— Always',color:'#FF5577'} },
-    { name:'ANNIVERSARY',    url:'kozmobob.com',    href:'https://kozmobob.com',        color:'rgba(192,160,96,.95)',border:'rgba(192,160,96,.40)',   msg:{sym:'✨',text:'Happy Anniversary — 10 Years!',from:'— Forever Yours',color:'#D4B870'} },
+    { name:'HAPPY BIRTHDAY', url:'kozmobob.com', href:'https://kozmobob.com', color:'rgba(255,215,0,.95)',  border:'rgba(255,215,0,.40)',   msg:{sym:'🎂',text:'Happy Birthday Maria!',   from:'— Love, James',    color:'#FFD700'} },
+    { name:'WILL YOU MARRY', url:'kozmobob.com', href:'https://kozmobob.com', color:'rgba(255,105,180,.95)',border:'rgba(255,105,180,.40)',msg:{sym:'💍',text:'Will You Marry Me Sarah?', from:'— Your Person',    color:'#FF88CC'} },
+    { name:'I LOVE YOU',     url:'kozmobob.com', href:'https://kozmobob.com', color:'rgba(255,80,80,.95)', border:'rgba(255,80,80,.40)',   msg:{sym:'❤️',text:'I Love You Mom',           from:'— Always',         color:'#FF5577'} },
+    { name:'ANNIVERSARY',    url:'kozmobob.com', href:'https://kozmobob.com', color:'rgba(192,160,96,.95)',border:'rgba(192,160,96,.40)',  msg:{sym:'✨',text:'Happy Anniversary — 10 Years!',from:'— Forever Yours',color:'#D4B870', href:'https://instagram.com'} },
   ];
   let idx = 0;
   let currentHref = BRANDS[0].href;
@@ -4207,7 +4207,7 @@ const OracleQuery = (() => {
     takeover.style.borderTopColor = msg.color + '66';
     takeover.classList.add('visible');
     clearTimeout(takeoverTimer);
-    takeoverTimer = setTimeout(() => takeover.classList.remove('visible'), 6000);
+    takeoverTimer = setTimeout(() => takeover.classList.remove('visible'), 12000);
   }
 
   function show(b){
@@ -4226,7 +4226,18 @@ const OracleQuery = (() => {
   }
 
   banner.addEventListener('click', ()=> window.open(currentHref,'_blank'));
-  if (takeover) takeover.addEventListener('click', ()=> window.open(currentHref,'_blank'));
+  if (takeover) takeover.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const b = BRANDS[idx];
+    if (b.msg && b.msg.sym === '✦') {
+      /* Advertise Here slot — open ad overlay */
+      if (typeof openAdvertOverlay === 'function') openAdvertOverlay('bottom');
+    } else if (b.msg && b.msg.href) {
+      /* Personal message with a business URL */
+      window.open(b.msg.href, '_blank');
+    }
+    /* No URL = tap does nothing, message just displays */
+  });
 
   nameEl.style.transition = 'opacity .35s ease, color .35s ease';
   show(BRANDS[0]);
