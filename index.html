@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#000000"/>
 <title>KozmoBob — Ask the Oracle. Get Your Cosmic Answer.</title>
 <meta name="description" content="KozmoBob is your cosmic oracle. Ask any question and receive a mystical answer from the universe. Powered by ancient wisdom and modern vibes." />
-<meta name="robots" content="index, follow" />
+<meta name="robots" content="index, follow" />h
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -4363,8 +4363,64 @@ const OracleQuery = (() => {
     {n:'The Sun',          k:'JOY',         r:'XIX',   g:'☀',  rare:true },
     {n:'Judgement',        k:'REBIRTH',     r:'XX',    g:'◉',  rare:true },
     {n:'The World',        k:'COMPLETION',  r:'XXI',   g:'⊕',  rare:true },
+        {n:'Ace of Wands',     k:'SPARK',       r:'W1',  g:'fire', rare:false},
+      {n:'Two of Wands',     k:'VISION',      r:'W2',  g:'fire', rare:false},
+  {n:'Three of Wands',   k:'EXPANSION',   r:'W3',  g:'fire', rare:false},
+  {n:'Four of Wands',    k:'CELEBRATION', r:'W4',  g:'fire', rare:false},
+      {n:'Five of Wands',    k:'CONFLICT',    r:'W5',  g:'fire', rare:false},
+      {n:'Six of Wands',     k:'TRIUMPH',     r:'W6',  g:'fire', rare:false},
+      {n:'Seven of Wands',   k:'DEFENSE',     r:'W7',  g:'fire', rare:false},
+      {n:'Eight of Wands',   k:'MOMENTUM',    r:'W8',  g:'fire', rare:false},
+      {n:'Nine of Wands',    k:'RESILIENCE',  r:'W9',  g:'fire', rare:false},
+      {n:'Ten of Wands',     k:'BURDEN',      r:'W10', g:'fire', rare:false},
+      {n:'Page of Wands',    k:'CURIOSITY',   r:'WP',  g:'fire', rare:false},
+  {n:'Knight of Wands',  k:'AMBITION',    r:'WKn', g:'fire', rare:false},
+      {n:'Queen of Wands',   k:'CONFIDENCE',  r:'WQ',  g:'fire', rare:true },
+  {n:'King of Wands',    k:'LEADERSHIP',  r:'WK',  g:'fire', rare:true },
+      {n:'Ace of Cups',      k:'LOVE',        r:'C1',  g:'wave', rare:false},
+      {n:'Two of Cups',      k:'BOND',        r:'C2',  g:'wave', rare:false},
+      {n:'Three of Cups',    k:'JOY',         r:'C3',  g:'wave', rare:false},
+      {n:'Four of Cups',     k:'APATHY',      r:'C4',  g:'wave', rare:false},
+      {n:'Five of Cups',     k:'GRIEF',       r:'C5',  g:'wave', rare:false},
+      {n:'Six of Cups',      k:'NOSTALGIA',   r:'C6',  g:'wave', rare:false},
+      {n:'Seven of Cups',    k:'ILLUSION',    r:'C7',  g:'wave', rare:false},
+      {n:'Eight of Cups',    k:'DEPARTURE',   r:'C8',  g:'wave', rare:false},
+  {n:'Nine of Cups',     k:'FULFILLMENT', r:'C9',  g:'wave', rare:false},
+  {n:'Ten of Cups',      k:'HARMONY',     r:'C10', g:'wave', rare:false},
+      {n:'Page of Cups',     k:'DREAMING',    r:'CP',  g:'wave', rare:false},
+      {n:'Knight of Cups',   k:'ROMANCE',     r:'CKn', g:'wave', rare:false},
+      {n:'Queen of Cups',    k:'EMPATHY',     r:'CQ',  g:'wave', rare:true },
+      {n:'King of Cups',     k:'WISDOM',      r:'CK',  g:'wave', rare:true },
+  {n:'Ace of Swords',    k:'CLARITY',     r:'S1',  g:'star', rare:false},
+  {n:'Two of Swords',    k:'STALEMATE',   r:'S2',  g:'star', rare:false},
+  {n:'Three of Swords',  k:'HEARTBREAK',  r:'S3',  g:'star', rare:false},
+      {n:'Four of Swords',   k:'REST',        r:'S4',  g:'star', rare:false},
+  {n:'Five of Swords',   k:'DEFEAT',      r:'S5',  g:'star', rare:false},
+      {n:'Six of Swords',    k:'TRANSITION',  r:'S6',  g:'star', rare:false},
+      {n:'Seven of Swords',  k:'STRATEGY',    r:'S7',  g:'star', rare:false},
+      {n:'Eight of Swords',  k:'TRAPPED',     r:'S8',  g:'star', rare:false},
+      {n:'Nine of Swords',   k:'ANXIETY',     r:'S9',  g:'star', rare:false},
+      {n:'Ten of Swords',    k:'ENDINGS',     r:'S10', g:'star', rare:false},
+      {n:'Page of Swords',   k:'ALERTNESS',   r:'SP',  g:'star', rare:false},
+      {n:'Knight of Swords', k:'URGENCY',     r:'SKn', g:'star', rare:false},
+      {n:'Queen of Swords',  k:'PERCEPTION',  r:'SQ',  g:'star', rare:true },
+      {n:'King of Swords',   k:'AUTHORITY',   r:'SK',  g:'star', rare:true },
+      {n:'Ace of Pentacles',    k:'PROSPERITY', r:'P1',  g:'leaf', rare:false},
+      {n:'Two of Pentacles',    k:'BALANCE',    r:'P2',  g:'leaf', rare:false},
+      {n:'Three of Pentacles',  k:'TEAMWORK',   r:'P3',  g:'leaf', rare:false},
+      {n:'Four of Pentacles',   k:'SECURITY',   r:'P4',  g:'leaf', rare:false},
+      {n:'Five of Pentacles',   k:'HARDSHIP',   r:'P5',  g:'leaf', rare:false},
+      {n:'Six of Pentacles',    k:'GENEROSITY', r:'P6',  g:'leaf', rare:false},
+      {n:'Seven of Pentacles',  k:'PATIENCE',   r:'P7',  g:'leaf', rare:false},
+      {n:'Eight of Pentacles',  k:'MASTERY',    r:'P8',  g:'leaf', rare:false},
+      {n:'Nine of Pentacles',   k:'ABUNDANCE',  r:'P9',  g:'leaf', rare:false},
+      {n:'Ten of Pentacles',    k:'LEGACY',     r:'P10', g:'leaf', rare:false},
+      {n:'Page of Pentacles',   k:'STUDY',      r:'PP',  g:'leaf', rare:false},
+      {n:'Knight of Pentacles', k:'DILIGENCE',  r:'PKn', g:'leaf', rare:false},
+  {n:'Queen of Pentacles',  k:'NURTURING',  r:'PQ',  g:'leaf', rare:true },
+  {n:'King of Pentacles',   k:'WEALTH',     r:'PK',  g:'leaf', rare:true },
   ];
-  const TOTAL = FULL_DECK.length; // 22
+  const TOTAL = FULL_DECK.length; // 78
 
   const overlay   = document.getElementById('album-overlay');
   const grid      = document.getElementById('album-grid');
