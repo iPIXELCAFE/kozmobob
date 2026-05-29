@@ -2482,11 +2482,35 @@ const OracleQuery = (() => {
     ];
   }
 
+  /* ── Fetch AI lines from /api/bob — falls back to generateLines() if unavailable ── */
+  async function fetchAILines(q) {
+    const mode = /^tarot/i.test(q) ? 'tarot' : 'oracle';
+    try {
+      const res = await Promise.race([
+        fetch('/api/bob', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: q, sign: window.__KBSign || 'gemini', mode }),
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000)),
+      ]);
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (data.fallback || !data.lines?.length) return null;
+      return data.lines;
+    } catch(e) {
+      return null; /* silent fallback */
+    }
+  }
+
   /* Oracle reading — lines appear one at a time, synced with voice */
-  function read(q, onDone) {
+  async function read(q, onDone) {
     txt.innerHTML = '';
     ctr.scrollTop = 0;
-    const lines = generateLines(q);
+
+    /* Try AI first, fall back to pre-written generateLines() */
+    const aiLines = await fetchAILines(q);
+    const lines = aiLines || generateLines(q);
 
     /* ── Mid-reading sponsor injection — free horoscope / Ask Bob only ──
          Tarot oracle = premium content, never interrupted by ads          */
