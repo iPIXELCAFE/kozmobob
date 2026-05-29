@@ -5809,18 +5809,35 @@ document.addEventListener('keydown',     boot, { once: true });
     successEl.style.display = 'block';
     const subEl = document.getElementById('advert-success-msg');
     if(subEl){
-      const slotLabel = selBill==='right'&&selSlot ? selSlot.label : '';
-      const dur = selBill==='right' ? slotLabel : (selHours===1?'1 hour':selHours+' hours');
-      subEl.innerHTML = '<b>'+biz.trim()+'</b> is now booked on the '
-        +(selBill==='left'?'Community':'Premium')+' billboard.<br>'
-        +(selBill==='right'?'Slot: '+dur:'Running for '+dur)
-        +'. Paid: $'+price+'.';
+      if(selBill === 'message'){
+        /* Personal message — generate share link */
+        const emoji   = (document.getElementById('advert-emoji')||{}).value || '✨';
+        const from    = (document.getElementById('advert-from') ||{}).value || '';
+        const msgLink = (document.getElementById('advert-url')  ||{}).value || '';
+        const params  = new URLSearchParams({
+          e: emoji, t: msg, f: from, l: msgLink
+        });
+        const shareUrl = 'https://kozmobob.com/message?' + params.toString();
+        subEl.innerHTML =
+          '<div style="font-size:2.5rem;margin-bottom:10px">'+emoji+'</div>'
+          +'<div style="margin-bottom:14px;color:rgba(255,222,105,.9);font-size:.82rem;">Your message is live on KozmoBob.</div>'
+          +'<div style="font-family:Courier New,monospace;font-size:.58rem;color:rgba(255,200,40,.5);margin-bottom:16px;">Share this link with whoever you want to see it:</div>'
+          +'<div id="msg-share-url" style="font-family:Courier New,monospace;font-size:.55rem;color:rgba(255,200,40,.8);background:rgba(255,200,40,.06);border:1px solid rgba(255,200,40,.2);border-radius:8px;padding:10px;word-break:break-all;cursor:pointer;margin-bottom:14px;" onclick="navigator.clipboard.writeText(\''+shareUrl+'\').then(()=>{this.style.color=\'rgba(100,255,100,.9)\';this.textContent=\'✓ Copied!\';setTimeout(()=>{this.style.color=\'\';this.textContent=\''+shareUrl+'\';},2000)})">'+shareUrl+'</div>'
+          +'<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
+          +'<a href="https://wa.me/?text='+encodeURIComponent(shareUrl)+'" target="_blank" style="font-family:Courier New,monospace;font-size:.62rem;letter-spacing:1.5px;color:rgba(37,211,102,.9);border:1px solid rgba(37,211,102,.4);border-radius:20px;padding:8px 16px;text-decoration:none;">WhatsApp</a>'
+          +'<a href="sms:?body='+encodeURIComponent(shareUrl)+'" style="font-family:Courier New,monospace;font-size:.62rem;letter-spacing:1.5px;color:rgba(0,207,255,.9);border:1px solid rgba(0,207,255,.4);border-radius:20px;padding:8px 16px;text-decoration:none;">SMS</a>'
+          +'<a href="mailto:?subject=A message for you&body='+encodeURIComponent(shareUrl)+'" style="font-family:Courier New,monospace;font-size:.62rem;letter-spacing:1.5px;color:rgba(255,200,40,.9);border:1px solid rgba(255,200,40,.4);border-radius:20px;padding:8px 16px;text-decoration:none;">Email</a>'
+          +'</div>';
+      } else {
+        const dur = selHours===1?'1 hour':selHours+' hours';
+        subEl.innerHTML = '✦ <b>'+(biz.trim()||'Your ad')+'</b> is now in the queue.<br>Goes live when it\'s your turn. Duration: '+dur+'.';
+        setTimeout(()=>{
+          const ov3 = overlay||document.getElementById('advert-overlay');
+          if(ov3) ov3.classList.remove('visible');
+        },4500);
+      }
     }
     selSlot = null;
-    setTimeout(()=>{
-      const ov3 = overlay||document.getElementById('advert-overlay');
-      if(ov3) ov3.classList.remove('visible');
-    },4500);
   });
 
 })();
