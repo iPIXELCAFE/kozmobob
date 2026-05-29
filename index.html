@@ -761,6 +761,22 @@ html,body{
   }
 }
 
+/* ── Emoji picker ── */
+#advert-emoji-picker{margin-top:8px;}
+.emoji-cat-label{font-family:'Courier New',monospace;font-size:.48rem;letter-spacing:.18em;color:rgba(255,200,40,.45);text-transform:uppercase;margin:10px 0 6px;}
+.emoji-row{display:flex;gap:8px;flex-wrap:wrap;}
+.epick{
+  font-size:1.8rem;cursor:pointer;
+  width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:10px;
+  border:2px solid transparent;
+  background:rgba(255,255,255,.04);
+  transition:border-color .15s,background .15s,transform .15s;
+}
+.epick:hover{background:rgba(255,200,40,.10);transform:scale(1.15);}
+.epick.selected{border-color:rgba(255,200,40,.80);background:rgba(255,200,40,.12);}
+
 /* ── Personal message mobile takeover ── */
 #mob-msg-takeover{
   display:none;
@@ -1366,8 +1382,56 @@ select.adv-input option{background:#111;}
         <textarea class="adv-input" id="advert-msg" maxlength="80" rows="2" placeholder="Your message..."></textarea>
       </div>
       <div class="adv-field" id="advert-emoji-field" style="display:none;">
-        <label class="adv-label">Emoji / Symbol</label>
-        <input class="adv-input" id="advert-emoji" type="text" placeholder="🎂 💍 ❤️ ✨" maxlength="4"/>
+        <label class="adv-label">Pick Your Symbol</label>
+        <div id="advert-emoji-picker">
+          <div class="emoji-cat-label">💌 Love & Romance</div>
+          <div class="emoji-row">
+            <span class="epick" data-e="💍">💍</span>
+            <span class="epick" data-e="❤️">❤️</span>
+            <span class="epick" data-e="💕">💕</span>
+            <span class="epick" data-e="💋">💋</span>
+            <span class="epick" data-e="👫">👫</span>
+            <span class="epick" data-e="💔">💔</span>
+          </div>
+          <div class="emoji-cat-label">🎉 Celebration</div>
+          <div class="emoji-row">
+            <span class="epick" data-e="🎂">🎂</span>
+            <span class="epick" data-e="🥂">🥂</span>
+            <span class="epick" data-e="🎊">🎊</span>
+            <span class="epick" data-e="🎁">🎁</span>
+            <span class="epick" data-e="🎈">🎈</span>
+            <span class="epick" data-e="🏆">🏆</span>
+          </div>
+          <div class="emoji-cat-label">✨ Cosmic</div>
+          <div class="emoji-row">
+            <span class="epick" data-e="✨">✨</span>
+            <span class="epick" data-e="🌙">🌙</span>
+            <span class="epick" data-e="⭐">⭐</span>
+            <span class="epick" data-e="🔮">🔮</span>
+            <span class="epick" data-e="🌟">🌟</span>
+            <span class="epick" data-e="☀️">☀️</span>
+          </div>
+          <div class="emoji-cat-label">💪 Life</div>
+          <div class="emoji-row">
+            <span class="epick" data-e="🎓">🎓</span>
+            <span class="epick" data-e="👶">👶</span>
+            <span class="epick" data-e="🏠">🏠</span>
+            <span class="epick" data-e="✈️">✈️</span>
+            <span class="epick" data-e="💰">💰</span>
+            <span class="epick" data-e="🙏">🙏</span>
+          </div>
+          <div class="emoji-cat-label">🔥 Spicy</div>
+          <div class="emoji-row">
+            <span class="epick" data-e="🍑">🍑</span>
+            <span class="epick" data-e="😈">😈</span>
+            <span class="epick" data-e="🔥">🔥</span>
+            <span class="epick" data-e="💀">💀</span>
+            <span class="epick" data-e="🤑">🤑</span>
+            <span class="epick" data-e="💩">💩</span>
+          </div>
+        </div>
+        <input type="hidden" id="advert-emoji" value="✨"/>
+        <div id="advert-emoji-preview" style="text-align:center;font-size:2.8rem;margin-top:8px;">✨</div>
       </div>
       <div class="adv-field" id="advert-from-field" style="display:none;">
         <label class="adv-label">From (optional)</label>
@@ -5643,6 +5707,22 @@ document.addEventListener('keydown',     boot, { once: true });
     window.selectBillboard(selBill);
     overlay.classList.add('visible');
   };
+
+  /* ── Emoji picker logic ── */
+  document.querySelectorAll('.epick').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.epick').forEach(e => e.classList.remove('selected'));
+      el.classList.add('selected');
+      const emoji = el.dataset.e;
+      const hidden = document.getElementById('advert-emoji');
+      const preview = document.getElementById('advert-emoji-preview');
+      if(hidden)  hidden.value       = emoji;
+      if(preview) preview.textContent = emoji;
+    });
+  });
+  /* Default first emoji selected */
+  const firstPick = document.querySelector('.epick');
+  if(firstPick) firstPick.classList.add('selected');
 
   window.selectBillboard = function(bill){
     selBill = bill;
