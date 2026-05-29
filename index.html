@@ -1334,12 +1334,12 @@ select.adv-input option{background:#111;}
       <div id="advert-bill-cards">
         <div class="ab-card selected" data-bill="left" onclick="selectBillboard('left')">
           <div class="ab-card-name">COMMUNITY</div>
-          <div class="ab-card-price">FROM $12/HR</div>
+          <div class="ab-card-price">$55/HR</div>
           <div class="ab-card-desc">2126 LED mega-screen · rotating spots</div>
         </div>
         <div class="ab-card" data-bill="right" onclick="selectBillboard('right')">
           <div class="ab-card-name">PREMIUM</div>
-          <div class="ab-card-price">FROM $199/HR</div>
+          <div class="ab-card-price">$250/HR</div>
           <div class="ab-card-desc">iPIXEL CAFE · exclusive full-screen</div>
         </div>
       </div>
@@ -5383,20 +5383,20 @@ document.addEventListener('keydown',     boot, { once: true });
   let selPremDate  = null;
   let selPremHours = 1;
 
-  /* ── Community pricing per hour by time slot ── */
+  /* ── Community pricing per hour (flat $55) ── */
   const COMM_SLOTS = [
-    {label:'Midnight — 4 AM', start:0,  end:4,  wd:18, we:25},
-    {label:'4 AM — 9 AM',     start:4,  end:9,  wd:12, we:17},
-    {label:'9 AM — 3 PM',     start:9,  end:15, wd:28, we:38},
-    {label:'3 PM — Midnight', start:15, end:24, wd:38, we:52},
+    {label:'Midnight — 4 AM', start:0,  end:4,  wd:55, we:55},
+    {label:'4 AM — 9 AM',     start:4,  end:9,  wd:55, we:55},
+    {label:'9 AM — 3 PM',     start:9,  end:15, wd:55, we:55},
+    {label:'3 PM — Midnight', start:15, end:24, wd:55, we:55},
   ];
 
-  /* ── Premium pricing per hour by time slot ── */
+  /* ── Premium pricing per hour (flat $250) ── */
   const PREM_SLOTS = [
-    {label:'Midnight — 4 AM', start:0,  end:4,  wd:299, we:399},
-    {label:'4 AM — 9 AM',     start:4,  end:9,  wd:199, we:299},
-    {label:'9 AM — 3 PM',     start:9,  end:15, wd:349, we:499},
-    {label:'3 PM — Midnight', start:15, end:24, wd:479, we:649},
+    {label:'Midnight — 4 AM', start:0,  end:4,  wd:250, we:250},
+    {label:'4 AM — 9 AM',     start:4,  end:9,  wd:250, we:250},
+    {label:'9 AM — 3 PM',     start:9,  end:15, wd:250, we:250},
+    {label:'3 PM — Midnight', start:15, end:24, wd:250, we:250},
   ];
 
   /* ──────────────────────────────────────────────
