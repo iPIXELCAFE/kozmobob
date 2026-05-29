@@ -3289,6 +3289,70 @@ const OracleQuery = (() => {
       syncBorder(rgb);
     }
   };
+
+  /* ── Inject personal message into left billboard rotation ── */
+  window.__injectPersonalMsg = function(data){
+    /* data: { emoji, text, from, link, color } */
+    const emoji  = data.emoji || '✨';
+    const text   = data.text  || '';
+    const from   = data.from  || '';
+    const col    = data.color || '#FFD700';
+    const rgb    = [255,215,0];
+
+    function drawPersonal(t){
+      ctx.fillStyle='#030200'; ctx.fillRect(0,0,W,H);
+      const cx=W/2;
+      /* glow */
+      const pulse=Math.sin(t*Math.PI*3)*0.08;
+      const grd=ctx.createRadialGradient(cx,H*0.35,0,cx,H*0.35,100);
+      grd.addColorStop(0,`rgba(255,215,0,${0.18+pulse})`);
+      grd.addColorStop(1,'transparent');
+      ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
+      /* big emoji */
+      ctx.textAlign='center';
+      ctx.font=`${60+Math.sin(t*Math.PI*2)*4}px serif`;
+      ctx.globalAlpha=0.90+Math.sin(t*Math.PI*4)*0.10;
+      ctx.fillText(emoji, cx, H*0.38);
+      ctx.globalAlpha=1;
+      /* message text — word wrap */
+      const words=text.split(' '), maxW=W-20;
+      ctx.fillStyle=col;
+      ctx.font=`bold 16px 'Georgia',serif`;
+      let line='',lines=[],y=H*0.52;
+      for(const w of words){
+        const test=line?line+' '+w:w;
+        if(ctx.measureText(test).width>maxW&&line){lines.push(line);line=w;}
+        else line=test;
+      }
+      if(line) lines.push(line);
+      lines.forEach((l,i)=>ctx.fillText(l,cx,y+i*22));
+      /* from */
+      if(from){
+        ctx.fillStyle=`rgba(255,215,0,.50)`;
+        ctx.font=`12px 'Courier New',monospace`;
+        ctx.fillText(from, cx, y+lines.length*22+16);
+      }
+      /* border */
+      ctx.strokeStyle=`rgba(255,215,0,${0.30+Math.sin(t*Math.PI*2)*0.12})`;
+      ctx.lineWidth=1.5; ctx.strokeRect(4,4,W-8,H-8);
+      drawHUD(t,col,rgb);
+    }
+
+    const slot = {
+      id:'personal-msg', name: emoji+' MESSAGE',
+      accent:col, rgb, bg:'#030200',
+      url: data.link || 'https://kozmobob.com',
+      draw: drawPersonal,
+      frames: AD_FRAMES * 6  /* ~1 min on screen */
+    };
+    BRANDS.unshift(slot);
+    adIdx=0; adFrame=0;
+    tickerBrand.textContent = emoji + ' PERSONAL MESSAGE';
+    syncBorder(rgb);
+
+    /* Also inject into mobile banner */
+    if(window.__injectMobileMsgBanner) window.__injectMobileMsgBanner(data);
+  };
 })();
 
 
@@ -4273,6 +4337,19 @@ const OracleQuery = (() => {
       if (b.msg) showTakeover(b.msg);
     }, 350);
   }
+
+  /* Inject personal message into mobile banner */
+  window.__injectMobileMsgBanner = function(data){
+    const entry = {
+      name: (data.emoji||'✨')+' MESSAGE',
+      url:'kozmobob.com', href:'https://kozmobob.com',
+      color:'rgba(255,215,0,.95)', border:'rgba(255,215,0,.40)',
+      msg:{ sym:data.emoji||'✨', text:data.text||'', from:data.from||'', color:'#FFD700', href:data.link||'' }
+    };
+    BRANDS.unshift(entry);
+    idx=0;
+    show(BRANDS[0]);
+  };
 
   banner.addEventListener('click', ()=> window.open(currentHref,'_blank'));
   if (takeover) takeover.addEventListener('click', (e)=>{
@@ -5803,8 +5880,15 @@ document.addEventListener('keydown',     boot, { once: true });
     try{ ads = JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(e){}
     ads.push({biz:biz.trim(),msg,url,logo,price,priority:priorityOn,startTime,endTime});
     try{ localStorage.setItem(KEY,JSON.stringify(ads)); }catch(e){}
-    if(selBill==='left'  && window.__injectLeftAd)  window.__injectLeftAd({biz:biz.trim(),msg,url,logo,priority:priorityOn,endTime});
-    if(selBill==='right' && window.__injectRightAd) window.__injectRightAd({biz:biz.trim(),msg,url,logo,endTime});
+    if(selBill==='left'    && window.__injectLeftAd)     window.__injectLeftAd({biz:biz.trim(),msg,url,logo,priority:priorityOn,endTime});
+    if(selBill==='right'   && window.__injectRightAd)    window.__injectRightAd({biz:biz.trim(),msg,url,logo,endTime});
+    if(selBill==='message' && window.__injectPersonalMsg) window.__injectPersonalMsg({
+      emoji: (document.getElementById('advert-emoji')||{}).value||'✨',
+      text:  msg,
+      from:  (document.getElementById('advert-from')||{}).value||'',
+      link:  url,
+      color: '#FFD700'
+    });
     formBody.style.display  = 'none';
     successEl.style.display = 'block';
     const subEl = document.getElementById('advert-success-msg');
