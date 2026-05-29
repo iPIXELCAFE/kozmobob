@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>A Message Through KozmoBob</title>
+<meta name="description" content="A personal message delivered through the cosmos."/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Georgia',serif;}
+
+#canvas-bg{position:fixed;inset:0;z-index:0;}
+
+#msg-wrap{
+  position:fixed;inset:0;z-index:10;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:24px;
+  opacity:0;
+  transition:opacity 1.2s ease;
+}
+#msg-wrap.visible{opacity:1;}
+
+#msg-card{
+  background:rgba(0,0,0,.82);
+  border:1px solid rgba(255,200,40,.28);
+  border-radius:20px;
+  padding:40px 36px;
+  max-width:480px;
+  width:100%;
+  text-align:center;
+  box-shadow:0 0 60px rgba(255,150,20,.12),0 0 120px rgba(255,100,10,.06);
+  backdrop-filter:blur(12px);
+}
+
+#msg-sym{
+  font-size:5rem;
+  line-height:1;
+  margin-bottom:20px;
+  animation:symPulse 2.5s ease-in-out infinite;
+}
+@keyframes symPulse{
+  0%,100%{filter:drop-shadow(0 0 12px rgba(255,200,40,.4));}
+  50%{filter:drop-shadow(0 0 32px rgba(255,200,40,.8)) drop-shadow(0 0 60px rgba(255,150,20,.3));}
+}
+
+#msg-text{
+  font-family:'Georgia',serif;
+  font-size:clamp(1.4rem,5vw,2rem);
+  line-height:1.4;
+  color:rgba(255,222,105,.97);
+  text-shadow:0 0 20px rgba(255,150,20,.5);
+  margin-bottom:16px;
+}
+
+#msg-from{
+  font-family:'Courier New',monospace;
+  font-size:.80rem;
+  letter-spacing:.15em;
+  color:rgba(255,200,40,.50);
+  margin-bottom:28px;
+}
+
+#msg-divider{
+  width:60%;height:1px;
+  background:linear-gradient(to right,transparent,rgba(255,200,40,.40),transparent);
+  margin:0 auto 28px;
+}
+
+#msg-source{
+  font-family:'Courier New',monospace;
+  font-size:.55rem;
+  letter-spacing:.20em;
+  color:rgba(255,200,40,.30);
+  text-transform:uppercase;
+  margin-bottom:20px;
+}
+
+#msg-link-btn{
+  display:none;
+  font-family:'Courier New',monospace;
+  font-size:.65rem;
+  letter-spacing:.12em;
+  color:rgba(0,207,255,.90);
+  border:1px solid rgba(0,207,255,.35);
+  border-radius:20px;
+  padding:10px 24px;
+  text-decoration:none;
+  margin-bottom:20px;
+  transition:border-color .2s,color .2s,box-shadow .2s;
+}
+#msg-link-btn:hover{
+  border-color:rgba(0,207,255,.8);
+  color:rgba(0,207,255,1);
+  box-shadow:0 0 18px rgba(0,207,255,.25);
+}
+
+#share-row{
+  display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px;
+}
+.share-btn{
+  font-family:'Courier New',monospace;
+  font-size:.58rem;letter-spacing:1.5px;
+  border-radius:20px;padding:8px 16px;
+  text-decoration:none;cursor:pointer;border:1px solid;
+  transition:opacity .2s;
+}
+.share-btn:hover{opacity:.75;}
+.share-wa{color:rgba(37,211,102,.9);border-color:rgba(37,211,102,.4);}
+.share-sms{color:rgba(0,207,255,.9);border-color:rgba(0,207,255,.4);}
+.share-copy{color:rgba(255,200,40,.9);border-color:rgba(255,200,40,.4);background:none;}
+
+#kozmo-link{
+  margin-top:28px;
+  font-family:'Courier New',monospace;
+  font-size:.50rem;letter-spacing:.22em;
+  color:rgba(255,200,40,.22);
+  text-decoration:none;
+  text-transform:uppercase;
+  transition:color .2s;
+}
+#kozmo-link:hover{color:rgba(255,200,40,.55);}
+
+#not-found{
+  display:none;
+  color:rgba(255,200,40,.6);
+  font-family:'Courier New',monospace;
+  font-size:.75rem;letter-spacing:.15em;
+  text-align:center;
+  padding:40px;
+}
+</style>
+</head>
+<body>
+
+<canvas id="canvas-bg"></canvas>
+
+<div id="msg-wrap">
+  <div id="msg-card">
+    <div id="msg-sym">✨</div>
+    <div id="msg-text"></div>
+    <div id="msg-from"></div>
+    <div id="msg-divider"></div>
+    <div id="msg-source">✦ Delivered through KozmoBob</div>
+    <a id="msg-link-btn" target="_blank" rel="noopener">Visit →</a>
+    <div id="share-row">
+      <a id="share-wa"  class="share-btn share-wa"  target="_blank">WhatsApp</a>
+      <a id="share-sms" class="share-btn share-sms">SMS</a>
+      <button id="share-copy" class="share-btn share-copy" onclick="copyLink()">Copy Link</button>
+    </div>
+    <a href="https://kozmobob.com" id="kozmo-link">Ask KozmoBob →</a>
+  </div>
+  <div id="not-found">No message found. <a href="https://kozmobob.com" style="color:rgba(255,200,40,.6);">Go to KozmoBob</a></div>
+</div>
+
+<script>
+/* ── Read URL params ── */
+const params = new URLSearchParams(window.location.search);
+const emoji  = params.get('e') || '✨';
+const text   = params.get('t') || '';
+const from   = params.get('f') || '';
+const link   = params.get('l') || '';
+
+if(!text){
+  document.getElementById('msg-card').style.display = 'none';
+  document.getElementById('not-found').style.display = 'block';
+} else {
+  document.getElementById('msg-sym').textContent  = emoji;
+  document.getElementById('msg-text').textContent = text;
+  if(from) document.getElementById('msg-from').textContent = from;
+  if(link){
+    const lb = document.getElementById('msg-link-btn');
+    lb.href = link.startsWith('http') ? link : 'https://'+link;
+    lb.style.display = 'inline-block';
+  }
+
+  /* Share buttons */
+  const pageUrl = window.location.href;
+  document.getElementById('share-wa').href  = 'https://wa.me/?text='+encodeURIComponent(pageUrl);
+  document.getElementById('share-sms').href = 'sms:?body='+encodeURIComponent(pageUrl);
+}
+
+function copyLink(){
+  navigator.clipboard.writeText(window.location.href).then(()=>{
+    const btn = document.getElementById('share-copy');
+    btn.textContent = '✓ Copied!';
+    btn.style.color = 'rgba(100,255,100,.9)';
+    setTimeout(()=>{ btn.textContent='Copy Link'; btn.style.color=''; },2000);
+  });
+}
+
+/* ── Animated star background ── */
+(function(){
+  const canvas = document.getElementById('canvas-bg');
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setClearColor(0x000000,1);
+
+  const scene = new THREE.Scene();
+  const cam   = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
+  cam.position.z = 3;
+
+  /* Stars */
+  const geo = new THREE.BufferGeometry();
+  const N = 1200;
+  const pos = new Float32Array(N*3);
+  for(let i=0;i<N*3;i++) pos[i]=(Math.random()-0.5)*20;
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  const stars = new THREE.Points(geo, new THREE.PointsMaterial({color:0xffd080,size:0.04,transparent:true,opacity:0.7}));
+  scene.add(stars);
+
+  /* Soft glow sphere */
+  const sphere = new THREE.Mesh(
+    new THREE.SphereGeometry(0.9,32,32),
+    new THREE.MeshBasicMaterial({color:0xff9010,transparent:true,opacity:0.06,wireframe:false})
+  );
+  scene.add(sphere);
+
+  window.addEventListener('resize',()=>{
+    cam.aspect = innerWidth/innerHeight;
+    cam.updateProjectionMatrix();
+    renderer.setSize(innerWidth,innerHeight);
+  });
+
+  let t = 0;
+  (function tick(){
+    requestAnimationFrame(tick);
+    t += 0.003;
+    stars.rotation.y = t * 0.08;
+    stars.rotation.x = t * 0.03;
+    sphere.material.opacity = 0.05 + Math.sin(t*2)*0.03;
+    renderer.render(scene, cam);
+  })();
+
+  /* Fade in message after short delay */
+  setTimeout(()=>{ document.getElementById('msg-wrap').classList.add('visible'); }, 800);
+})();
+</script>
+</body>
+</html>
