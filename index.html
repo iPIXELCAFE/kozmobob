@@ -1209,9 +1209,9 @@ select.adv-input option{background:#111;}
 <div id="mob-bot-banner">
   <div id="mob-bot-left">
     <span id="mob-bot-live">◉ LIVE</span>
-    <span id="mob-bot-name">MERCEDES·BENZ</span>
+    <span id="mob-bot-name">iPIXEL CAFE</span>
   </div>
-  <span id="mob-bot-url">mercedes-benz.com</span>
+  <span id="mob-bot-url">ipixelcafe.com</span>
   <span id="mob-bot-tag" onclick="event.stopPropagation();openAdvertOverlay('bottom')" style="cursor:pointer;letter-spacing:1.5px;">✦ ADVERTISE</span>
 </div>
 
@@ -1219,7 +1219,7 @@ select.adv-input option{background:#111;}
 <div id="lqb">
   <canvas id="lqb-canvas"></canvas>
   <div id="lqb-ticker">
-    <span id="lqb-ticker-brand">MERCEDES·BENZ</span>
+    <span id="lqb-ticker-brand">iPIXEL CAFE</span>
 
   </div>
   <div class="adv-chip" onclick="event.stopPropagation();openAdvertOverlay('left')">✦ ADVERTISE HERE</div>
@@ -2524,9 +2524,7 @@ const OracleQuery = (() => {
     const _isTarotRead = /^tarot/i.test(q);
     if (!_isTarotRead && !window.__KB.isPaid()) {
       const SPONSORS = [
-        { msg:'A moment of clarity, brought to you by Mercedes-Benz. The road ahead is yours.', url:'https://www.mercedes-benz.com' },
-        { msg:'Just do it — even this. Especially this. Brought to you by Nike.',               url:'https://www.nike.com' },
-        { msg:'Impossible is nothing. This reading continues, courtesy of Adidas.',             url:'https://www.adidas.com' },
+        { msg:'Seal your story forever at iPIXEL CAFE — digital time capsules for every moment.', url:'https://www.ipixelcafe.com', tts:'Seal your story forever at iPixel Cafe — digital time capsules for every moment.' },
         { msg:'Seal your story forever at iPIXEL CAFE — digital time capsules for every moment.', url:'https://www.ipixelcafe.com', tts:'Seal your story forever at iPixel Cafe — digital time capsules for every moment.' },
         { msg:'Authentic Italian, Las Vegas. Pizza and pasta perfection at Novella.',           url:'https://www.novellalv.com' },
       ];
@@ -2832,9 +2830,9 @@ const OracleQuery = (() => {
 
   /* ── Brand definitions ── */
   const BRANDS = [
-    { id:'mercedes', name:'MERCEDES·BENZ', accent:'#00CFFF', rgb:[0,207,255],   bg:'#000408', url:'https://www.mercedes-benz.com', draw:drawMercedes },
-    { id:'nike',     name:'NIKE',          accent:'#CCFF00', rgb:[204,255,0],   bg:'#010200', url:'https://www.nike.com',          draw:drawNike     },
-    { id:'adidas',   name:'ADIDAS',        accent:'#1C8EFF', rgb:[28,142,255],  bg:'#000206', url:'https://www.adidas.com',        draw:drawAdidas   },
+    { id:'ipixel2',  name:'iPIXEL CAFE',   accent:'#00CFFF', rgb:[0,207,255],   bg:'#000408', url:'https://ipixelcafe.com',        draw:drawIPIXEL   },
+    { id:'novella2', name:'NOVELLA LV',    accent:'#CCFF00', rgb:[204,255,0],   bg:'#010200', url:'https://novellalv.com',         draw:drawNovella  },
+    { id:'yourad',   name:'YOUR BRAND',    accent:'#AA88FF', rgb:[170,136,255], bg:'#020008', url:'https://kozmobob.com/advertise', draw:drawYourAd   },
     { id:'ipixel',   name:'iPIXEL CAFE',   accent:'#FFD700', rgb:[255,215,0],   bg:'#040300', url:'https://ipixelcafe.com',        draw:drawIPIXEL   },
     { id:'novella',  name:'NOVELLA',       accent:'#FF4422', rgb:[255,68,34],   bg:'#080100', url:'https://novellalv.com',         draw:drawNovella  },
   ];
@@ -2881,157 +2879,38 @@ const OracleQuery = (() => {
     });
   }
 
-  /* ── MERCEDES — electric cyan, revolving star ── */
-  function drawMercedes(t) {
-    const B = BRANDS[0];
+  /* ── YOUR AD — animated diamond, invite to advertise ── */
+  function drawYourAd(t) {
+    const B = BRANDS[2];
     const [r,g,b] = B.rgb;
-    ctx.fillStyle = B.bg; ctx.fillRect(0,0,W,H);
-
-    const cx = W/2, cy = H*0.42;
-    const pulse = Math.sin(t*Math.PI*4)*0.06;
-
-    /* ambient halo */
-    const grd = ctx.createRadialGradient(cx,cy,0,cx,cy,96);
-    grd.addColorStop(0, `rgba(${r},${g},${b},${0.16+pulse})`);
-    grd.addColorStop(1, 'transparent');
-    ctx.fillStyle = grd; ctx.fillRect(0,0,W,H);
-
-    /* outer ring */
-    const starR = 54 + Math.sin(t*Math.PI*2)*2;
-    ctx.save(); ctx.translate(cx, cy);
-    ctx.beginPath(); ctx.arc(0,0,starR,0,Math.PI*2);
-    ctx.strokeStyle = B.accent; ctx.lineWidth = 1.8; ctx.globalAlpha = 0.82; ctx.stroke();
-
-    /* inner subtle ring */
-    ctx.beginPath(); ctx.arc(0,0,starR-5,0,Math.PI*2);
-    ctx.strokeStyle=`rgba(${r},${g},${b},.20)`; ctx.lineWidth=4; ctx.stroke();
-    ctx.globalAlpha = 1;
-
-    /* three-pointed star arms — slowly rotating */
-    const rot = t * Math.PI * 0.4;
-    ctx.strokeStyle = B.accent; ctx.lineWidth = 2.8; ctx.lineCap = 'round';
-    for(let i=0;i<3;i++){
-      const a = rot + (i/3)*Math.PI*2 - Math.PI/2;
-      ctx.beginPath(); ctx.moveTo(0,0);
-      ctx.lineTo(Math.cos(a)*(starR-2), Math.sin(a)*(starR-2));
-      ctx.stroke();
-    }
-
-    /* center dot */
-    ctx.beginPath(); ctx.arc(0,0,3.5,0,Math.PI*2);
-    ctx.fillStyle=B.accent; ctx.fill();
-    ctx.restore();
-
-    /* brand name */
-    ctx.textAlign='center';
-    ctx.fillStyle=B.accent; ctx.globalAlpha=0.90+Math.sin(t*Math.PI*6)*0.10;
-    ctx.font=`bold 10px 'Courier New',monospace`; ctx.fillText('MERCEDES',cx,cy+starR+20);
-    ctx.font=`8px 'Courier New',monospace`;       ctx.fillText('— BENZ —',cx,cy+starR+33);
-    ctx.globalAlpha=1;
-
-    ctx.fillStyle=`rgba(${r},${g},${b},.52)`;
-    ctx.font=`7.5px 'Courier New',monospace`;
-    ctx.fillText('THE FUTURE', cx, cy+starR+53);
-    ctx.fillText('DRIVES ITSELF.', cx, cy+starR+65);
-
-    drawHUD(t, B.accent, B.rgb);
-  }
-
-  /* ── NIKE — neon lime, animated swoosh ── */
-  function drawNike(t) {
-    const B = BRANDS[1];
-    const [r,g,b] = B.rgb;
-    ctx.fillStyle=B.bg; ctx.fillRect(0,0,W,H);
-
+    ctx.fillStyle='#010004'; ctx.fillRect(0,0,W,H);
     const cx=W/2, cy=H*0.40;
-    const pulse = Math.sin(t*Math.PI*3)*0.06;
-
-    /* ambient */
-    const grd = ctx.createRadialGradient(cx,cy-10,0,cx,cy,105);
+    const pulse=Math.sin(t*Math.PI*2)*0.08;
+    const grd=ctx.createRadialGradient(cx,cy,0,cx,cy,90);
     grd.addColorStop(0,`rgba(${r},${g},${b},${0.12+pulse})`);
     grd.addColorStop(1,'transparent');
     ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
-
-    /* Swoosh */
-    ctx.save();
-    ctx.translate(cx-46, cy-24);
-    const sw=92, sh=48;
-    const sweep = Math.sin(t*Math.PI*2)*0.05;
+    /* rotating diamond */
+    const rot=t*Math.PI*0.5, ds=38+Math.sin(t*Math.PI*3)*4;
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot);
     ctx.beginPath();
-    ctx.moveTo(0, sh*0.60);
-    ctx.bezierCurveTo(sw*0.16, sh*(0.95+sweep), sw*0.68, sh*(0.14-sweep), sw, sh*0.02);
-    ctx.bezierCurveTo(sw*0.74, sh*0.27, sw*0.34, sh*0.54, sw*0.20, sh*0.67);
+    ctx.moveTo(0,-ds); ctx.lineTo(ds,0); ctx.lineTo(0,ds); ctx.lineTo(-ds,0);
     ctx.closePath();
-    ctx.fillStyle=B.accent;
-    ctx.globalAlpha=0.90+Math.sin(t*Math.PI*5)*0.10;
-    ctx.fill(); ctx.globalAlpha=1;
-    ctx.restore();
-
-    /* NIKE wordmark */
+    ctx.strokeStyle=B.accent; ctx.lineWidth=1.8; ctx.globalAlpha=0.75; ctx.stroke();
+    ctx.globalAlpha=1; ctx.restore();
     ctx.textAlign='center';
-    ctx.fillStyle=B.accent; ctx.font=`bold 26px 'Courier New',monospace`;
-    ctx.fillText('NIKE',cx,cy+50);
-
-    ctx.fillStyle=`rgba(${r},${g},${b},.50)`;
+    ctx.fillStyle=B.accent; ctx.font=`bold 11px 'Courier New',monospace`;
+    ctx.fillText('YOUR BRAND',cx,cy+ds+22);
+    ctx.fillStyle=`rgba(${r},${g},${b},.55)`;
     ctx.font=`7.5px 'Courier New',monospace`;
-    ctx.fillText('JUST DO IT.', cx, cy+70);
-
-
-    drawHUD(t, B.accent, B.rgb);
-  }
-
-  /* ── ADIDAS — electric blue, three-stripe mountain ── */
-  function drawAdidas(t) {
-    const B = BRANDS[2];
-    const [r,g,b] = B.rgb;
-    ctx.fillStyle=B.bg; ctx.fillRect(0,0,W,H);
-
-    const cx=W/2, cy=H*0.38;
-    const pulse=Math.sin(t*Math.PI*2)*0.06;
-
-    const grd=ctx.createRadialGradient(cx,cy+20,0,cx,cy,105);
-    grd.addColorStop(0,`rgba(${r},${g},${b},${0.14+pulse})`);
-    grd.addColorStop(1,'transparent');
-    ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
-
-    /* Three-stripe mountain — adidas trefoil silhouette */
-    const baseY = cy+38, sw=24, gap=7, heights=[60,78,62];
-    const totalW = 3*sw + 2*gap;
-    const startX = cx - totalW/2;
-    const sway = Math.sin(t*Math.PI*2)*3;
-
-    for(let i=0;i<3;i++){
-      const sx=startX+i*(sw+gap);
-      const h=heights[i]+sway*(i===1?1:-0.5);
-      const lean=[-8, 0, 8][i];
-      ctx.beginPath();
-      ctx.moveTo(sx,baseY);
-      ctx.lineTo(sx+sw,baseY);
-      ctx.lineTo(sx+sw+lean,baseY-h);
-      ctx.lineTo(sx+lean,baseY-h);
-      ctx.closePath();
-      ctx.fillStyle=B.accent;
-      ctx.globalAlpha=i===1?0.95:0.80;
-      ctx.fill();
-    }
-    ctx.globalAlpha=1;
-
-    /* wordmark */
-    ctx.textAlign='center';
-    ctx.fillStyle=B.accent; ctx.font=`bold 14px 'Courier New',monospace`;
-    ctx.fillText('ADIDAS',cx,baseY+20);
-
-    ctx.fillStyle=`rgba(${r},${g},${b},.50)`;
-    ctx.font=`7.5px 'Courier New',monospace`;
-    ctx.fillText('IMPOSSIBLE', cx, baseY+38);
-    ctx.fillText('IS NOTHING.', cx, baseY+51);
-
+    ctx.fillText('ADVERTISE HERE', cx, cy+ds+38);
+    ctx.fillText('KOZMOBOB.COM', cx, cy+ds+52);
     drawHUD(t, B.accent, B.rgb);
   }
 
   /* ── iPIXEL CAFE — gold, pixel grid wave ── */
   function drawIPIXEL(t) {
-    const B = BRANDS[3];
+    const B = BRANDS[0];
     const [r,g,b] = B.rgb;
     ctx.fillStyle=B.bg; ctx.fillRect(0,0,W,H);
 
@@ -3078,7 +2957,7 @@ const OracleQuery = (() => {
 
   /* ── NOVELLA — Italian red, steam & fork animation ── */
   function drawNovella(t) {
-    const B = BRANDS[4];
+    const B = BRANDS[1];
     const [r,g,b] = B.rgb;
     ctx.fillStyle=B.bg; ctx.fillRect(0,0,W,H);
 
@@ -3501,9 +3380,7 @@ const OracleQuery = (() => {
       /* Sponsor — free users only */
       const isPaid = window.__KB && window.__KB.isPaid();
       const CARD_SPONSORS = [
-        { msg:'A moment of clarity, brought to you by Mercedes-Benz. The road ahead is yours.', url:'https://www.mercedes-benz.com' },
-        { msg:'Just do it — even this. Especially this. Brought to you by Nike.',               url:'https://www.nike.com' },
-        { msg:'Impossible is nothing. This reading continues, courtesy of Adidas.',             url:'https://www.adidas.com' },
+        { msg:'Seal your story forever at iPIXEL CAFE — digital time capsules for every moment.', url:'https://www.ipixelcafe.com', tts:'Seal your story forever at iPixel Cafe — digital time capsules for every moment.' },
         { msg:'Seal your story forever at iPIXEL CAFE — digital time capsules for every moment.', url:'https://www.ipixelcafe.com', tts:'Seal your story forever at iPixel Cafe — digital time capsules for every moment.' },
         { msg:'Authentic Italian, Las Vegas. Pizza and pasta perfection at Novella.',           url:'https://www.novellalv.com' },
       ];
@@ -4224,9 +4101,9 @@ const OracleQuery = (() => {
   if(!banner || !nameEl) return;
 
   const BRANDS = [
-    { name:'MERCEDES·BENZ', url:'mercedes-benz.com',  href:'https://www.mercedes-benz.com', color:'rgba(0,207,255,.95)',  border:'rgba(0,207,255,.30)' },
-    { name:'NIKE',           url:'nike.com',           href:'https://www.nike.com',           color:'rgba(204,255,0,.95)', border:'rgba(204,255,0,.30)'  },
-    { name:'ADIDAS',         url:'adidas.com',         href:'https://www.adidas.com',         color:'rgba(28,142,255,.95)',border:'rgba(28,142,255,.30)' },
+    { name:'iPIXEL CAFE',    url:'ipixelcafe.com',     href:'https://www.ipixelcafe.com',    color:'rgba(255,215,0,.95)',  border:'rgba(255,215,0,.30)'  },
+    { name:'NOVELLA LV',     url:'novellalv.com',      href:'https://www.novellalv.com',      color:'rgba(255,80,40,.95)',  border:'rgba(255,80,40,.30)'  },
+    { name:'YOUR BRAND',     url:'kozmobob.com',       href:'https://kozmobob.com',           color:'rgba(170,136,255,.95)',border:'rgba(170,136,255,.30)'},
     { name:'iPIXEL CAFE',    url:'ipixelcafe.com',     href:'https://ipixelcafe.com',         color:'rgba(255,215,0,.95)', border:'rgba(255,215,0,.30)'  },
     { name:'NOVELLA',        url:'novellalv.com',      href:'https://novellalv.com',          color:'rgba(255,68,34,.95)',  border:'rgba(255,68,34,.30)'  },
   ];
