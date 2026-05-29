@@ -5,6 +5,7 @@
 */
 
 module.exports = async function handler(req, res) {
+  /* Only allow POST */
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -16,6 +17,7 @@ module.exports = async function handler(req, res) {
 
   const { question = '', sign = 'gemini', mode = 'oracle' } = req.body || {};
 
+  /* ── System prompt — Bob's voice and rules ── */
   const SIGN_CONTEXT = {
     aries:'ruled by Mars, fire sign, bold and impulsive',
     taurus:'ruled by Venus, earth sign, grounded and sensual',
@@ -40,17 +42,17 @@ RULES (non-negotiable):
 - Each line must be 10-20 words. Not shorter. Make them land.
 - Sound like a psychic who actually knows — not a horoscope. Be SPECIFIC to what they asked.
 - Speak directly to the person. Use "you" not "one".
-- No astrology cliches. No "the universe", no "energy", no "manifest".
+- No astrology clichés. No "the universe", no "energy", no "manifest".
 - The final line must be so specific and true it feels personal. Make them feel seen.
 - Never start two consecutive lines with the same word.`
-    : `You are KozmoBob — a brutally honest, deeply perceptive oracle. The person asking is ${sign} (${signContext}).
+    : `You are KozmoBob — a brutally honest, deeply perceptive oracle. The person asking is ${sign}${signContext ? ` (${signContext})` : ''}.
 RULES (non-negotiable):
 - Write exactly 4 lines. Each line stands alone. No bullet points, no numbers.
 - Each line must be 10-20 words. Not shorter. Make them land.
 - Respond DIRECTLY to what they asked. Not generic advice — speak to their specific situation.
 - Sound like you already know their life. You are revealing, not guessing.
-- No astrology cliches. No "the universe", no "energy", no "manifest", no "journey".
-- Use their sign traits subtly — never name the sign.
+- No astrology clichés. No "the universe", no "energy", no "manifest", no "journey".
+- Use their sign's traits subtly — don't name the sign or make it obvious.
 - The final line must gut-punch them with truth they already know but haven't said out loud.
 - Never start two consecutive lines with the same word.`;
 
@@ -65,10 +67,10 @@ RULES (non-negotiable):
         model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: question || 'What do I need to know right now?' },
+          { role: 'user',   content: question || 'What does the universe want me to know right now?' },
         ],
-        max_tokens: 220,
-        temperature: 0.95,
+        max_tokens: 180,
+        temperature: 0.92,
         top_p: 0.95,
       }),
     });
@@ -82,6 +84,7 @@ RULES (non-negotiable):
     const data = await groqRes.json();
     const raw  = data.choices?.[0]?.message?.content || '';
 
+    /* Split into lines, clean up, ensure 4 non-empty lines */
     const lines = raw
       .split('\n')
       .map(l => l.replace(/^[\d\.\-\*]+\s*/, '').trim())
