@@ -2037,16 +2037,16 @@ const OracleQuery = (() => {
     const memLine = (lastTopic && lastTopic!==topic && S.count>1 && BRIDGES[lastTopic]?.[topic])
       ? BRIDGES[lastTopic][topic] : null;
 
+    /* OPENS only used as fallback when AI is unavailable — kept minimal */
     const OPENS = [
-      `The field responds.`,`I see this clearly.`,`Something shifts in the energy.`,
-      `The signal is strong.`,`KozmoBob reads the current.`,`Interference clears.`,
-      `I've been waiting for this question.`,`The current opens.`,
+      `The signal is strong.`,`KozmoBob reads the current.`,`The current opens.`,
     ];
 
     /* ══════════════════════════════════════════════════════
        ZODIAC — 6 unique lines per sign, none repeat
     ══════════════════════════════════════════════════════ */
     if(topic==='zodiac'){
+      /* AI handles zodiac readings now — this is fallback only */
       setGlowColor(...SIGN_CLR[sign]);
       const cap=sign[0].toUpperCase()+sign.slice(1);
       const SIGNS={
@@ -2540,6 +2540,18 @@ const OracleQuery = (() => {
     function showLine() {
       if (li >= lines.length) {
         onDone();
+        /* Hook — tease paid reading for free users */
+        if (!window.__KB.isPaid()) {
+          setTimeout(() => {
+            const hook = document.createElement('span');
+            hook.className = 'oracle-line';
+            hook.style.cssText = 'display:block;margin-top:18px;font-size:.78rem;letter-spacing:.18em;color:rgba(255,200,40,.45);text-align:center;font-style:italic;cursor:pointer;';
+            hook.textContent = '✦  There is more I see.  Unlock your full reading.  ✦';
+            hook.addEventListener('click', () => vsect.classList.add('visible'));
+            txt.appendChild(hook);
+            ctr.scrollTop = ctr.scrollHeight;
+          }, 900);
+        }
         setTimeout(() => { vsect.classList.add('visible'); }, 750);
         return;
       }
