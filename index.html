@@ -104,42 +104,6 @@ html,body{
 }
 #demo-dismiss:hover{color:rgba(255,175,40,.55)}
 
-/* ── Daily horoscope pill ── */
-#daily-pill{
-  position:fixed;bottom:62px;left:50%;transform:translateX(-50%);
-  display:none;align-items:center;gap:8px;
-  background:rgba(0,0,0,.82);
-  border:1px solid rgba(255,200,40,.22);
-  border-radius:30px;
-  padding:6px 16px;
-  z-index:18;
-  pointer-events:none;
-  opacity:0;
-  transition:opacity .6s ease;
-  white-space:nowrap;
-  max-width:90vw;
-  overflow:hidden;
-}
-#daily-pill.visible{opacity:1;}
-#daily-pill-sign{
-  font-size:.65rem;letter-spacing:2px;
-  color:rgba(255,200,40,.7);
-  font-family:'Courier New',monospace;
-  text-transform:uppercase;
-}
-#daily-pill-text{
-  font-size:.62rem;letter-spacing:1.5px;
-  color:rgba(255,255,255,.45);
-  font-family:'Courier New',monospace;
-}
-#daily-pill-streak{
-  font-size:.58rem;letter-spacing:1.5px;
-  color:rgba(255,200,40,.35);
-  font-family:'Courier New',monospace;
-}
-@media(max-width:768px){
-  #daily-pill{bottom:152px;font-size:.58rem;}
-}
 
 /* ── Typewriter text ── */
 #oracle-micro-text{width:100%;max-width:600px;margin:0 auto;text-align:center;}
@@ -1274,12 +1238,6 @@ select.adv-input option{background:#111;}
 <div id="spread-area"></div>
 <div id="card-teaser"></div>
 
-<!-- Daily horoscope pill — auto shows on load -->
-<div id="daily-pill">
-  <span id="daily-pill-sign"></span>
-  <span id="daily-pill-text"></span>
-  <span id="daily-pill-streak"></span>
-</div>
 
 <!-- Mini Bob — right-side tarot oracle -->
 <div id="mini-bob-wrap">
@@ -3650,6 +3608,7 @@ const OracleQuery = (() => {
   const N_STARS  = 32;
 
   const MSGS = [
+    window.__KB_DAILY_MSG || 'THE UNIVERSE LISTENS',
     'PULL A CARD',
     'ASK ANYTHING',
     'THE CARDS KNOW',
@@ -3657,7 +3616,6 @@ const OracleQuery = (() => {
     'ASK THE ORACLE',
     'NOT A COINCIDENCE',
     'SOMETHING IS SHIFTING',
-    'THE UNIVERSE LISTENS',
     'THE ANSWER IS ALREADY HERE',
   ];
 
@@ -4251,45 +4209,29 @@ const OracleQuery = (() => {
   }
 })();
 
-/* ── 11. DAILY HOROSCOPE PILL — auto shows 1.5s after load ── */
+/* ── 11. DAILY HOROSCOPE → Bob idle messages ── */
 (function(){
-  const pill      = document.getElementById('daily-pill');
-  const pillSign  = document.getElementById('daily-pill-sign');
-  const pillText  = document.getElementById('daily-pill-text');
-  const pillStreak= document.getElementById('daily-pill-streak');
-  if(!pill) return;
-
   const sign = window.__KBSign;
   const GLYPHS = {aries:'♈',taurus:'♉',gemini:'♊',cancer:'♋',leo:'♌',virgo:'♍',libra:'♎',scorpio:'♏',sagittarius:'♐',capricorn:'♑',aquarius:'♒',pisces:'♓'};
-
   const DAILY = {
-    aries:       ['Mars fires early today — act before noon.','Your instinct is sharper than your logic right now. Trust it.','A door opens today. Walk through it immediately.'],
-    taurus:      ['Patience pays double today. Hold your position.','Something you planted is breaking ground.','The comfort you need is available. Allow it.'],
-    gemini:      ['Two conversations today will change something.','Your words carry more weight than you realize right now.','The idea that keeps returning — write it down today.'],
-    cancer:      ['Your intuition is operating at peak today. Listen.','Someone needs your warmth more than they can say.','A boundary you set recently is already protecting you.'],
-    leo:         ['Your presence is the gift today — show up fully.','Something you created is being noticed in rooms you\'re not in.','The recognition is coming. Stay visible.'],
-    virgo:       ['The detail you catch today saves something important.','Your precision is your power — use it intentionally.','A system you\'ve been building clicks into place.'],
-    libra:       ['A balance tips in your favor today.','The relationship energy shifts positively before evening.','Beauty finds you today in an unexpected form.'],
-    scorpio:     ['A hidden truth surfaces today. You\'re ready for it.','Your depth is your advantage — go deeper.','The transformation you\'ve been resisting is almost complete.'],
-    sagittarius: ['An unexpected opportunity arrives from a distance.','Your optimism is not naive today — it\'s accurate.','The adventure you\'ve been planning just got a green light.'],
-    capricorn:   ['Structure you built months ago pays off today.','Your discipline compounds. Stay consistent.','An authority figure notices your work in a meaningful way.'],
-    aquarius:    ['A radical idea you have is more practical than it sounds.','The collective needs your vision — share it.','Something unconventional works perfectly today.'],
-    pisces:      ['Your dream from last night has information in it.','The creative current is strong today — ride it.','A spiritual answer arrives through an ordinary moment.'],
+    aries:       ['MARS FIRES EARLY TODAY','YOUR INSTINCT IS SHARPER THAN YOUR LOGIC','A DOOR OPENS TODAY'],
+    taurus:      ['PATIENCE PAYS DOUBLE TODAY','SOMETHING YOU PLANTED IS BREAKING GROUND','THE COMFORT YOU NEED IS AVAILABLE'],
+    gemini:      ['TWO CONVERSATIONS CHANGE SOMETHING TODAY','YOUR WORDS CARRY MORE WEIGHT THAN YOU KNOW','THE IDEA RETURNING — WRITE IT DOWN'],
+    cancer:      ['YOUR INTUITION IS AT PEAK TODAY','SOMEONE NEEDS YOUR WARMTH MORE THAN THEY SAY','A BOUNDARY YOU SET IS PROTECTING YOU'],
+    leo:         ['YOUR PRESENCE IS THE GIFT TODAY','YOUR WORK IS BEING NOTICED','THE RECOGNITION IS COMING'],
+    virgo:       ['THE DETAIL YOU CATCH TODAY SAVES SOMETHING','YOUR PRECISION IS YOUR POWER','A SYSTEM YOU BUILT CLICKS INTO PLACE'],
+    libra:       ['A BALANCE TIPS IN YOUR FAVOR','THE RELATIONSHIP ENERGY SHIFTS TODAY','BEAUTY FINDS YOU IN AN UNEXPECTED FORM'],
+    scorpio:     ['A HIDDEN TRUTH SURFACES TODAY','YOUR DEPTH IS YOUR ADVANTAGE','THE TRANSFORMATION IS ALMOST COMPLETE'],
+    sagittarius: ['AN OPPORTUNITY ARRIVES FROM A DISTANCE','YOUR OPTIMISM TODAY IS ACCURATE','THE ADVENTURE JUST GOT A GREEN LIGHT'],
+    capricorn:   ['STRUCTURE YOU BUILT PAYS OFF TODAY','YOUR DISCIPLINE COMPOUNDS','AN AUTHORITY NOTICES YOUR WORK'],
+    aquarius:    ['YOUR RADICAL IDEA IS MORE PRACTICAL THAN IT SOUNDS','THE COLLECTIVE NEEDS YOUR VISION','SOMETHING UNCONVENTIONAL WORKS TODAY'],
+    pisces:      ['YOUR DREAM HAD INFORMATION IN IT','THE CREATIVE CURRENT IS STRONG — RIDE IT','A SPIRITUAL ANSWER ARRIVES THROUGH THE ORDINARY'],
   };
-
-  const msgs = DAILY[sign] || DAILY.gemini;
-  const msg  = msgs[new Date().getDate() % msgs.length];
-  const streak = window.__KB.streak();
-  const cap = sign[0].toUpperCase()+sign.slice(1);
-
-  pillSign.textContent  = `${GLYPHS[sign]} ${cap} · today`;
-  pillText.textContent  = msg;
-  pillStreak.textContent = streak > 1 ? `· ${streak}d streak` : '';
-  pill.style.display = 'flex';
-
-  setTimeout(()=>{ pill.classList.add('visible'); }, 1500);
-  /* Fade out after 8 seconds */
-  setTimeout(()=>{ pill.style.opacity='0'; setTimeout(()=>{ pill.style.display='none'; }, 700); }, 9500);
+  const dailyMsgs = DAILY[sign] || DAILY.gemini;
+  const todayMsg  = dailyMsgs[new Date().getDate() % dailyMsgs.length];
+  const glyph     = GLYPHS[sign] || '✦';
+  /* Prepend sign glyph so it reads like Bob speaking */
+  window.__KB_DAILY_MSG = glyph + ' ' + todayMsg;
 })();
 
 /* ── 12. FREE CARD PULL LIMIT — 2 pulls per day, resets at midnight ── */
@@ -4496,10 +4438,11 @@ const OracleQuery = (() => {
     /* Milestone message */
     milestone.textContent = MILESTONES[count] || '';
 
-    /* Album button — shows after first card, updates count */
+    /* Album button — always visible on mobile, hidden on desktop until first card */
     if(albumBtn){
       albumCount.textContent = `(${count}/${TOTAL})`;
-      albumBtn.style.display = count > 0 ? 'block' : 'none';
+      const alwaysShow = window.innerWidth <= 900;
+      albumBtn.style.display = (count > 0 || alwaysShow) ? 'block' : 'none';
     }
   }
 
