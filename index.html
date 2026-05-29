@@ -2483,14 +2483,21 @@ const OracleQuery = (() => {
   }
 
   /* ── Fetch AI lines from /api/bob — falls back to generateLines() if unavailable ── */
+  const SIGN_NAMES = new Set(['aries','taurus','gemini','cancer','leo','virgo','libra','scorpio','sagittarius','capricorn','aquarius','pisces']);
   async function fetchAILines(q) {
-    const mode = /^tarot/i.test(q) ? 'tarot' : 'oracle';
+    const qLow = q.toLowerCase().trim();
+    const isHoroscope = SIGN_NAMES.has(qLow);
+    const mode = isHoroscope ? 'horoscope' : /^tarot/i.test(q) ? 'tarot' : 'oracle';
+    /* For zodiac clicks, send a real horoscope question */
+    const question = isHoroscope
+      ? `Give ${qLow} a powerful, specific daily horoscope reading for today. What do they need to hear right now?`
+      : q;
     try {
       const res = await Promise.race([
         fetch('/api/bob', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question: q, sign: window.__KBSign || 'gemini', mode }),
+          body: JSON.stringify({ question, sign: isHoroscope ? qLow : (window.__KBSign || 'gemini'), mode }),
         }),
         new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000)),
       ]);
