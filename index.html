@@ -1510,10 +1510,10 @@ window.__KB = (() => {
     isPaid:      ()  => s.paid===true,
     canPull:     ()  => { checkReset(); return s.pulls < pullLimit(); },
     usePull:     ()  => { s.pulls++;       save(); },
-    canHoro:     ()  => { checkReset(); return s.horoscopes < 9999; }, /* DEV MODE — restore to 1 */
-    useHoro:     ()  => { s.horoscopes++;  save(); },
-    canQuestion: ()  => { checkReset(); return s.questions < 9999; }, /* DEV MODE — restore to 1 */
-    useQuestion: ()  => { s.questions++;   save(); },
+    canHoro:     ()  => { checkReset(); return (s.horoscopes||0) < 9999; }, /* DEV MODE — restore to 1 */
+    useHoro:     ()  => { s.horoscopes = (s.horoscopes||0)+1; save(); },
+    canQuestion: ()  => { checkReset(); return (s.questions||0) < 9999; }, /* DEV MODE — restore to 1 */
+    useQuestion: ()  => { s.questions = (s.questions||0)+1; save(); },
     addCard:     (c) => { if(!s.cards.includes(c)){ s.cards.push(c); save(); } },
     getCards:    ()  => [...(s.cards||[])],
     streak:      ()  => s.streak||1,
