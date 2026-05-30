@@ -2759,6 +2759,13 @@ const OracleQuery = (() => {
     function showLine() {
       if (li >= lines.length) {
         onDone();
+        /* Auto-save reading to KV */
+        const _cleanLines = lines.filter(l => !l.startsWith('__SPONSOR__'));
+        if (window.__saveReading) window.__saveReading(
+          SIGN_NAMES.has((q||'').toLowerCase().trim()) ? q.toLowerCase().trim() : (window.__KBSign||'unknown'),
+          _isTarotRead ? 'tarot' : SIGN_NAMES.has((q||'').toLowerCase().trim()) ? 'horoscope' : 'oracle',
+          _cleanLines
+        );
         /* Hook — tease paid reading for free users, oracle/horoscope only, not tarot */
         if (!window.__KB.isPaid() && !_isTarotRead && !SIGN_NAMES.has((q||'').toLowerCase().trim())) {
           setTimeout(() => {
@@ -4904,19 +4911,76 @@ const OracleQuery = (() => {
   if(albumBtn) albumBtn.addEventListener('click', openAlbum);
 
   /* ── MY READINGS button ── */
+  /* ── Device ID — persistent per browser ── */
+  let __deviceId = localStorage.getItem('__kb_did');
+  if (!__deviceId) {
+    __deviceId = 'dev_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem('__kb_did', __deviceId);
+  }
+
+  /* ── Auto-save reading to KV ── */
+  window.__saveReading = async function(sign, mode, lines) {
+    try {
+      await fetch('/api/save-reading', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deviceId: __deviceId, sign, mode, lines, timestamp: Date.now() }),
+      });
+    } catch(e) { /* silent */ }
+  };
+
+  /* ── MY READINGS panel ── */
   const readingsBtn = document.getElementById('readings-btn');
   if(readingsBtn){
-    /* Show for paid users (or always show for now so it's visible) */
     readingsBtn.style.display = 'block';
-    readingsBtn.addEventListener('click', () => {
-      /* Placeholder — readings panel coming soon */
+    readingsBtn.addEventListener('click', async () => {
       const existing = document.getElementById('__readings_panel');
       if(existing){ existing.remove(); return; }
+
       const panel = document.createElement('div');
       panel.id = '__readings_panel';
-      panel.style.cssText='position:fixed;top:70px;left:14px;width:200px;background:rgba(4,2,12,.97);border:1px solid rgba(255,200,40,.3);border-radius:14px;padding:16px;z-index:50;font-family:Courier New,monospace;color:rgba(255,200,40,.7);font-size:.6rem;letter-spacing:1.5px;box-shadow:0 0 24px rgba(0,0,0,.7);';
-      panel.innerHTML='<div style="text-align:center;margin-bottom:12px;letter-spacing:3px;">MY READINGS</div><div style="color:rgba(255,255,255,.25);font-size:.55rem;text-align:center;line-height:1.6;">Saved readings will appear here after your first paid reading.</div>';
+      panel.style.cssText='position:fixed;top:70px;left:14px;width:214px;max-height:70vh;overflow-y:auto;background:rgba(4,2,12,.97);border:1px solid rgba(255,200,40,.3);border-radius:14px;padding:14px;z-index:50;font-family:Courier New,monospace;color:rgba(255,200,40,.7);font-size:.6rem;letter-spacing:1.5px;box-shadow:0 0 24px rgba(0,0,0,.8);';
+      panel.innerHTML='<div style="text-align:center;letter-spacing:3px;margin-bottom:10px;">MY READINGS</div><div style="color:rgba(255,255,255,.3);font-size:.55rem;text-align:center;">Loading...</div>';
       document.body.appendChild(panel);
+
+      try {
+        const res = await fetch(`/api/get-readings?deviceId=${encodeURIComponent(__deviceId)}`);
+        const { readings } = await res.json();
+        if (!readings || !readings.length) {
+          panel.innerHTML='<div style="text-align:center;letter-spacing:3px;margin-bottom:10px;">MY READINGS</div><div style="color:rgba(255,255,255,.25);font-size:.55rem;text-align:center;line-height:1.7;">No readings yet.<br>Ask Bob something.</div>';
+          return;
+        }
+        const items = readings.map(r => {
+          const d = new Date(r.timestamp);
+          const dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+          const preview = (r.lines[0]||'').slice(0,60) + (r.lines[0]?.length>60?'…':'');
+          return `<div class="__ritem" data-id="${r.id}" style="border-top:1px solid rgba(255,200,40,.12);padding:8px 0;cursor:pointer;">
+            <div style="color:rgba(255,200,40,.45);font-size:.5rem;letter-spacing:2px;margin-bottom:3px;">${dateStr} · ${(r.sign||r.mode).toUpperCase()}</div>
+            <div style="color:rgba(255,255,255,.55);font-size:.58rem;letter-spacing:.5px;line-height:1.5;">${preview}</div>
+          </div>`;
+        }).join('');
+        panel.innerHTML=`<div style="text-align:center;letter-spacing:3px;margin-bottom:10px;">MY READINGS</div>${items}`;
+
+        /* Click to expand full reading */
+        panel.querySelectorAll('.__ritem').forEach((el, i) => {
+          el.addEventListener('click', () => {
+            const r = readings[i];
+            const full = r.lines.map(l=>`<div style="margin-bottom:8px;line-height:1.5;color:rgba(255,222,105,.85);">${l}</div>`).join('');
+            const d = new Date(r.timestamp);
+            const detail = document.createElement('div');
+            detail.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;';
+            detail.innerHTML=`<div style="max-width:420px;width:100%;font-family:Courier New,monospace;">
+              <div style="color:rgba(255,200,40,.4);font-size:.55rem;letter-spacing:3px;margin-bottom:18px;text-align:center;">${d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})} · ${(r.sign||r.mode).toUpperCase()}</div>
+              <div style="font-family:Georgia,serif;">${full}</div>
+              <div id="__rd_close" style="margin-top:28px;text-align:center;cursor:pointer;color:rgba(255,255,255,.25);font-size:.6rem;letter-spacing:3px;">✕ &nbsp; CLOSE</div>
+            </div>`;
+            document.body.appendChild(detail);
+            detail.querySelector('#__rd_close').addEventListener('click', ()=>detail.remove());
+          });
+        });
+      } catch(e) {
+        panel.innerHTML='<div style="text-align:center;letter-spacing:3px;margin-bottom:10px;">MY READINGS</div><div style="color:rgba(255,80,80,.5);font-size:.55rem;text-align:center;">Could not load readings.</div>';
+      }
     });
   }
   if(dlBtn)    dlBtn.addEventListener('click', downloadAlbum);
