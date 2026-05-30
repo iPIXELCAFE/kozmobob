@@ -1476,7 +1476,7 @@ window.__KB = (() => {
   };
   const prevDay = d => { const x=new Date(d); x.setDate(x.getDate()-1); return x.toISOString().slice(0,10); };
   const isWeekend = () => { const d = new Date().getDay(); return d === 0 || d === 6; }; /* 0=Sun, 6=Sat */
-  const pullLimit = () => 9999; /* DEV MODE — restore to: isWeekend() ? 4 : 2 */
+  const pullLimit = () => 2; /* 2 card pulls per day */
 
   /* Load / migrate localStorage */
   let s = {};
@@ -1490,10 +1490,11 @@ window.__KB = (() => {
     const td = today();
     if (s.date !== td) {
       const wasYesterday = s.date === prevDay(td);
-      s.streak   = wasYesterday ? (s.streak||0)+1 : 1;
-      s.date     = td;
-      s.pulls    = 0;
-      s.readings = 0;
+      s.streak     = wasYesterday ? (s.streak||0)+1 : 1;
+      s.date       = td;
+      s.pulls      = 0;
+      s.horoscopes = 0;
+      s.questions  = 0;
       if(!s.cards)  s.cards  = [];
       if(!s.joined) s.joined = td;
       save();
@@ -1502,20 +1503,23 @@ window.__KB = (() => {
   checkReset(); /* run once on load too */
 
   return {
-    domain,                              /* 'KOZMO' or 'KOSMO' */
-    isPaid:     ()  => s.paid===true,
-    canPull:    ()  => { checkReset(); return s.pulls < pullLimit(); },
-    usePull:    ()  => { s.pulls++;    save(); },
-    canRead:    ()  => { checkReset(); return s.readings < 9999; }, /* DEV MODE — restore to 3 */
-    useRead:    ()  => { s.readings++; save(); },
-    addCard:    (c) => { if(!s.cards.includes(c)){ s.cards.push(c); save(); } },
-    getCards:   ()  => [...(s.cards||[])],
-    streak:     ()  => s.streak||1,
-    joined:     ()  => s.joined||td,
-    pullsLeft:  ()  => Math.max(0, pullLimit() - (s.pulls||0)),
-    readLeft:   ()  => Math.max(0, 3 - (s.readings||0)),
+    domain,                                /* 'KOZMO' or 'KOSMO' */
+    isPaid:      ()  => s.paid===true,
+    canPull:     ()  => { checkReset(); return s.pulls < pullLimit(); },
+    usePull:     ()  => { s.pulls++;       save(); },
+    canHoro:     ()  => { checkReset(); return s.horoscopes < 1; },
+    useHoro:     ()  => { s.horoscopes++;  save(); },
+    canQuestion: ()  => { checkReset(); return s.questions < 1; },
+    useQuestion: ()  => { s.questions++;   save(); },
+    addCard:     (c) => { if(!s.cards.includes(c)){ s.cards.push(c); save(); } },
+    getCards:    ()  => [...(s.cards||[])],
+    streak:      ()  => s.streak||1,
+    joined:      ()  => s.joined||today(),
+    pullsLeft:   ()  => Math.max(0, pullLimit() - (s.pulls||0)),
+    horoLeft:    ()  => Math.max(0, 1 - (s.horoscopes||0)),
+    questionLeft:()  => Math.max(0, 1 - (s.questions||0)),
     /* Mock unlock — in production this checks real payment */
-    unlock:     ()  => { s.paid=true; save(); },
+    unlock:      ()  => { s.paid=true; save(); },
   };
 })();
 
@@ -4436,21 +4440,37 @@ const OracleQuery = (() => {
   setTimeout(patchDraw, 2000);
 })();
 
-/* ── 13. READING LIMIT — 3 free readings per day ── */
+/* ── 13. READING LIMIT — 1 horoscope + 1 question free per day ── */
 (function(){
   const origSubmit = window.OracleQuery?.submit;
   if(!origSubmit) return;
+
+  const showLimit = (html) => {
+    const msg = document.createElement('div');
+    msg.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.92);border:1px solid rgba(255,200,40,.35);border-radius:12px;padding:20px 28px;z-index:99;text-align:center;font-family:Courier New,monospace;color:rgba(255,200,40,.8);font-size:.75rem;letter-spacing:2px;pointer-events:none;';
+    msg.innerHTML = html;
+    document.body.appendChild(msg);
+    setTimeout(()=>msg.remove(), 2800);
+  };
+
   const limitedSubmit = (q) => {
     if(window.__KB.isPaid()){ origSubmit(q); return; }
-    if(!window.__KB.canRead()){
-      const msg = document.createElement('div');
-      msg.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.92);border:1px solid rgba(255,200,40,.35);border-radius:12px;padding:20px 28px;z-index:99;text-align:center;font-family:Courier New,monospace;color:rgba(255,200,40,.8);font-size:.75rem;letter-spacing:2px;pointer-events:none;';
-      msg.innerHTML = '◈ 3 FREE READINGS USED TODAY<br><span style="color:rgba(255,255,255,.3);font-size:.6rem;letter-spacing:1.5px;">RETURNS AT MIDNIGHT · GO PREMIUM FOR UNLIMITED</span>';
-      document.body.appendChild(msg);
-      setTimeout(()=>msg.remove(), 2800);
-      return;
+    const qLow = (q||'').toLowerCase().trim();
+    const isHoroscope = window.SIGN_NAMES ? window.SIGN_NAMES.has(qLow) : false;
+
+    if(isHoroscope){
+      if(!window.__KB.canHoro()){
+        showLimit('◈ FREE HOROSCOPE USED TODAY<br><span style="color:rgba(255,255,255,.3);font-size:.6rem;letter-spacing:1.5px;">RETURNS AT MIDNIGHT · GO PREMIUM FOR UNLIMITED</span>');
+        return;
+      }
+      window.__KB.useHoro();
+    } else {
+      if(!window.__KB.canQuestion()){
+        showLimit('◈ FREE QUESTION USED TODAY<br><span style="color:rgba(255,255,255,.3);font-size:.6rem;letter-spacing:1.5px;">RETURNS AT MIDNIGHT · GO PREMIUM FOR UNLIMITED</span>');
+        return;
+      }
+      window.__KB.useQuestion();
     }
-    window.__KB.useRead();
     origSubmit(q);
   };
   if(window.OracleQuery) window.OracleQuery.submit = limitedSubmit;
