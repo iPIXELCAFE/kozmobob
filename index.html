@@ -836,6 +836,36 @@ html,body{
 /* ══════════════════════════════════════
    CARD COLLECTION ALBUM
    ══════════════════════════════════════ */
+#readings-btn{
+  position:fixed;
+  left:14px;
+  top:28px;
+  right:auto;transform:none;
+  z-index:18;display:none;
+  width:200px;
+  background:rgba(0,0,0,.88);
+  border:1px solid rgba(255,200,40,.35);
+  border-radius:24px;
+  padding:10px 0;
+  font-family:'Courier New',monospace;
+  font-size:.65rem;letter-spacing:2.5px;
+  color:rgba(255,200,40,.80);text-align:center;
+  cursor:pointer;text-transform:uppercase;
+  transition:border-color .25s,color .25s,box-shadow .25s;
+  pointer-events:all;
+  box-shadow:0 0 18px rgba(255,185,20,.12);
+}
+#readings-btn:hover{border-color:rgba(255,200,40,.70);color:rgba(255,200,40,.98);box-shadow:0 0 28px rgba(255,185,20,.28);}
+@media(max-width:900px){
+  #readings-btn{
+    position:fixed;top:auto;bottom:104px;
+    left:calc(50vw + 4px);right:auto;transform:none;
+    width:calc(50vw - 8px);padding:9px 0;
+    font-size:.58rem;border-radius:18px;
+    z-index:31;
+  }
+}
+
 #album-btn{
   position:fixed;
   left:14px;
@@ -1320,6 +1350,7 @@ select.adv-input option{background:#111;}
 
 <!-- ── COLLECTION ALBUM BUTTON ── -->
 <button id="album-btn">✦ MY CARDS <span id="album-count"></span></button>
+<button id="readings-btn" style="display:none;">✦ MY READINGS</button>
 
 <!-- ── COLLECTION ALBUM OVERLAY ── -->
 <div id="album-overlay">
@@ -4794,6 +4825,23 @@ const OracleQuery = (() => {
   closeBtn.addEventListener('click', closeAlbum);
   /* close only via button */
   if(albumBtn) albumBtn.addEventListener('click', openAlbum);
+
+  /* ── MY READINGS button ── */
+  const readingsBtn = document.getElementById('readings-btn');
+  if(readingsBtn){
+    /* Show for paid users (or always show for now so it's visible) */
+    readingsBtn.style.display = 'block';
+    readingsBtn.addEventListener('click', () => {
+      /* Placeholder — readings panel coming soon */
+      const existing = document.getElementById('__readings_panel');
+      if(existing){ existing.remove(); return; }
+      const panel = document.createElement('div');
+      panel.id = '__readings_panel';
+      panel.style.cssText='position:fixed;top:70px;left:14px;width:200px;background:rgba(4,2,12,.97);border:1px solid rgba(255,200,40,.3);border-radius:14px;padding:16px;z-index:50;font-family:Courier New,monospace;color:rgba(255,200,40,.7);font-size:.6rem;letter-spacing:1.5px;box-shadow:0 0 24px rgba(0,0,0,.7);';
+      panel.innerHTML='<div style="text-align:center;margin-bottom:12px;letter-spacing:3px;">MY READINGS</div><div style="color:rgba(255,255,255,.25);font-size:.55rem;text-align:center;line-height:1.6;">Saved readings will appear here after your first paid reading.</div>';
+      document.body.appendChild(panel);
+    });
+  }
   if(dlBtn)    dlBtn.addEventListener('click', downloadAlbum);
   if(printBtn) printBtn.addEventListener('click', () => {
     /* Open album image in new tab for native print dialog */
