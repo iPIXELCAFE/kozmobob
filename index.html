@@ -2599,17 +2599,27 @@ const OracleQuery = (() => {
     const aiLines = await fetchAILines(q);
     const lines = aiLines || generateLines(q);
 
-    /* ── Mid-reading sponsor injection — free horoscope / Ask Bob only ──
-         Tarot oracle = premium content, never interrupted by ads          */
+    /* ── Post-reading sponsor overlay (shown after reading finishes) ── */
     const _isTarotRead = /^tarot/i.test(q);
-    if (!_isTarotRead && !window.__KB.isPaid()) {
+    const _sponsorData = (!_isTarotRead && !window.__KB.isPaid()) ? (() => {
       const SPONSORS = [
-        { msg:'Seal your story forever at iPIXEL CAFE — digital time capsules for every moment.', url:'https://www.ipixelcafe.com', tts:'Seal your story forever at iPixel Cafe — digital time capsules for every moment.' },
-        { msg:'Seal your story forever at iPIXEL CAFE — digital time capsules for every moment.', url:'https://www.ipixelcafe.com', tts:'Seal your story forever at iPixel Cafe — digital time capsules for every moment.' },
-        { msg:'Authentic Italian, Las Vegas. Pizza and pasta perfection at Novella.',           url:'https://www.novellalv.com' },
+        { msg:'Seal your story forever at iPIXEL CAFE', sub:'Digital time capsules for every moment.', url:'https://www.ipixelcafe.com' },
+        { msg:'Authentic Italian in Las Vegas', sub:'Pizza and pasta perfection at Novella.', url:'https://www.novellalv.com' },
       ];
-      const sp = SPONSORS[Math.floor(Math.random()*SPONSORS.length)];
-      lines.splice(Math.min(3, lines.length), 0, '__SPONSOR__' + sp.url + '|' + sp.msg);
+      return SPONSORS[Math.floor(Math.random()*SPONSORS.length)];
+    })() : null;
+
+    function showSponsorOverlay(sp) {
+      const existing = document.getElementById('__kb_sponsor_overlay');
+      if(existing) existing.remove();
+      const ov = document.createElement('div');
+      ov.id = '__kb_sponsor_overlay';
+      ov.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(4,2,12,.97);border:1px solid rgba(255,200,40,.25);border-radius:14px;padding:16px 24px;z-index:9998;text-align:center;font-family:Courier New,monospace;min-width:240px;max-width:320px;box-shadow:0 0 30px rgba(0,0,0,.7);animation:takeoverIn .4s ease forwards;';
+      ov.innerHTML=`<div style="font-size:.6rem;letter-spacing:3px;color:rgba(255,200,40,.35);margin-bottom:8px;">✦ SPONSORED</div><a href="${sp.url}" target="_blank" rel="noopener" style="color:rgba(255,200,40,.85);font-size:.75rem;letter-spacing:1.5px;text-decoration:none;display:block;margin-bottom:4px;">${sp.msg}</a><div style="color:rgba(255,255,255,.3);font-size:.6rem;letter-spacing:1px;">${sp.sub}</div><div id="__kb_sp_x" style="margin-top:12px;cursor:pointer;color:rgba(255,255,255,.2);font-size:.6rem;letter-spacing:3px;">✕ CLOSE</div>`;
+      document.body.appendChild(ov);
+      const close = () => ov.remove();
+      ov.querySelector('#__kb_sp_x').addEventListener('click', close);
+      setTimeout(close, 10000);
     }
 
     if (window.speechSynthesis) speechSynthesis.cancel();
@@ -2619,7 +2629,7 @@ const OracleQuery = (() => {
       if (li >= lines.length) {
         onDone();
         /* Hook — tease paid reading for free users, oracle/horoscope only, not tarot */
-        if (!window.__KB.isPaid() && !/^tarot/i.test(q) && !SIGN_NAMES.has((q||'').toLowerCase().trim())) {
+        if (!window.__KB.isPaid() && !_isTarotRead && !SIGN_NAMES.has((q||'').toLowerCase().trim())) {
           setTimeout(() => {
             const hook = document.createElement('span');
             hook.className = 'oracle-line';
@@ -2630,34 +2640,14 @@ const OracleQuery = (() => {
             ctr.scrollTop = ctr.scrollHeight;
           }, 900);
         }
-        setTimeout(() => { vsect.classList.add('visible'); }, 750);
+        /* Show sponsor overlay after reading — clean floating card */
+        if (_sponsorData) setTimeout(() => showSponsorOverlay(_sponsorData), 1200);
         return;
       }
       const rawLine = lines[li];
-      const isSponsor = rawLine.startsWith('__SPONSOR__');
-      let line = rawLine, sponsorLink = '';
-      if (isSponsor) {
-        const payload = rawLine.slice(11);
-        const pipe = payload.indexOf('|');
-        if (pipe > 0) { sponsorLink = payload.slice(0, pipe); line = payload.slice(pipe+1); }
-        else { line = payload; }
-      }
-
-      let sp;
-      if (isSponsor && sponsorLink) {
-        sp = document.createElement('a');
-        sp.href   = sponsorLink;
-        sp.target = '_blank';
-        sp.rel    = 'noopener noreferrer';
-        sp.style.cssText = 'display:block;font-size:.82rem;border-top:1px solid rgba(255,140,0,.2);border-bottom:1px solid rgba(255,140,0,.2);padding:10px 0;margin:8px 0;text-align:center;text-decoration:none;cursor:pointer;';
-        sp.classList.add('sponsor-flash');
-        sp.addEventListener('mouseenter', () => { sp.style.color='rgba(255,210,90,.7)'; });
-        sp.addEventListener('mouseleave', () => { sp.style.color='rgba(255,255,255,.28)'; });
-      } else {
-        sp = document.createElement('span');
-        sp.className = 'oracle-line';
-        if (isSponsor) sp.style.cssText = 'display:block;font-size:.8rem;letter-spacing:.15em;color:rgba(255,255,255,.28);font-style:italic;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);padding:10px 0;margin:8px 0;text-align:center;';
-      }
+      const line = rawLine; /* clean — no more sponsor injection in line stream */
+      let sp = document.createElement('span');
+      sp.className = 'oracle-line';
       sp.textContent = '';
       txt.appendChild(sp);
       ctr.scrollTop = ctr.scrollHeight;
@@ -2676,7 +2666,7 @@ const OracleQuery = (() => {
         }
       }, 115);
 
-      if (!isSponsor && window.speechSynthesis) {
+      if (window.speechSynthesis) {
         try {
           const u = new SpeechSynthesisUtterance(line);
           const isTarot = /^tarot/i.test(q);
@@ -2691,7 +2681,6 @@ const OracleQuery = (() => {
           speechSynthesis.speak(u);
         } catch(e) { setTimeout(showLine, 750); }
       } else {
-        /* Sponsor: wait for typing + small buffer */
         setTimeout(showLine, Math.max(1100, words.length * 115 + 350));
       }
     }
@@ -4448,28 +4437,41 @@ const OracleQuery = (() => {
   const origSubmit = window.OracleQuery?.submit;
   if(!origSubmit) return;
 
-  const showLimit = (html) => {
+  const SIGNS = new Set(['aries','taurus','gemini','cancer','leo','virgo','libra','scorpio','sagittarius','capricorn','aquarius','pisces']);
+
+  const showLimit = (title, sub) => {
+    const existing = document.getElementById('__kb_limit_msg');
+    if(existing) existing.remove();
     const msg = document.createElement('div');
-    msg.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.92);border:1px solid rgba(255,200,40,.35);border-radius:12px;padding:20px 28px;z-index:99;text-align:center;font-family:Courier New,monospace;color:rgba(255,200,40,.8);font-size:.75rem;letter-spacing:2px;pointer-events:none;';
-    msg.innerHTML = html;
+    msg.id = '__kb_limit_msg';
+    msg.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(4,2,12,.97);border:1px solid rgba(255,200,40,.4);border-radius:16px;padding:28px 36px;z-index:9999;text-align:center;font-family:Courier New,monospace;color:rgba(255,200,40,.9);font-size:.8rem;letter-spacing:2px;box-shadow:0 0 40px rgba(0,0,0,.8);min-width:260px;';
+    msg.innerHTML = `<div style="font-size:1.5rem;margin-bottom:10px;">◈</div><div>${title}</div><div style="color:rgba(255,255,255,.3);font-size:.6rem;letter-spacing:1.5px;margin-top:8px;">${sub}</div><div id="__kb_limit_x" style="margin-top:16px;cursor:pointer;color:rgba(255,200,40,.4);font-size:.65rem;letter-spacing:3px;">✕ CLOSE</div>`;
     document.body.appendChild(msg);
-    setTimeout(()=>msg.remove(), 2800);
+    const close = () => msg.remove();
+    msg.querySelector('#__kb_limit_x').addEventListener('click', close);
+    setTimeout(close, 5000);
   };
 
   const limitedSubmit = (q) => {
     if(window.__KB.isPaid()){ origSubmit(q); return; }
     const qLow = (q||'').toLowerCase().trim();
-    const isHoroscope = window.SIGN_NAMES ? window.SIGN_NAMES.has(qLow) : false;
+    const isTarot = /^tarot/i.test(q);
+    const isHoroscope = SIGNS.has(qLow);
+
+    if(isTarot){
+      /* tarot uses card pulls — not counted here */
+      origSubmit(q); return;
+    }
 
     if(isHoroscope){
       if(!window.__KB.canHoro()){
-        showLimit('◈ FREE HOROSCOPE USED TODAY<br><span style="color:rgba(255,255,255,.3);font-size:.6rem;letter-spacing:1.5px;">RETURNS AT MIDNIGHT · GO PREMIUM FOR UNLIMITED</span>');
+        showLimit('FREE HOROSCOPE USED TODAY','RETURNS AT MIDNIGHT · GO PREMIUM FOR UNLIMITED');
         return;
       }
       window.__KB.useHoro();
     } else {
       if(!window.__KB.canQuestion()){
-        showLimit('◈ FREE QUESTION USED TODAY<br><span style="color:rgba(255,255,255,.3);font-size:.6rem;letter-spacing:1.5px;">RETURNS AT MIDNIGHT · GO PREMIUM FOR UNLIMITED</span>');
+        showLimit('FREE QUESTION USED TODAY','RETURNS AT MIDNIGHT · GO PREMIUM FOR UNLIMITED');
         return;
       }
       window.__KB.useQuestion();
