@@ -2673,6 +2673,51 @@ const OracleQuery = (() => {
   }
 
   /* Oracle reading — lines appear one at a time, synced with voice */
+  /* ── Personal message portal overlay — fires after reading when a paid message is live ── */
+  function showPersonalMsgPortal(msg, readingPanel) {
+    const existing = document.getElementById('__personal_msg_portal');
+    if (existing) existing.remove();
+
+    /* Build fullscreen overlay — hidden until portal reveals */
+    const ov = document.createElement('div');
+    ov.id = '__personal_msg_portal';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:9990;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;pointer-events:none;opacity:0;transition:opacity 1.4s ease;background:rgba(0,0,0,0);';
+    ov.innerHTML = `
+      <div style="text-align:center;max-width:380px;width:100%;">
+        <span id="__pmsg_sym" style="font-size:5rem;line-height:1;display:block;margin-bottom:20px;filter:drop-shadow(0 0 24px rgba(255,200,60,.8));animation:symFloat 3s ease-in-out infinite;">${msg.sym||'✨'}</span>
+        <div style="font-family:'Georgia',serif;font-size:clamp(1.5rem,5vw,2.1rem);line-height:1.4;color:${msg.color||'rgba(255,222,105,.97)'};text-shadow:0 0 28px rgba(255,150,20,.6),0 0 60px rgba(255,100,10,.3);margin-bottom:14px;">${msg.text||''}</div>
+        <div style="font-family:'Courier New',monospace;font-size:.80rem;letter-spacing:.18em;color:rgba(255,200,40,.45);margin-bottom:36px;">${msg.from||''}</div>
+        <div style="width:50%;height:1px;background:linear-gradient(to right,transparent,rgba(255,200,40,.35),transparent);margin:0 auto 20px;"></div>
+        <div id="__pmsg_x" style="font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:3px;color:rgba(255,255,255,.3);cursor:pointer;pointer-events:all;">✕ &nbsp; CLOSE</div>
+      </div>`;
+    document.body.appendChild(ov);
+
+    /* Hide reading panel completely */
+    if (readingPanel) readingPanel.style.opacity = '0';
+
+    const close = () => {
+      ov.style.opacity = '0';
+      ov.style.pointerEvents = 'none';
+      /* Restore Bob */
+      OracleScene.mat.uniforms.uPortalOpen.value = 0;
+      OracleScene.auraMat.uniforms.uPortalOpen.value = 0;
+      OracleScene.mat.uniforms.uLightningFlash.value = 0;
+      OracleScene.mat.uniforms.uFrozen.value = 1;
+      OracleScene.ball.scale.setScalar(1);
+      window.__portalActive = false;
+      /* Restore reading */
+      if (readingPanel) readingPanel.style.opacity = '1';
+      setTimeout(() => ov.remove(), 1500);
+    };
+    ov.querySelector('#__pmsg_x').addEventListener('click', close);
+
+    /* Fire portal — same sequence as message.html */
+    OracleScene.triggerPortal(() => {
+      ov.style.opacity = '1';
+      ov.style.pointerEvents = 'all';
+    });
+  }
+
   async function read(q, onDone) {
     txt.innerHTML = '';
     ctr.scrollTop = 0;
@@ -2709,6 +2754,11 @@ const OracleQuery = (() => {
             txt.appendChild(hook);
             ctr.scrollTop = ctr.scrollHeight;
           }, 900);
+        }
+        /* ── Personal message portal — fires after reading if a paid message is live ── */
+        const _liveMsg = window.__getCurrentPersonalMsg && window.__getCurrentPersonalMsg();
+        if (_liveMsg) {
+          setTimeout(() => showPersonalMsgPortal(_liveMsg, ctr), 1200);
         }
         return;
       }
@@ -4368,6 +4418,14 @@ const OracleQuery = (() => {
   const msgText    = document.getElementById('mob-msg-text');
   const msgFrom    = document.getElementById('mob-msg-from');
   let takeoverTimer = null;
+
+  /* Expose current personal message so reading can check it */
+  window.__getCurrentPersonalMsg = function() {
+    const b = BRANDS[idx];
+    /* Personal message = has msg, but not the "Advertise Here" placeholder */
+    if (b && b.msg && b.msg.sym !== '✦') return b.msg;
+    return null;
+  };
 
   function showTakeover(msg) {
     /* disabled until real paid messages are live */
