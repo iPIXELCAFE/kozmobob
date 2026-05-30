@@ -1793,6 +1793,10 @@ const OracleScene = (() => {
   /* ── Portal sequence: distort → flash → reveal ── */
   function triggerPortal(onReveal) {
     window.__portalActive = true;
+    /* Unfreeze Bob so portal displacement works */
+    mat.uniforms.uFrozen.value         = 0;
+    mat.uniforms.uStateColorMix.value  = 0;
+    mat.uniforms.uLightningFlash.value = 0;
     let phase = 'distort', phaseStart = clk.getElapsedTime();
     const _tick = () => {
       const t = clk.getElapsedTime(), el = t - phaseStart;
@@ -1823,6 +1827,7 @@ const OracleScene = (() => {
         mat.uniforms.uPortalOpen.value = 0;
         mat.uniforms.uLightningFlash.value = 0;
         mat.uniforms.uRippleStrength.value = 0;
+        mat.uniforms.uFrozen.value = 1; /* re-freeze after portal */
         auraMat.uniforms.uPortalOpen.value = 0;
         window.__portalActive = false;
         return; /* stop loop */
@@ -2679,6 +2684,7 @@ const OracleQuery = (() => {
         OracleScene.mat.uniforms.uPortalOpen.value=0;
         OracleScene.auraMat.uniforms.uPortalOpen.value=0;
         OracleScene.mat.uniforms.uLightningFlash.value=0;
+        OracleScene.mat.uniforms.uFrozen.value=1;
         OracleScene.ball.scale.setScalar(1);
         window.__portalActive = false;
         setTimeout(()=>ov.remove(), 1500);
