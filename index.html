@@ -1439,7 +1439,7 @@ select.adv-input option{background:#111;}
         <textarea class="adv-input" id="advert-msg" maxlength="80" rows="2" placeholder="Your message..."></textarea>
       </div>
       <div class="adv-field" id="advert-emoji-field" style="display:none;">
-        <label class="adv-label">Pick Your Symbol</label>
+        <label class="adv-label">Pick Your Symbols <span style="color:rgba(255,200,40,.35);font-size:.55rem;">(up to 5)</span></label>
         <div id="advert-emoji-picker">
           <div class="emoji-cat-label">💌 Love & Romance</div>
           <div class="emoji-row">
@@ -1518,6 +1518,105 @@ select.adv-input option{background:#111;}
 <!-- ADVERTISE HERE chips — positioned in billboard HTML via JS -->
 
 <script>
+/* ══════════════════════════════════════════════════════════════
+   ADVERT OVERLAY — open, close, billboard select, multi-emoji
+   ══════════════════════════════════════════════════════════════ */
+(function(){
+  const MAX_EMOJI = 5;
+  let selectedEmojis = ['✨'];
+
+  const overlay   = document.getElementById('advert-overlay');
+  const closeBtn  = document.getElementById('advert-close');
+  const emojiField= document.getElementById('advert-emoji-field');
+  const fromField = document.getElementById('advert-from-field');
+  const bizField  = document.getElementById('advert-biz-field');
+  const emojiInput= document.getElementById('advert-emoji');
+  const emojiPrev = document.getElementById('advert-emoji-preview');
+  const msgArea   = document.getElementById('advert-msg');
+  const msgCount  = document.getElementById('advert-msg-count');
+  const priceAmt  = document.getElementById('advert-price-amount');
+  const priceDesc = document.getElementById('advert-price-desc');
+  const payBtn    = document.getElementById('advert-pay-btn');
+  const billCards = document.querySelectorAll('.ab-card');
+  let currentBill = 'left';
+
+  /* ── Billboard selector ── */
+  window.selectBillboard = function(type) {
+    currentBill = type;
+    billCards.forEach(c => c.classList.toggle('selected', c.dataset.bill === type));
+    if (type === 'message') {
+      emojiField.style.display = 'block';
+      fromField.style.display  = 'block';
+      bizField.style.display   = 'none';
+      priceAmt.textContent  = '$35';
+      priceDesc.textContent = 'Personal message · stays as a star forever';
+      payBtn.textContent    = '❆ SEND NOW — $35';
+    } else if (type === 'right') {
+      emojiField.style.display = 'none';
+      fromField.style.display  = 'none';
+      bizField.style.display   = 'block';
+      priceAmt.textContent  = '$250';
+      priceDesc.textContent = '1 hour · Premium billboard · yours alone';
+      payBtn.textContent    = '❆ BOOK NOW — $250';
+    } else {
+      emojiField.style.display = 'none';
+      fromField.style.display  = 'none';
+      bizField.style.display   = 'block';
+      priceAmt.textContent  = '$55';
+      priceDesc.textContent = '1 hour · Community billboard · first come first served';
+      payBtn.textContent    = '❆ BOOK NOW — $55';
+    }
+  };
+
+  /* ── Multi-emoji picker — up to MAX_EMOJI selections ── */
+  function updateEmojiDisplay() {
+    const joined = selectedEmojis.join('');
+    if (emojiInput)  emojiInput.value      = joined;
+    if (emojiPrev)   emojiPrev.textContent = joined;
+  }
+
+  document.querySelectorAll('.epick').forEach(el => {
+    el.addEventListener('click', () => {
+      const e = el.dataset.e;
+      const idx = selectedEmojis.indexOf(e);
+      if (idx > -1) {
+        /* Deselect */
+        selectedEmojis.splice(idx, 1);
+        el.classList.remove('selected');
+      } else if (selectedEmojis.length < MAX_EMOJI) {
+        /* Select */
+        selectedEmojis.push(e);
+        el.classList.add('selected');
+      } else {
+        /* At limit — flash the preview */
+        if (emojiPrev) { emojiPrev.style.opacity='.3'; setTimeout(()=>emojiPrev.style.opacity='1',200); }
+      }
+      updateEmojiDisplay();
+    });
+  });
+
+  /* ── Message char count ── */
+  if (msgArea && msgCount) {
+    msgArea.addEventListener('input', () => { msgCount.textContent = msgArea.value.length; });
+  }
+
+  /* ── Open / close ── */
+  window.openAdvertOverlay = function(slot) {
+    if (!overlay) return;
+    selectBillboard(slot === 'message' ? 'message' : 'left');
+    overlay.classList.add('visible');
+  };
+  if (closeBtn) closeBtn.addEventListener('click', () => overlay.classList.remove('visible'));
+  if (overlay)  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.classList.remove('visible'); });
+
+  /* ── Pay button — placeholder until Stripe is wired ── */
+  if (payBtn) payBtn.addEventListener('click', () => {
+    alert('Payment coming soon! KozmoBob is setting up Stripe.');
+  });
+
+  updateEmojiDisplay();
+})();
+
 /* ══════════════════════════════════════════════════════════════
    KB — KozmoBob global state: domain, free limits, streaks, cards
    ══════════════════════════════════════════════════════════════ */
