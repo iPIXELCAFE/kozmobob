@@ -1534,9 +1534,16 @@ window.__KB = (() => {
   let s = {};
   try { s = JSON.parse(localStorage.getItem('__kb')||'{}'); } catch(e){}
 
-  /* Reset daily counters if new day — checked on every pull/read so
-     the page can stay open across midnight without losing the reset */
   const save = () => { try { localStorage.setItem('__kb', JSON.stringify(s)); } catch(e){} };
+
+  /* Migrate old array format to count object — runs on every load */
+  if(!s.cards) s.cards = {};
+  if(Array.isArray(s.cards)){
+    const arr = s.cards;
+    s.cards = {};
+    arr.forEach(n => { s.cards[n] = (s.cards[n]||0) + 1; });
+    save();
+  }
 
   const checkReset = () => {
     const td = today();
@@ -1547,14 +1554,6 @@ window.__KB = (() => {
       s.pulls      = 0;
       s.horoscopes = 0;
       s.questions  = 0;
-      if(!s.cards)  s.cards  = {};
-      /* Migrate old array format to count object */
-      if(Array.isArray(s.cards)){
-        const arr = s.cards;
-        s.cards = {};
-        arr.forEach(n => { s.cards[n] = (s.cards[n]||0) + 1; });
-        save();
-      }
       if(!s.joined) s.joined = td;
       save();
     }
