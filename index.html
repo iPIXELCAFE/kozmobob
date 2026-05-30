@@ -2769,7 +2769,8 @@ const OracleQuery = (() => {
     if (e.key !== 'Enter') return;
     const v = inp.value.trim(); if (!v) return;
     inp.value = ''; ph.style.opacity = '1';
-    submit(v);
+    /* Use window.OracleQuery.submit so the limit wrapper intercepts */
+    (window.OracleQuery ? window.OracleQuery.submit : submit)(v);
   }, true);
 
   window.OracleQuery = { submit, setState };
@@ -2837,7 +2838,7 @@ const OracleQuery = (() => {
       el.style.background=`rgba(${r},${g},${b},.13)`;
       /* Lock billboard to this sign's color for the duration of the reading */
       if (window.Billboard) window.Billboard.setAccentColor(r/255, g/255, b/255);
-      OracleQuery.submit(s.n.toLowerCase());
+      (window.OracleQuery ? window.OracleQuery.submit : OracleQuery.submit)(s.n.toLowerCase());
     });
 
     ring.appendChild(el);
