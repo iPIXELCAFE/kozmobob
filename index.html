@@ -822,6 +822,7 @@ html,body{
     top:50px;
     width:96vw;
     padding:16px 12px 48px;
+    z-index:9970!important;
   }
 
   /* Reading text: vw-based so it scales with any phone */
@@ -870,11 +871,12 @@ html,body{
 #readings-btn:hover{border-color:rgba(255,200,40,.70);color:rgba(255,200,40,.98);box-shadow:0 0 28px rgba(255,185,20,.28);}
 @media(max-width:900px){
   #readings-btn{
-    position:fixed;top:auto!important;bottom:150px!important;
+    position:fixed;
+    top:50px!important;bottom:auto!important;
     left:4px!important;right:auto;transform:none;
-    width:calc(100vw - 8px)!important;padding:9px 0;
+    width:calc(50vw - 8px)!important;padding:9px 0;
     font-size:.58rem;border-radius:18px;
-    z-index:9980!important;
+    z-index:31!important;
   }
 }
 
