@@ -1024,6 +1024,14 @@ html,body{
 .aslot-key{font-size:11px;letter-spacing:.18em;color:rgba(200,172,255,.85);text-transform:uppercase;}
 .aslot.unknown .aslot-key{color:rgba(255,255,255,.05);}
 
+.aslot-pull-count{
+  position:absolute;top:4px;left:4px;
+  font-size:.26rem;letter-spacing:1px;
+  color:rgba(255,200,40,.70);
+  background:rgba(255,200,40,.08);
+  border:1px solid rgba(255,200,40,.20);
+  border-radius:3px;padding:1px 4px;
+}
 .aslot-rare-badge{
   position:absolute;top:4px;right:4px;
   font-size:.24rem;letter-spacing:1.5px;
@@ -1529,7 +1537,14 @@ window.__KB = (() => {
       s.pulls      = 0;
       s.horoscopes = 0;
       s.questions  = 0;
-      if(!s.cards)  s.cards  = [];
+      if(!s.cards)  s.cards  = {};
+      /* Migrate old array format to count object */
+      if(Array.isArray(s.cards)){
+        const arr = s.cards;
+        s.cards = {};
+        arr.forEach(n => { s.cards[n] = (s.cards[n]||0) + 1; });
+        save();
+      }
       if(!s.joined) s.joined = td;
       save();
     }
@@ -1545,8 +1560,9 @@ window.__KB = (() => {
     useHoro:     ()  => { s.horoscopes = (s.horoscopes||0)+1; save(); },
     canQuestion: ()  => { checkReset(); return (s.questions||0) < 9999; }, /* DEV MODE — restore to 1 */
     useQuestion: ()  => { s.questions = (s.questions||0)+1; save(); },
-    addCard:     (c) => { if(!s.cards.includes(c)){ s.cards.push(c); save(); } },
-    getCards:    ()  => [...(s.cards||[])],
+    addCard:     (c) => { s.cards[c] = (s.cards[c]||0) + 1; save(); },
+    getCards:    ()  => Object.keys(s.cards||{}),
+    getCardCount:(c) => (s.cards||{})[c] || 0,
     streak:      ()  => s.streak||1,
     joined:      ()  => s.joined||today(),
     pullsLeft:   ()  => Math.max(0, pullLimit() - (s.pulls||0)),
@@ -4721,8 +4737,11 @@ const OracleQuery = (() => {
 
       if(has){
         const glyphColor = card.rare ? 'gold' : 'rgba(255,175,40,.90)';
+        const pullCount = window.__KB ? window.__KB.getCardCount(card.n) : 0;
+        const countBadge = pullCount > 1 ? `<div class="aslot-pull-count">×${pullCount}</div>` : '';
         slot.innerHTML =
           (card.rare ? '<div class="aslot-rare-badge">RARE</div>' : '') +
+          countBadge +
           `<div class="aslot-num">${card.r}</div>` +
           `<div class="aslot-glyph" style="color:${glyphColor}">${card.g}</div>` +
           `<div class="aslot-div"></div>` +
