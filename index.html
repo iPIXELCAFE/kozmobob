@@ -2947,6 +2947,71 @@ const OracleQuery = (() => {
   return { submit, setState };
 })();
 
+/* ── IDLE PORTAL — fires every 45s during idle, shows current brand message ── */
+(function(){
+  const INTERVAL = 45000; /* 45 seconds */
+  const AUTO_CLOSE = 9000; /* 9 seconds */
+
+  function getIdleMsg() {
+    /* Personal message takes priority */
+    const personal = window.__getCurrentPersonalMsg && window.__getCurrentPersonalMsg();
+    if (personal) return { type:'personal', msg: personal };
+    /* Otherwise use current brand if it has a msg */
+    const brand = window.__getCurrentBrand && window.__getCurrentBrand();
+    if (brand && brand.msg && brand.msg.sym !== '✦') return { type:'ad', msg: brand.msg, url: brand.href };
+    return null;
+  }
+
+  function showIdlePortal() {
+    if (window.__OS !== 'IDLE') return;
+    if (window.__portalActive) return;
+    const item = getIdleMsg();
+    if (!item) return;
+
+    const msg = item.msg;
+    const ov = document.createElement('div');
+    ov.id = '__idle_portal_overlay';
+    ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:99990;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;pointer-events:none;opacity:0;transition:opacity 1.4s ease;background:rgba(0,0,0,.92);';
+    ov.innerHTML = `
+      <div style="text-align:center;max-width:380px;width:100%;">
+        <span style="font-size:4.5rem;line-height:1;display:block;margin-bottom:18px;filter:drop-shadow(0 0 24px rgba(255,200,60,.8));animation:symFloat 3s ease-in-out infinite;">${msg.sym||'✨'}</span>
+        <div style="font-family:'Georgia',serif;font-size:clamp(1.3rem,5vw,2rem);line-height:1.4;color:${msg.color||'rgba(255,222,105,.97)'};text-shadow:0 0 28px rgba(255,150,20,.6),0 0 60px rgba(255,100,10,.3);margin-bottom:12px;">${msg.text||''}</div>
+        <div style="font-family:'Courier New',monospace;font-size:.75rem;letter-spacing:.18em;color:rgba(255,200,40,.45);margin-bottom:32px;">${msg.from||''}</div>
+        <div style="width:50%;height:1px;background:linear-gradient(to right,transparent,rgba(255,200,40,.35),transparent);margin:0 auto 20px;"></div>
+        <div id="__idle_portal_x" style="font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:3px;color:rgba(255,255,255,.3);cursor:pointer;pointer-events:all;">✕ &nbsp; CLOSE</div>
+      </div>`;
+    document.body.appendChild(ov);
+
+    const close = () => {
+      ov.style.opacity = '0';
+      ov.style.pointerEvents = 'none';
+      OracleScene.mat.uniforms.uPortalOpen.value = 0;
+      OracleScene.auraMat.uniforms.uPortalOpen.value = 0;
+      OracleScene.mat.uniforms.uLightningFlash.value = 0;
+      OracleScene.mat.uniforms.uFrozen.value = 0;
+      OracleScene.ball.scale.setScalar(1);
+      window.__portalActive = false;
+      setTimeout(() => ov.remove(), 1500);
+    };
+
+    ov.querySelector('#__idle_portal_x').addEventListener('click', close);
+    const autoTimer = setTimeout(close, AUTO_CLOSE);
+    /* Cancel auto-close if user taps X first */
+    ov.querySelector('#__idle_portal_x').addEventListener('click', () => clearTimeout(autoTimer), { once:true });
+
+    OracleScene.triggerPortal(() => {
+      ov.style.opacity = '1';
+      ov.style.pointerEvents = 'all';
+    });
+  }
+
+  /* Start loop after 30s initial delay so page loads first */
+  setTimeout(() => {
+    showIdlePortal();
+    setInterval(showIdlePortal, INTERVAL);
+  }, 30000);
+})();
+
 
 
 /* ── 6. ZODIAC RING — fixed clock-face around Bob, never spins ── */
@@ -4456,9 +4521,11 @@ const OracleQuery = (() => {
   /* Expose current personal message so reading can check it */
   window.__getCurrentPersonalMsg = function() {
     const b = BRANDS[idx];
-    /* Personal message = has msg, but not the "Advertise Here" placeholder */
     if (b && b.msg && b.msg.sym !== '✦') return b.msg;
     return null;
+  };
+  window.__getCurrentBrand = function() {
+    return BRANDS[idx] || null;
   };
 
   function showTakeover(msg) {
