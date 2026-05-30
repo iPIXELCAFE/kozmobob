@@ -1715,9 +1715,10 @@ const OracleScene = (() => {
       uStateColorMix:  { value: 0 },
       uStateColor:     { value: new THREE.Vector3(.28, .28, .32) },
       uGlowColor:      { value: new THREE.Vector3(1., 0.62, 0.08) },
+      uPortalOpen:     { value: 0 },
     },
     vertexShader: `
-      uniform float uTime,uRippleTime,uRippleStrength,uFrozen;
+      uniform float uTime,uRippleTime,uRippleStrength,uFrozen,uPortalOpen;
       uniform vec3  uInteraction;
       varying vec3  vN,vWP;
       float sn(vec3 p){
@@ -1728,14 +1729,15 @@ const OracleScene = (() => {
         float b = sin(uTime*.75)*.5+.5;
         float d = distance(position,uInteraction);
         float w = sin(d*9.-uRippleTime*5.)*exp(-d*2.8)*exp(-uRippleTime*1.8);
-        vec3 dp = position + normal*(sn(position)*.06 + b*.035 + w*.09*uRippleStrength)*(1.-uFrozen);
+        float portalWarp = uPortalOpen*sin(uTime*8.+position.y*6.)*.18;
+        vec3 dp = position + normal*(sn(position)*.06 + b*.035 + w*.09*uRippleStrength + portalWarp)*(1.-uFrozen);
         vec4 wp = modelMatrix*vec4(dp,1.);
         vWP = wp.xyz;
         gl_Position = projectionMatrix*viewMatrix*wp;
       }
     `,
     fragmentShader: `
-      uniform float uTime,uLightningFlash,uStateColorMix;
+      uniform float uTime,uLightningFlash,uStateColorMix,uPortalOpen;
       uniform vec3  uCameraPos,uStateColor,uGlowColor;
       varying vec3  vN,vWP;
       void main(){
@@ -1745,10 +1747,12 @@ const OracleScene = (() => {
         vec3  c  = mix(vec3(.02,.01,.06)+uGlowColor*.18*bp*.12, uGlowColor, f*.85);
         c += uGlowColor*f*bp*.08;
         c += uGlowColor*uLightningFlash*.9+vec3(.1,.1,.05)*uLightningFlash;
+        c += vec3(.8,.7,.3)*uPortalOpen*f*.6;
         c  = mix(c, uStateColor, uStateColorMix);
-        gl_FragColor = vec4(c,1.);
+        gl_FragColor = vec4(c,1.-uPortalOpen*.85);
       }
     `,
+    transparent: true,
   });
 
   const ball = new THREE.Mesh(new THREE.SphereGeometry(1.2, mob?32:64, mob?32:64), mat);
@@ -1756,9 +1760,9 @@ const OracleScene = (() => {
 
   const auraMat = new THREE.ShaderMaterial({
     transparent:true, side:THREE.BackSide, depthWrite:false, blending:THREE.AdditiveBlending,
-    uniforms: { uTime:{value:0}, uGlowColor:{value:new THREE.Vector3(1.,.55,.05)} },
+    uniforms: { uTime:{value:0}, uGlowColor:{value:new THREE.Vector3(1.,.55,.05)}, uPortalOpen:{value:0} },
     vertexShader:`varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-    fragmentShader:`uniform float uTime;uniform vec3 uGlowColor;varying vec3 vN;void main(){float r=pow(1.-abs(dot(vN,vec3(0,0,1))),2.2);float p=sin(uTime*.75)*.5+.5;float a=r*(.28+p*.12);gl_FragColor=vec4(uGlowColor*.95*a,a);}`,
+    fragmentShader:`uniform float uTime,uPortalOpen;uniform vec3 uGlowColor;varying vec3 vN;void main(){float r=pow(1.-abs(dot(vN,vec3(0,0,1))),2.2);float p=sin(uTime*.75)*.5+.5;float a=r*(.28+p*.12)*(1.-uPortalOpen*.7);gl_FragColor=vec4(uGlowColor*.95*a,a);}`,
   });
   scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.45,32,32), auraMat));
 
@@ -1786,7 +1790,47 @@ const OracleScene = (() => {
   });
   tick();
 
-  return { ball, mat, auraMat, cam };
+  /* ── Portal sequence: distort → flash → reveal ── */
+  function triggerPortal(onReveal) {
+    let phase = 'distort', phaseStart = clk.getElapsedTime();
+    const _tick = () => {
+      const t = clk.getElapsedTime(), el = t - phaseStart;
+      if(phase === 'distort'){
+        const p = Math.min(1, el/2.2);
+        mat.uniforms.uRippleStrength.value = p*2.8;
+        mat.uniforms.uRippleTime.value = t*3;
+        mat.uniforms.uPortalOpen.value = p*.3;
+        auraMat.uniforms.uPortalOpen.value = p*.3;
+        ball.scale.setScalar(1+p*.12*Math.sin(t*6));
+        if(el > 2.2){ phase='flash'; phaseStart=t; }
+      } else if(phase === 'flash'){
+        const p = Math.min(1, el/1.2);
+        mat.uniforms.uLightningFlash.value = Math.sin(p*Math.PI)*1.2;
+        mat.uniforms.uPortalOpen.value = p;
+        auraMat.uniforms.uPortalOpen.value = p;
+        ball.scale.setScalar(1+p*.4);
+        if(el > 1.2){ phase='reveal'; phaseStart=t; if(onReveal) onReveal(); }
+      } else if(phase === 'reveal'){
+        const p = Math.min(1, el/1.5);
+        mat.uniforms.uLightningFlash.value = (1-p)*.3;
+        mat.uniforms.uPortalOpen.value = 1-p*.4;
+        auraMat.uniforms.uPortalOpen.value = 1-p*.4;
+        ball.scale.setScalar(1+.4*(1-p));
+        if(el > 1.5){ phase='done'; }
+      } else {
+        ball.scale.setScalar(1);
+        mat.uniforms.uPortalOpen.value = 0;
+        mat.uniforms.uLightningFlash.value = 0;
+        mat.uniforms.uRippleStrength.value = 0;
+        auraMat.uniforms.uPortalOpen.value = 0;
+        return; /* stop loop */
+      }
+      requestAnimationFrame(_tick);
+    };
+    requestAnimationFrame(_tick);
+  }
+
+  return { ball, mat, auraMat, cam, triggerPortal };
 })();
 
 
@@ -2612,14 +2656,38 @@ const OracleQuery = (() => {
     function showSponsorOverlay(sp) {
       const existing = document.getElementById('__kb_sponsor_overlay');
       if(existing) existing.remove();
+
+      /* Build the card — hidden until portal reveals it */
       const ov = document.createElement('div');
       ov.id = '__kb_sponsor_overlay';
-      ov.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(4,2,12,.97);border:1px solid rgba(255,200,40,.25);border-radius:14px;padding:16px 24px;z-index:9998;text-align:center;font-family:Courier New,monospace;min-width:240px;max-width:320px;box-shadow:0 0 30px rgba(0,0,0,.7);animation:takeoverIn .4s ease forwards;';
-      ov.innerHTML=`<div style="font-size:.6rem;letter-spacing:3px;color:rgba(255,200,40,.35);margin-bottom:8px;">✦ SPONSORED</div><a href="${sp.url}" target="_blank" rel="noopener" style="color:rgba(255,200,40,.85);font-size:.75rem;letter-spacing:1.5px;text-decoration:none;display:block;margin-bottom:4px;">${sp.msg}</a><div style="color:rgba(255,255,255,.3);font-size:.6rem;letter-spacing:1px;">${sp.sub}</div><div id="__kb_sp_x" style="margin-top:12px;cursor:pointer;color:rgba(255,255,255,.2);font-size:.6rem;letter-spacing:3px;">✕ CLOSE</div>`;
+      ov.style.cssText='position:fixed;inset:0;z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;pointer-events:none;opacity:0;transition:opacity 1.4s ease;';
+      ov.innerHTML=`
+        <div style="text-align:center;max-width:340px;width:100%;">
+          <div style="font-size:.55rem;letter-spacing:4px;color:rgba(255,200,40,.35);margin-bottom:18px;font-family:Courier New,monospace;">✦ &nbsp; SPONSORED &nbsp; ✦</div>
+          <a href="${sp.url}" target="_blank" rel="noopener" style="display:block;font-family:Georgia,serif;font-size:clamp(1.2rem,4vw,1.7rem);line-height:1.35;color:rgba(255,222,105,.97);text-shadow:0 0 28px rgba(255,150,20,.6),0 0 60px rgba(255,100,10,.3);text-decoration:none;margin-bottom:10px;">${sp.msg}</a>
+          <div style="font-family:Courier New,monospace;font-size:.62rem;letter-spacing:.15em;color:rgba(255,200,40,.4);margin-bottom:28px;">${sp.sub}</div>
+          <div style="width:50%;height:1px;background:linear-gradient(to right,transparent,rgba(255,200,40,.3),transparent);margin:0 auto 20px;"></div>
+          <div id="__kb_sp_x" style="cursor:pointer;font-family:Courier New,monospace;font-size:.6rem;letter-spacing:3px;color:rgba(255,255,255,.2);pointer-events:all;">✕ &nbsp; CLOSE</div>
+        </div>`;
       document.body.appendChild(ov);
-      const close = () => ov.remove();
+
+      const close = () => {
+        ov.style.opacity='0';
+        ov.style.pointerEvents='none';
+        /* restore Bob */
+        if(OracleScene.mat.uniforms.uPortalOpen) OracleScene.mat.uniforms.uPortalOpen.value=0;
+        if(OracleScene.auraMat.uniforms.uPortalOpen) OracleScene.auraMat.uniforms.uPortalOpen.value=0;
+        OracleScene.ball.scale.setScalar(1);
+        setTimeout(()=>ov.remove(), 1500);
+      };
       ov.querySelector('#__kb_sp_x').addEventListener('click', close);
       setTimeout(close, 10000);
+
+      /* Trigger portal → on reveal, fade in the card */
+      OracleScene.triggerPortal(() => {
+        ov.style.opacity='1';
+        ov.style.pointerEvents='all';
+      });
     }
 
     if (window.speechSynthesis) speechSynthesis.cancel();
