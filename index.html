@@ -469,7 +469,7 @@ html,body{
 @media(max-width:768px){
   #card-teaser{top:calc(50% - 210px);font-size:clamp(.8rem,3.2vw,.98rem);}
 }
-#card-teaser.visible{opacity:1;}
+#card-teaser.visible{opacity:1;pointer-events:all;}
 #spread-area{
   position:fixed;top:50%;left:50%;
   transform:translate(-50%,-50%);
@@ -3912,6 +3912,12 @@ const OracleQuery = (() => {
       const lines = rawSents.map(s => s.trim()).filter(Boolean).slice(0, 4);
       teaser.innerHTML = '';
       teaser.classList.add('visible');
+      /* X close button */
+      const teaserX = document.createElement('button');
+      teaserX.textContent = '✕';
+      teaserX.style.cssText='position:absolute;top:8px;right:12px;background:none;border:none;color:rgba(255,255,255,.25);font-family:Courier New,monospace;font-size:.65rem;letter-spacing:2px;cursor:pointer;padding:4px 8px;';
+      teaserX.addEventListener('click', clearSpread);
+      teaser.appendChild(teaserX);
 
       /* Sponsor — free users only */
       const isPaid = window.__KB && window.__KB.isPaid();
