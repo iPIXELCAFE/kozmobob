@@ -4,10 +4,55 @@
    Free:  Groq free tier — no credit card, 14,400 req/day
 */
 
+/* ── Rate limiting (in-memory, resets on cold start) ── */
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX    = 10;         // max requests per IP per window
+const ipMap = new Map();
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const entry = ipMap.get(ip) || { count: 0, start: now };
+  if (now - entry.start > RATE_LIMIT_WINDOW) {
+    // window expired — reset
+    ipMap.set(ip, { count: 1, start: now });
+    return false;
+  }
+  entry.count++;
+  ipMap.set(ip, entry);
+  return entry.count > RATE_LIMIT_MAX;
+}
+
+/* ── Allowed origins ── */
+const ALLOWED_ORIGINS = [
+  'https://kozmobob.com',
+  'https://www.kozmobob.com',
+];
+
 module.exports = async function handler(req, res) {
+  /* CORS — only allow our own domain */
+  const origin = req.headers.origin || '';
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else if (!origin) {
+    // direct server-to-server or same-origin — allow
+  } else {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  /* Preflight */
+  if (req.method === 'OPTIONS') return res.status(204).end();
+
   /* Only allow POST */
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  /* Rate limit by IP */
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
+  if (isRateLimited(ip)) {
+    return res.status(429).json({ error: 'Too many requests. Slow down.', fallback: true });
   }
 
   const key = process.env.GROQ_API_KEY;
@@ -16,6 +61,13 @@ module.exports = async function handler(req, res) {
   }
 
   const { question = '', sign = 'gemini', mode = 'oracle' } = req.body || {};
+
+  /* Input validation */
+  const VALID_SIGNS = ['aries','taurus','gemini','cancer','leo','virgo','libra','scorpio','sagittarius','capricorn','aquarius','pisces'];
+  const VALID_MODES = ['oracle','tarot','horoscope'];
+  const cleanSign   = VALID_SIGNS.includes((sign||'').toLowerCase()) ? sign.toLowerCase() : 'gemini';
+  const cleanMode   = VALID_MODES.includes((mode||'').toLowerCase()) ? mode.toLowerCase() : 'oracle';
+  const cleanQ      = String(question).slice(0, 500); // cap at 500 chars
 
   /* ── System prompt — Bob's voice and rules ── */
   const SIGN_CONTEXT = {
@@ -33,9 +85,9 @@ module.exports = async function handler(req, res) {
     pisces:'ruled by Neptune, water sign, dreamy and empathetic',
   };
 
-  const signContext = SIGN_CONTEXT[sign.toLowerCase()] || '';
+  const signContext = SIGN_CONTEXT[cleanSign] || '';
 
-  const systemPrompt = mode === 'tarot'
+  const systemPrompt = cleanMode === 'tarot'
     ? `You are KozmoBob — a brutally honest, deeply perceptive mystical oracle. You see what others miss.
 RULES (non-negotiable):
 - Write exactly 4 lines. Each line stands alone. No bullet points, no numbers.
@@ -45,18 +97,18 @@ RULES (non-negotiable):
 - No astrology clichés. No "the universe", no "energy", no "manifest".
 - The final line must be so specific and true it feels personal. Make them feel seen.
 - Never start two consecutive lines with the same word.`
-  : mode === 'horoscope'
-    ? `You are KozmoBob — a brutally honest daily oracle for ${sign} (${signContext}).
+  : cleanMode === 'horoscope'
+    ? `You are KozmoBob — a brutally honest daily oracle for ${cleanSign} (${signContext}).
 RULES (non-negotiable):
 - Write exactly 4 lines. Each line stands alone. No bullet points, no numbers.
 - Each line must be 10-20 words. Make every word count.
 - This is their horoscope for TODAY. Make it feel urgent and current.
-- Speak to what a ${sign} is likely feeling and facing RIGHT NOW in their life.
+- Speak to what a ${cleanSign} is likely feeling and facing RIGHT NOW in their life.
 - No generic astrology. No "the stars say". No "energy". No "manifest".
 - NEVER invent specific details — no fake places, people, or events. Stay psychological and emotional.
 - The final line must feel like Bob knows their secret. Make it land hard.
 - Never start two consecutive lines with the same word.`
-    : `You are KozmoBob — a brutally honest, deeply perceptive oracle. The person asking is ${sign} (${signContext}).
+    : `You are KozmoBob — a brutally honest, deeply perceptive oracle. The person asking is ${cleanSign} (${signContext}).
 RULES (non-negotiable):
 - Write exactly 4 lines. Each line stands alone. No bullet points, no numbers.
 - Each line must be 10-20 words. Not shorter. Make them land.
@@ -80,7 +132,7 @@ RULES (non-negotiable):
         model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user',   content: question || 'What does the universe want me to know right now?' },
+          { role: 'user',   content: cleanQ || 'What does the universe want me to know right now?' },
         ],
         max_tokens: 180,
         temperature: 0.92,
