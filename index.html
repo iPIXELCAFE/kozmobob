@@ -2650,53 +2650,15 @@ const OracleQuery = (() => {
     const aiLines = await fetchAILines(q);
     const lines = aiLines || generateLines(q);
 
-    /* ── Post-reading sponsor overlay (shown after reading finishes) ── */
+    /* ── Mid-reading sponsor injection — after line 3, before final line ── */
     const _isTarotRead = /^tarot/i.test(q);
-    const _sponsorData = (!_isTarotRead && !window.__KB.isPaid()) ? (() => {
+    if (!_isTarotRead && !window.__KB.isPaid()) {
       const SPONSORS = [
-        { msg:'Seal your story forever at iPIXEL CAFE', sub:'Digital time capsules for every moment.', url:'https://www.ipixelcafe.com' },
-        { msg:'Authentic Italian in Las Vegas', sub:'Pizza and pasta perfection at Novella.', url:'https://www.novellalv.com' },
+        { msg:'Seal your story forever at iPIXEL CAFE — digital time capsules for every moment.', url:'https://www.ipixelcafe.com', tts:'Seal your story forever at iPixel Cafe — digital time capsules for every moment.' },
+        { msg:'Authentic Italian, Las Vegas. Pizza and pasta perfection at Novella.', url:'https://www.novellalv.com' },
       ];
-      return SPONSORS[Math.floor(Math.random()*SPONSORS.length)];
-    })() : null;
-
-    function showSponsorOverlay(sp) {
-      const existing = document.getElementById('__kb_sponsor_overlay');
-      if(existing) existing.remove();
-
-      /* Build the card — hidden until portal reveals it */
-      const ov = document.createElement('div');
-      ov.id = '__kb_sponsor_overlay';
-      ov.style.cssText='position:fixed;inset:0;z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;pointer-events:none;opacity:0;transition:opacity 1.4s ease;';
-      ov.innerHTML=`
-        <div style="text-align:center;max-width:340px;width:100%;">
-          <div style="font-size:.55rem;letter-spacing:4px;color:rgba(255,200,40,.35);margin-bottom:18px;font-family:Courier New,monospace;">✦ &nbsp; SPONSORED &nbsp; ✦</div>
-          <a href="${sp.url}" target="_blank" rel="noopener" style="display:block;font-family:Georgia,serif;font-size:clamp(1.2rem,4vw,1.7rem);line-height:1.35;color:rgba(255,222,105,.97);text-shadow:0 0 28px rgba(255,150,20,.6),0 0 60px rgba(255,100,10,.3);text-decoration:none;margin-bottom:10px;">${sp.msg}</a>
-          <div style="font-family:Courier New,monospace;font-size:.62rem;letter-spacing:.15em;color:rgba(255,200,40,.4);margin-bottom:28px;">${sp.sub}</div>
-          <div style="width:50%;height:1px;background:linear-gradient(to right,transparent,rgba(255,200,40,.3),transparent);margin:0 auto 20px;"></div>
-          <div id="__kb_sp_x" style="cursor:pointer;font-family:Courier New,monospace;font-size:.6rem;letter-spacing:3px;color:rgba(255,255,255,.2);pointer-events:all;">✕ &nbsp; CLOSE</div>
-        </div>`;
-      document.body.appendChild(ov);
-
-      const close = () => {
-        ov.style.opacity='0';
-        ov.style.pointerEvents='none';
-        OracleScene.mat.uniforms.uPortalOpen.value=0;
-        OracleScene.auraMat.uniforms.uPortalOpen.value=0;
-        OracleScene.mat.uniforms.uLightningFlash.value=0;
-        OracleScene.mat.uniforms.uFrozen.value=1;
-        OracleScene.ball.scale.setScalar(1);
-        window.__portalActive = false;
-        setTimeout(()=>ov.remove(), 1500);
-      };
-      ov.querySelector('#__kb_sp_x').addEventListener('click', close);
-      setTimeout(close, 10000);
-
-      /* Trigger portal → on reveal, fade in the card */
-      OracleScene.triggerPortal(() => {
-        ov.style.opacity='1';
-        ov.style.pointerEvents='all';
-      });
+      const sp = SPONSORS[Math.floor(Math.random()*SPONSORS.length)];
+      lines.splice(Math.min(3, lines.length), 0, '__SPONSOR__' + sp.url + '|' + sp.msg + '|' + (sp.tts||sp.msg));
     }
 
     if (window.speechSynthesis) speechSynthesis.cancel();
@@ -2717,14 +2679,30 @@ const OracleQuery = (() => {
             ctr.scrollTop = ctr.scrollHeight;
           }, 900);
         }
-        /* Show sponsor overlay after reading — clean floating card */
-        if (_sponsorData) setTimeout(() => showSponsorOverlay(_sponsorData), 1200);
         return;
       }
       const rawLine = lines[li];
-      const line = rawLine; /* clean — no more sponsor injection in line stream */
-      let sp = document.createElement('span');
-      sp.className = 'oracle-line';
+      const isSponsor = rawLine.startsWith('__SPONSOR__');
+      let line = rawLine, sponsorLink = '', sponsorTts = '';
+      if (isSponsor) {
+        const payload = rawLine.slice(11);
+        const parts = payload.split('|');
+        sponsorLink = parts[0] || '';
+        line        = parts[1] || '';
+        sponsorTts  = parts[2] || line;
+      }
+      let sp;
+      if (isSponsor) {
+        sp = document.createElement('a');
+        sp.href = sponsorLink; sp.target='_blank'; sp.rel='noopener noreferrer';
+        sp.style.cssText='display:block;font-size:.82rem;border-top:1px solid rgba(255,140,0,.2);border-bottom:1px solid rgba(255,140,0,.2);padding:10px 0;margin:8px 0;text-align:center;text-decoration:none;cursor:pointer;';
+        sp.classList.add('sponsor-flash');
+        sp.addEventListener('mouseenter',()=>{sp.style.color='rgba(255,210,90,.7)';});
+        sp.addEventListener('mouseleave',()=>{sp.style.color='';});
+      } else {
+        sp = document.createElement('span');
+        sp.className = 'oracle-line';
+      }
       sp.textContent = '';
       txt.appendChild(sp);
       ctr.scrollTop = ctr.scrollHeight;
@@ -2745,7 +2723,7 @@ const OracleQuery = (() => {
 
       if (window.speechSynthesis) {
         try {
-          const u = new SpeechSynthesisUtterance(line);
+          const u = new SpeechSynthesisUtterance(isSponsor ? sponsorTts : line);
           const isTarot = /^tarot/i.test(q);
           const onMobile = window.innerWidth <= 900;
           /* Mobile: always female. Desktop: male for tarot, female for horoscope */
@@ -3649,13 +3627,10 @@ const OracleQuery = (() => {
       /* Sponsor — free users only */
       const isPaid = window.__KB && window.__KB.isPaid();
       const CARD_SPONSORS = [
-        { msg:'Seal your story forever at iPIXEL CAFE — digital time capsules for every moment.', url:'https://www.ipixelcafe.com', tts:'Seal your story forever at iPixel Cafe — digital time capsules for every moment.' },
-        { msg:'Seal your story forever at iPIXEL CAFE — digital time capsules for every moment.', url:'https://www.ipixelcafe.com', tts:'Seal your story forever at iPixel Cafe — digital time capsules for every moment.' },
-        { msg:'Authentic Italian, Las Vegas. Pizza and pasta perfection at Novella.',           url:'https://www.novellalv.com' },
+        { msg:'Seal your story forever at iPIXEL CAFE', sub:'Digital time capsules for every moment.', url:'https://www.ipixelcafe.com' },
+        { msg:'Authentic Italian in Las Vegas', sub:'Pizza and pasta perfection at Novella.', url:'https://www.novellalv.com' },
       ];
       const sponsorPick = isPaid ? null : CARD_SPONSORS[Math.floor(Math.random()*CARD_SPONSORS.length)];
-      const sponsorMsg  = sponsorPick ? sponsorPick.msg : null;
-      const sponsorUrl  = sponsorPick ? sponsorPick.url : null;
 
       if (window.speechSynthesis) speechSynthesis.cancel();
 
@@ -3675,45 +3650,22 @@ const OracleQuery = (() => {
               teaser.appendChild(hook);
             }, 400);
           }
-          if (!sponsorMsg) { cooldown = false; return; } /* paid — no sponsor, done */
+          if (!sponsorPick) { cooldown = false; return; }
           const sep = document.createElement('a');
-          sep.href   = sponsorUrl || '#';
-          sep.target = '_blank';
-          sep.rel    = 'noopener noreferrer';
-          sep.style.cssText = 'display:block;margin:10px 0 5px;border-top:1px solid rgba(255,140,0,.25);padding-top:8px;font-size:.80em;text-decoration:none;cursor:pointer;pointer-events:auto;';
+          sep.href = sponsorPick.url; sep.target='_blank'; sep.rel='noopener noreferrer';
+          sep.style.cssText='display:block;margin:10px 0 5px;border-top:1px solid rgba(255,140,0,.25);padding-top:8px;font-size:.80em;text-decoration:none;cursor:pointer;pointer-events:auto;';
           sep.classList.add('sponsor-flash');
-          sep.addEventListener('mouseenter', () => { sep.style.animationPlayState='paused'; sep.style.color='rgba(255,255,255,1)'; sep.style.textShadow='0 0 20px rgba(255,180,0,1)'; });
-          sep.addEventListener('mouseleave', () => { sep.style.animationPlayState='running'; sep.style.color=''; sep.style.textShadow=''; });
+          sep.addEventListener('mouseenter',()=>{sep.style.color='rgba(255,255,255,1)';sep.style.textShadow='0 0 20px rgba(255,180,0,1)';});
+          sep.addEventListener('mouseleave',()=>{sep.style.color='';sep.style.textShadow='';});
           teaser.appendChild(sep);
-          /* Type sponsor word by word */
-          const sWords = sponsorMsg.split(' ');
+          const sWords = sponsorPick.msg.split(' ');
           let sw = 0;
-          const sTimer = setInterval(() => {
-            if (cardReadAbort) { clearInterval(sTimer); return; }
-            if (sw < sWords.length) { sep.textContent += (sw===0?'':' ') + sWords[sw++]; }
+          const sTimer = setInterval(()=>{
+            if(cardReadAbort){clearInterval(sTimer);return;}
+            if(sw<sWords.length){sep.textContent+=(sw===0?'':' ')+sWords[sw++];}
             else clearInterval(sTimer);
-          }, 105);
-          si++;
-          if (window.speechSynthesis) {
-            try {
-              const ttsMsg = sponsorMsg
-                .replace(/iPIXEL/g,'iPixel')
-                .replace(/CAFE/g,'Cafe')
-                .replace(/NovEllaLV\.com/gi,'Novella LV dot com')
-                .replace(/NovEllaLV/gi,'Novella LV');
-              const u = new SpeechSynthesisUtterance(ttsMsg);
-              /* Mobile: female. Desktop: male reads tarot sponsor */
-              const spMob = window.innerWidth <= 900;
-              const pv = (!spMob && window.__pickMaleVoice) ? window.__pickMaleVoice() : (window.__pickVoice ? window.__pickVoice() : null);
-              if (pv) u.voice = pv;
-              u.rate = 0.78; u.pitch = spMob ? 0.76 : 0.55; u.volume = 0.7;
-              u.onend  = () => { cooldown = false; };
-              u.onerror= () => { cooldown = false; };
-              speechSynthesis.speak(u);
-            } catch(e) { cooldown = false; }
-          } else {
-            setTimeout(() => { cooldown = false; }, 1200);
-          }
+          },105);
+          cooldown = false;
           return;
         }
         if (si > lines.length) { cooldown = false; return; }
