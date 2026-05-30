@@ -1776,7 +1776,7 @@ const OracleScene = (() => {
     aid = requestAnimationFrame(tick);
     const t = clk.getElapsedTime();
     mat.uniforms.uTime.value = t;
-    if (window.__OS !== 'LOCKED') {
+    if (window.__OS !== 'LOCKED' && !window.__portalActive) {
       auraMat.uniforms.uTime.value = t;
       const sp = window.__OS === 'THINKING' ? .55 : .08;
       ball.rotation.y = t * sp;
@@ -1792,6 +1792,7 @@ const OracleScene = (() => {
 
   /* ── Portal sequence: distort → flash → reveal ── */
   function triggerPortal(onReveal) {
+    window.__portalActive = true;
     let phase = 'distort', phaseStart = clk.getElapsedTime();
     const _tick = () => {
       const t = clk.getElapsedTime(), el = t - phaseStart;
@@ -1823,6 +1824,7 @@ const OracleScene = (() => {
         mat.uniforms.uLightningFlash.value = 0;
         mat.uniforms.uRippleStrength.value = 0;
         auraMat.uniforms.uPortalOpen.value = 0;
+        window.__portalActive = false;
         return; /* stop loop */
       }
       requestAnimationFrame(_tick);
@@ -2674,10 +2676,11 @@ const OracleQuery = (() => {
       const close = () => {
         ov.style.opacity='0';
         ov.style.pointerEvents='none';
-        /* restore Bob */
-        if(OracleScene.mat.uniforms.uPortalOpen) OracleScene.mat.uniforms.uPortalOpen.value=0;
-        if(OracleScene.auraMat.uniforms.uPortalOpen) OracleScene.auraMat.uniforms.uPortalOpen.value=0;
+        OracleScene.mat.uniforms.uPortalOpen.value=0;
+        OracleScene.auraMat.uniforms.uPortalOpen.value=0;
+        OracleScene.mat.uniforms.uLightningFlash.value=0;
         OracleScene.ball.scale.setScalar(1);
+        window.__portalActive = false;
         setTimeout(()=>ov.remove(), 1500);
       };
       ov.querySelector('#__kb_sp_x').addEventListener('click', close);
