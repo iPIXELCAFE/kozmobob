@@ -1479,7 +1479,7 @@ window.__KB = (() => {
   };
   const prevDay = d => { const x=new Date(d); x.setDate(x.getDate()-1); return x.toISOString().slice(0,10); };
   const isWeekend = () => { const d = new Date().getDay(); return d === 0 || d === 6; }; /* 0=Sun, 6=Sat */
-  const pullLimit = () => 2; /* 2 card pulls per day */
+  const pullLimit = () => 9999; /* DEV MODE — restore to 2 */
 
   /* Load / migrate localStorage */
   let s = {};
@@ -1510,9 +1510,9 @@ window.__KB = (() => {
     isPaid:      ()  => s.paid===true,
     canPull:     ()  => { checkReset(); return s.pulls < pullLimit(); },
     usePull:     ()  => { s.pulls++;       save(); },
-    canHoro:     ()  => { checkReset(); return s.horoscopes < 1; },
+    canHoro:     ()  => { checkReset(); return s.horoscopes < 9999; }, /* DEV MODE — restore to 1 */
     useHoro:     ()  => { s.horoscopes++;  save(); },
-    canQuestion: ()  => { checkReset(); return s.questions < 1; },
+    canQuestion: ()  => { checkReset(); return s.questions < 9999; }, /* DEV MODE — restore to 1 */
     useQuestion: ()  => { s.questions++;   save(); },
     addCard:     (c) => { if(!s.cards.includes(c)){ s.cards.push(c); save(); } },
     getCards:    ()  => [...(s.cards||[])],
@@ -4378,14 +4378,8 @@ const OracleQuery = (() => {
   let takeoverTimer = null;
 
   function showTakeover(msg) {
-    if (!takeover || window.__KB.isPaid()) return;
-    if (msgSym)  msgSym.textContent  = msg.sym;
-    if (msgText) { msgText.textContent = msg.text; msgText.style.color = msg.color; }
-    if (msgFrom) msgFrom.textContent = msg.from || '';
-    takeover.style.borderTopColor = msg.color + '66';
-    takeover.classList.add('visible');
-    clearTimeout(takeoverTimer);
-    takeoverTimer = setTimeout(() => takeover.classList.remove('visible'), 12000);
+    /* disabled until real paid messages are live */
+    return;
   }
 
   function show(b){
@@ -4489,7 +4483,7 @@ const OracleQuery = (() => {
         const msg = document.createElement('div');
         msg.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.92);border:1px solid rgba(255,200,40,.35);border-radius:12px;padding:20px 28px;z-index:99;text-align:center;font-family:Courier New,monospace;color:rgba(255,200,40,.8);font-size:.75rem;letter-spacing:2px;pointer-events:none;';
         const lim = window.__KB.pullsLeft()===0 ? (new Date().getDay()===0||new Date().getDay()===6?4:2) : '';
-        msg.innerHTML = `◈ ${lim} FREE PULLS USED TODAY<br><span style="color:rgba(255,255,255,.3);font-size:.6rem;letter-spacing:1.5px;">RETURNS AT MIDNIGHT · GO PREMIUM FOR UNLIMITED</span>`;
+        msg.innerHTML = `◈ ${lim} FREE PULLS USED TODAY<br><span style="color:rgba(255,255,255,.3);font-size:.6rem;letter-spacing:1.5px;">RETURNS AT MIDNIGHT</span>`;
         document.body.appendChild(msg);
         setTimeout(()=>msg.remove(), 2800);
       } else {
@@ -4534,13 +4528,13 @@ const OracleQuery = (() => {
 
     if(isHoroscope){
       if(!window.__KB.canHoro()){
-        showLimit('FREE HOROSCOPE USED TODAY','RETURNS AT MIDNIGHT · GO PREMIUM FOR UNLIMITED');
+        showLimit('FREE HOROSCOPE USED TODAY','RETURNS AT MIDNIGHT');
         return;
       }
       window.__KB.useHoro();
     } else {
       if(!window.__KB.canQuestion()){
-        showLimit('FREE QUESTION USED TODAY','RETURNS AT MIDNIGHT · GO PREMIUM FOR UNLIMITED');
+        showLimit('FREE QUESTION USED TODAY','RETURNS AT MIDNIGHT');
         return;
       }
       window.__KB.useQuestion();
