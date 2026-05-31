@@ -1264,6 +1264,18 @@ select.adv-input option{background:#111;}
   from { opacity:0; transform:perspective(600px) rotateY(90deg) scale(.9); }
   to   { opacity:1; transform:perspective(600px) rotateY(0deg)  scale(1);  }
 }
+
+/* ── Album card in-place flip ── */
+.aslot.collected { perspective: 600px; }
+.aslot-flip { width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .5s ease;cursor:pointer; }
+.aslot-flip.flipped { transform:rotateY(180deg); }
+.aslot-face { position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;border-radius:10px; }
+.aslot-face.back { transform:rotateY(180deg);background:linear-gradient(135deg,#14082a,#280a3c);border:1px solid rgba(255,200,40,.6);box-shadow:inset 0 0 20px rgba(255,150,0,.08); }
+.aslot-back-title { font-size:10px;letter-spacing:.2em;color:rgba(255,200,40,.8);margin-bottom:8px;font-family:Courier New,monospace;text-align:center; }
+.aslot-back-line { width:28px;height:1px;background:rgba(255,200,40,.3);margin:6px auto; }
+.aslot-back-text { font-size:11px;line-height:1.55;color:rgba(255,255,255,.93);text-align:center;font-family:Georgia,serif; }
+.aslot-back-key  { font-size:9px;letter-spacing:.2em;color:rgba(255,200,40,.5);font-family:Courier New,monospace;text-align:center; }
+
 </style>
 </head>
 <body>
@@ -5407,35 +5419,29 @@ function showPaywall(mode, sign, col) {
         const glyphColor = card.rare ? 'gold' : 'rgba(255,175,40,.90)';
         const pullCount = window.__KB ? window.__KB.getCardCount(card.n) : 0;
         const countBadge = pullCount > 1 ? `<div class="aslot-pull-count">×${pullCount}</div>` : '';
-        slot.innerHTML =
-          (card.rare ? '<div class="aslot-rare-badge">RARE</div>' : '') +
-          countBadge +
-          `<div class="aslot-num">${card.r}</div>` +
-          `<div class="aslot-glyph" style="color:${glyphColor}">${card.g}</div>` +
-          `<div class="aslot-div"></div>` +
-          `<div class="aslot-name">${card.n}</div>` +
-          `<div class="aslot-key">${card.k}</div>`;
-        /* Tap a collected card → flip to show meaning */
+        const meaning = CARD_BACK_TEXT[card.n] || (card.k + '. This card carries a truth you already know.');
+        slot.innerHTML = `<div class="aslot-flip">
+          <div class="aslot-face front">
+            ${card.rare ? '<div class="aslot-rare-badge">RARE</div>' : ''}
+            ${countBadge}
+            <div class="aslot-num">${card.r}</div>
+            <div class="aslot-glyph" style="color:${glyphColor}">${card.g}</div>
+            <div class="aslot-div"></div>
+            <div class="aslot-name">${card.n}</div>
+            <div class="aslot-key">${card.k}</div>
+          </div>
+          <div class="aslot-face back">
+            <div class="aslot-back-title">${card.n}</div>
+            <div class="aslot-back-line"></div>
+            <div class="aslot-back-text">${meaning}</div>
+            <div class="aslot-back-line"></div>
+            <div class="aslot-back-key">${card.k}</div>
+          </div>
+        </div>`;
         slot.addEventListener('click', (e) => {
           e.stopPropagation();
-          const existing = document.getElementById('__kb_card_flip');
-          if (existing) { existing.remove(); return; }
-          const meaning = CARD_BACK_TEXT[card.n] || (card.k + '. This card carries a truth you already know.');
-          const ov = document.createElement('div');
-          ov.id = '__kb_card_flip';
-          ov.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.85);';
-          ov.innerHTML = `<div style="background:linear-gradient(135deg,#14082a,#280a3c);border:1px solid rgba(255,200,40,.7);border-radius:16px;padding:32px 28px;max-width:340px;width:100%;text-align:center;font-family:Courier New,monospace;box-shadow:0 0 60px rgba(255,200,40,.25);">
-            <div style="font-size:.6rem;letter-spacing:.3em;color:rgba(255,200,40,.6);margin-bottom:6px;">${card.r}</div>
-            <div style="font-size:2rem;margin-bottom:10px;">${card.g}</div>
-            <div style="font-size:1rem;letter-spacing:.15em;color:#fff;margin-bottom:4px;">${card.n}</div>
-            <div style="font-size:.6rem;letter-spacing:.25em;color:rgba(255,200,40,.55);margin-bottom:20px;">${card.k}</div>
-            <div style="width:40px;height:1px;background:rgba(255,200,40,.3);margin:0 auto 20px;"></div>
-            <div style="font-size:.85rem;line-height:1.7;color:rgba(255,255,255,.92);font-family:Georgia,serif;">${meaning}</div>
-            <div style="margin-top:24px;font-size:.5rem;letter-spacing:.3em;color:rgba(255,200,40,.3);cursor:pointer;" onclick="document.getElementById('__kb_card_flip').remove()">✕ &nbsp; CLOSE</div>
-          </div>`;
-          document.body.appendChild(ov);
-          ov.addEventListener('click', (ev) => { if(ev.target===ov) ov.remove(); });
-          setTimeout(() => { if(ov.parentNode) ov.remove(); }, 10000);
+          const flipEl = slot.querySelector('.aslot-flip');
+          if (flipEl) flipEl.classList.toggle('flipped');
         });
       } else {
         slot.innerHTML =
