@@ -1011,9 +1011,9 @@ html,body{
 }
 #kb-compat-go:hover{background:rgba(255,120,180,.2);border-color:rgba(255,120,180,.65);color:rgba(255,160,200,.98);}
 @media(max-width:900px){
-  #kb-sound-btn{top:14px;right:14px;}
-  #kb-compat-btn{top:14px;right:60px;}
-  #kb-weekly-btn{top:14px;right:106px;}
+  #kb-sound-btn{top:130px;right:14px;}
+  #kb-compat-btn{top:130px;right:60px;}
+  #kb-weekly-btn{top:130px;right:106px;}
 }
 @media(max-width:900px){
   #album-btn{
@@ -1519,7 +1519,7 @@ select.adv-input option{background:#111;}
 <button id="album-btn">✦ MY CARDS <span id="album-count"></span></button>
 <button id="readings-btn" style="display:none;">✦ MY READINGS</button>
 <!-- ── WEEKLY READING BUTTON ── -->
-<button id="kb-weekly-btn" title="This week's collective reading">✦ THIS WEEK</button>
+<button id="kb-weekly-btn" title="This week's collective reading">✦</button>
 <!-- ── COMPATIBILITY READING BUTTON ── -->
 <button id="kb-compat-btn" title="Compatibility reading">♡</button>
 <!-- ── SOUND TOGGLE ── -->
@@ -7220,7 +7220,7 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
   const btn=document.getElementById('kb-sound-btn');
   if(!btn) return;
   let ctx=null,masterGain=null,started=false;
-  let muted=localStorage.getItem('__kb_sound')==='0';
+  let muted=localStorage.getItem('__kb_sound')!=='1'; /* off by default — user must opt in */
   function initAudio(){
     if(ctx) return;
     ctx=new (window.AudioContext||window.webkitAudioContext)();
@@ -7241,7 +7241,7 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
   function setMute(m){
     muted=m;localStorage.setItem('__kb_sound',m?'0':'1');
     btn.classList.toggle('muted',m);
-    btn.textContent=m?'\u266a\u0336':'\u266a';
+    btn.textContent=m?'\u25A0':'\u266a'; /* ■ = muted, ♪ = on */
     if(masterGain) masterGain.gain.setTargetAtTime(m?0:0.18,ctx.currentTime,0.3);
   }
   window.__KBSound={
@@ -7267,7 +7267,7 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
   function onFirstTap(){initAudio();if(muted)setMute(true);document.removeEventListener('pointerdown',onFirstTap);}
   document.addEventListener('pointerdown',onFirstTap);
   btn.classList.toggle('muted',muted);
-  btn.textContent=muted?'\u266a\u0336':'\u266a';
+  btn.textContent=muted?'\u25A0':'\u266a';
   btn.addEventListener('click',e=>{e.stopPropagation();initAudio();setMute(!muted);});
 })();
 
