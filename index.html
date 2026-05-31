@@ -5391,7 +5391,8 @@ function showPaywall(mode, sign, col) {
           `<div class="aslot-name">${card.n}</div>` +
           `<div class="aslot-key">${card.k}</div>`;
         /* Tap a collected card → flip to show meaning */
-        slot.addEventListener('click', () => {
+        slot.addEventListener('click', (e) => {
+          e.stopPropagation();
           /* Remove any existing flip card */
           const existingFlip = document.getElementById('__kb_card_flip');
           if (existingFlip) { existingFlip.remove(); return; }
