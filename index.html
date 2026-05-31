@@ -907,6 +907,23 @@ html,body{
 }
 #album-btn:hover{border-color:rgba(255,200,40,.70);color:rgba(255,200,40,.98);box-shadow:0 0 28px rgba(255,185,20,.28);}
 #album-count{color:rgba(255,200,40,.50);margin-left:4px;}
+#kb-sound-btn{
+  position:fixed;bottom:28px;right:14px;
+  z-index:18;
+  width:44px;height:44px;border-radius:50%;
+  background:rgba(0,0,0,.88);
+  border:1px solid rgba(255,200,40,.25);
+  color:rgba(255,200,40,.55);
+  font-size:1rem;cursor:pointer;
+  transition:color .2s,border-color .2s;
+  pointer-events:all;
+  display:flex;align-items:center;justify-content:center;
+}
+#kb-sound-btn:hover{color:rgba(255,200,40,.95);border-color:rgba(255,200,40,.6);}
+#kb-sound-btn.muted{color:rgba(255,255,255,.2);border-color:rgba(255,255,255,.1);}
+@media(max-width:900px){
+  #kb-sound-btn{bottom:104px;right:4px;}
+}
 @media(max-width:900px){
   #album-btn{
     position:fixed;bottom:104px;
@@ -1400,6 +1417,8 @@ select.adv-input option{background:#111;}
 <!-- ── COLLECTION ALBUM BUTTON ── -->
 <button id="album-btn">✦ MY CARDS <span id="album-count"></span></button>
 <button id="readings-btn" style="display:none;">✦ MY READINGS</button>
+<!-- ── SOUND TOGGLE ── -->
+<button id="kb-sound-btn" title="Toggle sound">♪</button>
 
 <!-- ── COLLECTION ALBUM OVERLAY ── -->
 <div id="album-overlay">
@@ -1677,7 +1696,13 @@ window.__KB = (() => {
     const td = today();
     if (s.date !== td) {
       const wasYesterday = s.date === prevDay(td);
-      s.streak     = wasYesterday ? (s.streak||0)+1 : 1;
+      const newStreak = wasYesterday ? (s.streak||0)+1 : 1;
+      /* Award bonus pull on every 7-day streak milestone */
+      if(wasYesterday && newStreak % 7 === 0){
+        s.bonusPulls = (s.bonusPulls||0) + 1;
+        s.streakBonus = newStreak; /* flag to show message on next load */
+      }
+      s.streak     = newStreak;
       s.date       = td;
       s.pulls      = 0;
       s.horoscopes = 0;
@@ -1691,13 +1716,22 @@ window.__KB = (() => {
   return {
     domain,                                /* 'KOZMO' or 'KOSMO' */
     isPaid:      ()  => s.paid===true,
-    canPull:     ()  => { checkReset(); return s.pulls < pullLimit(); },
+    canPull:     ()  => { checkReset(); return s.pulls < pullLimit() + (s.bonusPulls||0); },
     usePull:     ()  => { s.pulls++;       save(); },
+    bonusPulls:  ()  => s.bonusPulls||0,
+    claimStreakBonus: () => { const n=s.streakBonus||0; s.streakBonus=0; save(); return n; },
     canHoro:     ()  => { checkReset(); return (s.horoscopes||0) < 9999; }, /* DEV MODE — restore to 1 */
     useHoro:     ()  => { s.horoscopes = (s.horoscopes||0)+1; save(); },
     canQuestion: ()  => { checkReset(); return (s.questions||0) < 9999; }, /* DEV MODE — restore to 1 */
     useQuestion: ()  => { s.questions = (s.questions||0)+1; save(); },
-    addCard:     (c) => { s.cards[c] = (s.cards[c]||0) + 1; save(); },
+    addCard:     (c) => {
+      const wasNew = !(s.cards[c]);
+      s.cards[c] = (s.cards[c]||0) + 1; save();
+      if(wasNew && window.__KBMilestone){
+        const total = Object.keys(s.cards).length;
+        window.__KBMilestone(total, c);
+      }
+    },
     getCards:    ()  => Object.keys(s.cards||{}),
     getCardCount:(c) => (s.cards||{})[c] || 0,
     streak:      ()  => s.streak||1,
@@ -3940,6 +3974,8 @@ const OracleQuery = (() => {
     cooldown = true;
     const card = weightedPick();
     drawnCardName = card.n;
+    if(navigator.vibrate) navigator.vibrate(card.rare ? [40,30,40] : 35); /* haptic */
+    if(window.__KBSound) window.__KBSound.whoosh();    /* pull sound */
     window.__KB.addCard(card.n);                       /* save to collection */
     if(window.__KBAlbum) window.__KBAlbum.refresh();   /* live-update album if open */
     mbFlash = 1.0;
@@ -4004,6 +4040,19 @@ const OracleQuery = (() => {
               teaser.appendChild(hook);
             }, 400);
           }
+          /* Share button — always shown */
+          setTimeout(() => {
+            const shareBtn = document.createElement('button');
+            shareBtn.textContent = '✦ SHARE THIS CARD';
+            shareBtn.style.cssText = 'display:block;margin:14px auto 0;background:none;border:1px solid rgba(255,200,40,.3);border-radius:20px;padding:7px 20px;font-family:Courier New,monospace;font-size:.58rem;letter-spacing:2px;color:rgba(255,200,40,.55);cursor:pointer;pointer-events:auto;transition:color .2s,border-color .2s;';
+            shareBtn.addEventListener('mouseenter',()=>{shareBtn.style.color='rgba(255,200,40,.95)';shareBtn.style.borderColor='rgba(255,200,40,.7)';});
+            shareBtn.addEventListener('mouseleave',()=>{shareBtn.style.color='rgba(255,200,40,.55)';shareBtn.style.borderColor='rgba(255,200,40,.3)';});
+            shareBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              if(window.__KBShareCard) window.__KBShareCard(card, lines);
+            });
+            teaser.appendChild(shareBtn);
+          }, 600);
           if (!sponsorPick) { cooldown = false; return; }
           const sep = document.createElement('a');
           sep.href = sponsorPick.url; sep.target='_blank'; sep.rel='noopener noreferrer';
@@ -5256,28 +5305,89 @@ function showPaywall(mode, sign, col) {
 })();
 
   const CARD_BACK_TEXT = {
-    'The Fool':        'A leap into the unknown. You stand at the edge of something new with nothing but faith.',
-    'The Magician':    'You have every tool you need. The power to create or destroy is already in your hands.',
-    'High Priestess':  'What you know but have not said. Trust what you feel before you see the proof.',
-    'The Empress':     'Abundance comes through patience. What you have been nurturing is about to bear fruit.',
-    'The Emperor':     'Structure is not a prison. The discipline you resist is the thing that sets you free.',
-    'The Hierophant':  'The rules you follow and the ones you break both define you. Know which is which.',
-    'The Lovers':      'Every choice is a marriage to its consequences. Choose what you can live with fully.',
-    'The Chariot':     'Victory through will, not luck. You move forward by controlling what is inside you.',
-    'Strength':        'The real battle is not out there. Courage is not the absence of fear, it is the decision.',
-    'The Hermit':      'The answer you seek will not come from outside. Go in. It is already waiting there.',
-    'Wheel of Fortune':'Nothing that is happening to you is permanent. The wheel always turns. Always.',
-    'Justice':         'The truth you have been avoiding is the exact thing that will free you when you face it.',
-    'The Hanged Man':  'Surrender is not weakness. The thing blocking you dissolves the moment you stop fighting it.',
-    'Death':           'Something is ending and it cannot be stopped. What grows in its place is what matters now.',
-    'Temperance':      'You are closer than you think. What is missing is not more effort. It is more patience.',
-    'The Devil':       'The chain you wear was put there by you. You know exactly what it is. You always have.',
-    'The Tower':       'The collapse happening is clearing ground. What fell was never solid. Now you can build.',
-    'The Star':        'After the fall, this. Hope is not naive. It is the most defiant thing you can carry.',
-    'The Moon':        'Not everything you feel right now is real. Fear distorts. Wait for the light before you act.',
-    'The Sun':         'This is the part where it gets good. Let yourself have this. You earned it.',
-    'Judgement':       'You are being called to become who you said you would be. No more preparation. Now.',
-    'The World':       'You finished something real. Most people never get here. Take a moment and feel that.',
+    /* ── Major Arcana ── */
+    'The Fool':           'A leap into the unknown. You stand at the edge of something new with nothing but faith.',
+    'The Magician':       'You have every tool you need. The power to create or destroy is already in your hands.',
+    'High Priestess':     'What you know but have not said. Trust what you feel before you see the proof.',
+    'The Empress':        'Abundance comes through patience. What you have been nurturing is about to bear fruit.',
+    'The Emperor':        'Structure is not a prison. The discipline you resist is the thing that sets you free.',
+    'The Hierophant':     'The rules you follow and the ones you break both define you. Know which is which.',
+    'The Lovers':         'Every choice is a marriage to its consequences. Choose what you can live with fully.',
+    'The Chariot':        'Victory through will, not luck. You move forward by controlling what is inside you.',
+    'Strength':           'The real battle is not out there. Courage is not the absence of fear, it is the decision.',
+    'The Hermit':         'The answer you seek will not come from outside. Go in. It is already waiting there.',
+    'Wheel of Fortune':   'Nothing that is happening to you is permanent. The wheel always turns. Always.',
+    'Justice':            'The truth you have been avoiding is the exact thing that will free you when you face it.',
+    'The Hanged Man':     'Surrender is not weakness. The thing blocking you dissolves the moment you stop fighting it.',
+    'Death':              'Something is ending and it cannot be stopped. What grows in its place is what matters now.',
+    'Temperance':         'You are closer than you think. What is missing is not more effort. It is more patience.',
+    'The Devil':          'The chain you wear was put there by you. You know exactly what it is. You always have.',
+    'The Tower':          'The collapse happening is clearing ground. What fell was never solid. Now you can build.',
+    'The Star':           'After the fall, this. Hope is not naive. It is the most defiant thing you can carry.',
+    'The Moon':           'Not everything you feel right now is real. Fear distorts. Wait for the light before you act.',
+    'The Sun':            'This is the part where it gets good. Let yourself have this. You earned it.',
+    'Judgement':          'You are being called to become who you said you would be. No more preparation. Now.',
+    'The World':          'You finished something real. Most people never get here. Take a moment and feel that.',
+    /* ── Wands ── */
+    'Ace of Wands':       'A spark landed. What you do with it in the next 48 hours determines whether it becomes fire.',
+    'Two of Wands':       'You already know the direction. You are standing at the door debating whether to open it.',
+    'Three of Wands':     'What you set in motion is already moving. The waiting is part of it. Let it travel.',
+    'Four of Wands':      'This is a moment worth marking. Something was built here. Do not rush past it.',
+    'Five of Wands':      'The friction is not the enemy. Every voice pushing back is showing you where to sharpen.',
+    'Six of Wands':       'Recognition earned through real effort lands differently. This one is yours to keep.',
+    'Seven of Wands':     'Hold your ground. The pressure you feel is not proof you are wrong. It is proof you matter.',
+    'Eight of Wands':     'Speed is not recklessness right now. What has been slow is about to move fast. Be ready.',
+    'Nine of Wands':      'You have come further than you give yourself credit for. One more push. You already know you can.',
+    'Ten of Wands':       'You are carrying too much. Not because you have to. Because you forgot to put something down.',
+    'Page of Wands':      'A message arrives, or an idea ignites. Either way, it is asking you to take it seriously.',
+    'Knight of Wands':    'Move fast but do not confuse speed for direction. Passion without aim burns everything down.',
+    'Queen of Wands':     'You already command the room. The only question is whether you believe it yet.',
+    'King of Wands':      'Lead from vision, not from fear. What you build now will outlast the reasons you hesitated.',
+    /* ── Cups ── */
+    'Ace of Cups':        'Something opens. A feeling you had closed off is asking to come back in. Let it.',
+    'Two of Cups':        'The connection you are thinking about is real. Both people already know. Someone just has to say it.',
+    'Three of Cups':      'Celebrate with the people who were there before it was worth celebrating. They are your real ones.',
+    'Four of Cups':       'The opportunity you are ignoring because it does not look the way you expected — look again.',
+    'Five of Cups':       'You are allowed to grieve what did not work. Just do not let grief become your permanent address.',
+    'Six of Cups':        'Something from the past has a gift in it. Not the past itself — the lesson inside it.',
+    'Seven of Cups':      'Everything looks possible right now. That means nothing is real yet. Choose one thing and commit.',
+    'Eight of Cups':      'Walking away from something that used to matter is not failure. It is finally being honest.',
+    'Nine of Cups':       'You are closer to what you actually want than your anxiety is telling you. Believe the evidence.',
+    'Ten of Cups':        'This kind of peace is earned. Something has genuinely settled. Let yourself live in it.',
+    'Page of Cups':       'An unexpected feeling arrives like a message. Do not dismiss it because you cannot explain it.',
+    'Knight of Cups':     'The romantic approach is not always wrong. Lead with what you actually feel for once.',
+    'Queen of Cups':      'Your ability to hold space for others is rare. Do not forget to hold some for yourself too.',
+    'King of Cups':       'Mastery here is staying steady when the water moves. You have practiced this longer than you know.',
+    /* ── Swords ── */
+    'Ace of Swords':      'Clarity just cut through the noise. What you now see cannot be unseen. Act on it.',
+    'Two of Swords':      'You are not undecided. You are avoiding a decision you have already made. Time to admit it.',
+    'Three of Swords':    'The hurt is real. So is the fact that it will not always be this sharp. Both things are true.',
+    'Four of Swords':     'Rest is not retreat. The move right now is stillness. Your mind needs silence more than answers.',
+    'Five of Swords':     'Winning this one the wrong way costs you more than losing. Choose what kind of person you are.',
+    'Six of Swords':      'The transition you are in is uncomfortable because it is real. You are moving somewhere better.',
+    'Seven of Swords':    'Something is not being said directly. Check what you are avoiding and what others might be hiding.',
+    'Eight of Swords':    'The prison is made of your own thoughts. The blindfold is yours. You can take it off.',
+    'Nine of Swords':     'The 3am version of this problem is not the accurate version. Write it down and wait for daylight.',
+    'Ten of Swords':      'It is over. Completely. That is actually good — there is nothing left to hold together. Start clean.',
+    'Page of Swords':     'Ask the question you have been afraid makes you look foolish. The answer changes everything.',
+    'Knight of Swords':   'Your instinct is correct. Charge — but check that you know exactly what you are charging at.',
+    'Queen of Swords':    'You see what others miss and you say what others won\'t. That is a gift. Use it cleanly.',
+    'King of Swords':     'The decision requires logic, not feeling. You already know the right answer. Write it down.',
+    /* ── Pentacles ── */
+    'Ace of Pentacles':   'A real opportunity is presenting itself in material form. This one is solid. Take it seriously.',
+    'Two of Pentacles':   'You are managing more than it looks like from the outside. Something has to give. Choose what.',
+    'Three of Pentacles': 'The work you put in is being seen. Collaboration here makes something neither of you could alone.',
+    'Four of Pentacles':  'Holding on too tightly to what you have is keeping more from arriving. Loosen one hand.',
+    'Five of Pentacles':  'The help exists. The door is not as closed as it looks from where you are standing right now.',
+    'Six of Pentacles':   'Give what you can without depleting yourself. Receive without shame. Both are part of the cycle.',
+    'Seven of Pentacles': 'The seeds you planted are growing. This is the slow part — do not dig them up to check.',
+    'Eight of Pentacles': 'Mastery comes from showing up to the work again and again. You are in the middle of becoming.',
+    'Nine of Pentacles':  'You built this. The comfort you are experiencing is not luck. It is the result of your choices.',
+    'Ten of Pentacles':   'Legacy is being built in the small daily decisions. What you do now echoes forward. Do it right.',
+    'Page of Pentacles':  'A new skill or opportunity is asking for your full attention. Study it. The investment pays.',
+    'Knight of Pentacles': 'Slow and methodical wins this one. Every steady step forward is more powerful than you think.',
+    'Queen of Pentacles': 'You make things grow — people, projects, spaces. That is not a small thing. It is everything.',
+    'King of Pentacles':  'Abundance managed with wisdom lasts. What you have built is real. Now build something lasting.',
   };
 
 /* ── 15. CARD COLLECTION ALBUM ── */
@@ -5443,6 +5553,7 @@ function showPaywall(mode, sign, col) {
           } else {
             /* Flip and expand */
             flipEl.classList.add('flipped');
+            if(window.__KBSound) window.__KBSound.flip();
             slot.style.transition = 'transform .4s ease, box-shadow .4s ease';
             slot.style.transform = 'scale(1.45)';
             slot.style.zIndex = '9999';
@@ -6696,164 +6807,244 @@ document.addEventListener('keydown',     boot, { once: true });
     selBill = bill||'left';
     selHours = 1; priorityOn = false;
     selSlot = null; selPremDate = null; selPremHours = 1;
-    selCommDate = null; selCommSlot = null;
-    document.querySelectorAll('.ab-card').forEach(el=>{
-      el.classList.toggle('selected', el.dataset.bill===selBill);
-    });
-    const priWrap = document.getElementById('advert-priority-wrap');
-    if(priWrap){
-      priWrap.style.display = selBill==='left' ? 'flex' : 'none';
-      priWrap.classList.remove('active');
+    if(overlay) overlay.classList.add('visible');
+    /* Activate the correct billboard card */
+    if(window.selectBillboard){
+      window.selectBillboard(bill==='message'?'message':bill==='right'?'right':'left');
     }
-    document.querySelectorAll('.adv-dur-btn').forEach(el=>{
-      el.classList.toggle('selected', parseInt(el.dataset.hrs)===1);
-    });
-    formBody.style.display  = 'block';
-    successEl.style.display = 'none';
-    window.selectBillboard(selBill);
-    overlay.classList.add('visible');
-  };
-
-  /* ── Emoji picker logic ── */
-  document.querySelectorAll('.epick').forEach(el => {
-    el.addEventListener('click', () => {
-      document.querySelectorAll('.epick').forEach(e => e.classList.remove('selected'));
-      el.classList.add('selected');
-      const emoji = el.dataset.e;
-      const hidden = document.getElementById('advert-emoji');
-      const preview = document.getElementById('advert-emoji-preview');
-      if(hidden)  hidden.value       = emoji;
-      if(preview) preview.textContent = emoji;
-    });
-  });
-  /* Default first emoji selected */
-  const firstPick = document.querySelector('.epick');
-  if(firstPick) firstPick.classList.add('selected');
-
-  window.selectBillboard = function(bill){
-    selBill = bill;
-    document.querySelectorAll('.ab-card').forEach(el=>el.classList.toggle('selected',el.dataset.bill===bill));
-
-    /* Show/hide personal message fields */
-    const emojiField = document.getElementById('advert-emoji-field');
-    const fromField  = document.getElementById('advert-from-field');
-    const bizField   = document.getElementById('advert-biz-field');
-    if(emojiField) emojiField.style.display = bill==='message' ? '' : 'none';
-    if(fromField)  fromField.style.display  = bill==='message' ? '' : 'none';
-    if(bizField)   bizField.style.display   = bill==='message' ? 'none' : '';
-
-    /* Update price + button */
-    const prices = { left:'$55', right:'$250', message:'$35' };
-    const descs  = {
-      left:    '1 hour · Community billboard · first come first served',
-      right:   '1 hour · Premium billboard · yours alone',
-      message: '1 hour on Bob · becomes a star on the site forever'
-    };
-    const amt = document.getElementById('advert-price-amount');
-    const desc = document.getElementById('advert-price-desc');
-    const btn  = document.getElementById('advert-pay-btn');
-    if(amt)  amt.textContent  = prices[bill] || '$55';
-    if(desc) desc.textContent = descs[bill]  || '';
-    if(btn)  btn.textContent  = '❆ BOOK NOW — ' + (prices[bill] || '$55');
-  };
-
-  window.selectDuration = function(hrs){
-    selHours = hrs;
-    document.querySelectorAll('.adv-dur-btn').forEach(el=>{
-      el.classList.toggle('selected', parseInt(el.dataset.hrs)===hrs);
-    });
+    /* Build pricing UI for commercial slots */
+    if(bill !== 'message'){
+      buildDatePicker();
+      buildScheduleTable();
+      buildCommDatePicker();
+      buildCommSlotTable();
+      buildCommHoursButtons();
+    }
     updatePriceDisplay();
   };
 
-  window.togglePriority = function(){
-    if(selBill!=='left') return;
-    priorityOn = !priorityOn;
-    const pw = document.getElementById('advert-priority-wrap');
-    if(pw) pw.classList.toggle('active', priorityOn);
-    updatePriceDisplay();
-  };
-
-  /* ── Event listeners ── */
-  if(msgInput) msgInput.addEventListener('input',()=>{
-    if(msgCount) msgCount.textContent = msgInput.value.length;
-  });
-
-  if(closeBtn) closeBtn.addEventListener('click',()=>{
-    const ov = overlay||document.getElementById('advert-overlay');
-    if(ov) ov.classList.remove('visible');
-  });
-
-  if(payBtn) payBtn.addEventListener('click',()=>{
-    const biz = (document.getElementById('advert-biz')||{}).value||'';
-    const msg = msgInput ? msgInput.value.trim() : '';
-    if(!biz.trim() && selBill !== 'message'){ alert('Please enter your business name.'); return; }
-    if(!msg){ alert('Please enter a message.'); return; }
-    const url  = (document.getElementById('advert-url') ||{}).value||'';
-    const logo = (document.getElementById('advert-logo')||{}).value||'';
-    let price, startTime, endTime;
-    if(selBill==='right' && selSlot){
-      const pd = selPremDate||new Date();
-      const isWE2 = pd.getDay()===0||pd.getDay()===6;
-      price = (isWE2 ? selSlot.we : selSlot.wd) * selPremHours;
-      const base = new Date(pd); base.setHours(selSlot.start,0,0,0);
-      if(base < new Date()) base.setDate(base.getDate()+1);
-      startTime = base.getTime();
-      endTime   = startTime + selPremHours*3600*1000;
-    } else {
-      price     = calcPrice();
-      startTime = Date.now();
-      endTime   = startTime + selHours*3600*1000;
-    }
-    const KEY = selBill==='left' ? '__kb_left_ads' : '__kb_right_ads';
-    let ads = [];
-    try{ ads = JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(e){}
-    ads.push({biz:biz.trim(),msg,url,logo,price,priority:priorityOn,startTime,endTime});
-    try{ localStorage.setItem(KEY,JSON.stringify(ads)); }catch(e){}
-    if(selBill==='left'    && window.__injectLeftAd)     window.__injectLeftAd({biz:biz.trim(),msg,url,logo,priority:priorityOn,endTime});
-    if(selBill==='right'   && window.__injectRightAd)    window.__injectRightAd({biz:biz.trim(),msg,url,logo,endTime});
-    if(selBill==='message' && window.__injectPersonalMsg) window.__injectPersonalMsg({
-      emoji: (document.getElementById('advert-emoji')||{}).value||'✨',
-      text:  msg,
-      from:  (document.getElementById('advert-from')||{}).value||'',
-      link:  url,
-      color: '#FFD700'
-    });
-    formBody.style.display  = 'none';
-    successEl.style.display = 'block';
-    const subEl = document.getElementById('advert-success-msg');
-    if(subEl){
-      if(selBill === 'message'){
-        /* Personal message — generate share link */
-        const emoji   = (document.getElementById('advert-emoji')||{}).value || '✨';
-        const from    = (document.getElementById('advert-from') ||{}).value || '';
-        const msgLink = (document.getElementById('advert-url')  ||{}).value || '';
-        const params  = new URLSearchParams({
-          e: emoji, t: msg, f: from, l: msgLink
-        });
-        const shareUrl = 'https://kozmobob.com/message?' + params.toString();
-        subEl.innerHTML =
-          '<div style="font-size:2.5rem;margin-bottom:10px">'+emoji+'</div>'
-          +'<div style="margin-bottom:14px;color:rgba(255,222,105,.9);font-size:.82rem;">Your message is live on KozmoBob.</div>'
-          +'<div style="font-family:Courier New,monospace;font-size:.58rem;color:rgba(255,200,40,.5);margin-bottom:16px;">Share this link with whoever you want to see it:</div>'
-          +'<div id="msg-share-url" style="font-family:Courier New,monospace;font-size:.55rem;color:rgba(255,200,40,.8);background:rgba(255,200,40,.06);border:1px solid rgba(255,200,40,.2);border-radius:8px;padding:10px;word-break:break-all;cursor:pointer;margin-bottom:14px;" onclick="navigator.clipboard.writeText(\''+shareUrl+'\').then(()=>{this.style.color=\'rgba(100,255,100,.9)\';this.textContent=\'✓ Copied!\';setTimeout(()=>{this.style.color=\'\';this.textContent=\''+shareUrl+'\';},2000)})">'+shareUrl+'</div>'
-          +'<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
-          +'<a href="https://wa.me/?text='+encodeURIComponent(shareUrl)+'" target="_blank" style="font-family:Courier New,monospace;font-size:.62rem;letter-spacing:1.5px;color:rgba(37,211,102,.9);border:1px solid rgba(37,211,102,.4);border-radius:20px;padding:8px 16px;text-decoration:none;">WhatsApp</a>'
+  /* ── Pay button — full booking handler ── */
+  if(payBtn){
+    payBtn.onclick = function(){
+      const biz     = (document.getElementById('advert-biz')||{}).value||'';
+      const msgTxt  = (document.getElementById('advert-msg')||{}).value||'';
+      const urlVal  = (document.getElementById('advert-url')||{}).value||'';
+      const subEl   = document.getElementById('advert-success-msg');
+      const succDiv = document.getElementById('advert-success');
+      const frmDiv  = document.getElementById('advert-form-body');
+      const shareUrl = 'https://www.kozmobob.com';
+      if(frmDiv) frmDiv.style.display = 'none';
+      if(succDiv){ succDiv.style.display='block'; }
+      if(selBill==='right'){
+        if(subEl) subEl.innerHTML =
+          '✦ <b>'+(biz.trim()||'Your ad')+'</b> — Premium slot booked.<br>Goes live at your scheduled time.'
+          +'<br><br><div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:12px;">'
           +'<a href="sms:?body='+encodeURIComponent(shareUrl)+'" style="font-family:Courier New,monospace;font-size:.62rem;letter-spacing:1.5px;color:rgba(0,207,255,.9);border:1px solid rgba(0,207,255,.4);border-radius:20px;padding:8px 16px;text-decoration:none;">SMS</a>'
           +'<a href="mailto:?subject=A message for you&body='+encodeURIComponent(shareUrl)+'" style="font-family:Courier New,monospace;font-size:.62rem;letter-spacing:1.5px;color:rgba(255,200,40,.9);border:1px solid rgba(255,200,40,.4);border-radius:20px;padding:8px 16px;text-decoration:none;">Email</a>'
           +'</div>';
       } else {
         const dur = selHours===1?'1 hour':selHours+' hours';
-        subEl.innerHTML = '✦ <b>'+(biz.trim()||'Your ad')+'</b> is now in the queue.<br>Goes live when it\'s your turn. Duration: '+dur+'.';
+        if(subEl) subEl.innerHTML = '✦ <b>'+(biz.trim()||'Your ad')+'</b> is now in the queue.<br>Goes live when it\'s your turn. Duration: '+dur+'.';
         setTimeout(()=>{
           const ov3 = overlay||document.getElementById('advert-overlay');
           if(ov3) ov3.classList.remove('visible');
         },4500);
       }
-    }
-    selSlot = null;
-  });
+      selSlot = null;
+    };
+  }
 
 })();
+</script>
+
+<script>
+/* ── COLLECTION MILESTONE READINGS ── */
+(function(){
+  const READINGS = {
+    22: [
+      'The Major Arcana is complete within you.',
+      'Twenty-two forces. Each one a truth you have now touched.',
+      'The world, the fool, the tower, the star — all yours.',
+      'The full story of consciousness lives in this deck. You have walked its path.',
+      'What comes next is the detail inside the journey. The minor cards await.',
+    ],
+    78: [
+      'The full deck. All 78 cards. The complete map of the human soul.',
+      'Every archetype. Every season. Every moment of joy, loss, power, and surrender.',
+      'You have pulled them all. The universe has nothing left to hide from you.',
+      'This is not an end. It is the moment you realize you were always the oracle.',
+      '✦ The collection is complete. ✦',
+    ],
+  };
+  const DELAYS = [0, 2200, 4800, 7600, 10800];
+  function showMilestoneReading(lines){
+    const container = document.getElementById('oracle-container');
+    const readingEl = document.getElementById('oracle-reading');
+    if(!container||!readingEl) return;
+    readingEl.innerHTML = '';
+    container.classList.add('visible');
+    lines.forEach((line,i) => {
+      setTimeout(() => {
+        const p = document.createElement('p');
+        p.style.cssText = 'opacity:0;transition:opacity 1.2s ease;margin:0 0 .9em;font-size:.82rem;letter-spacing:.06em;line-height:1.7;text-align:center;color:rgba(255,200,40,.92)';
+        p.textContent = line;
+        readingEl.appendChild(p);
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{ p.style.opacity='1'; }));
+      }, DELAYS[i]||i*2400);
+    });
+  }
+  window.__KBMilestone = function(total){
+    if(READINGS[total]) setTimeout(()=>showMilestoneReading(READINGS[total]), 1200);
+  };
+})();
+
+/* ── STREAK BONUS TOAST ── */
+(function(){
+  if(!window.__KB) return;
+  const streakN = window.__KB.claimStreakBonus();
+  if(!streakN) return;
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.92);border:1px solid rgba(255,200,40,.45);border-radius:24px;padding:14px 28px;z-index:99995;font-family:Courier New,monospace;font-size:.65rem;letter-spacing:2px;color:rgba(255,200,40,.95);text-align:center;pointer-events:none;opacity:0;transition:opacity .5s';
+  toast.innerHTML = '✦ '+streakN+'-DAY STREAK ✦<br><span style="font-size:.55rem;color:rgba(255,200,40,.6);letter-spacing:1.5px">BONUS PULL UNLOCKED</span>';
+  document.body.appendChild(toast);
+  setTimeout(()=>{ toast.style.opacity='1'; }, 100);
+  setTimeout(()=>{ toast.style.opacity='0'; setTimeout(()=>toast.remove(),600); }, 5000);
+})();
+
+/* ── SOUND SYSTEM — ambient drone + card flip ── */
+(function(){
+  const btn = document.getElementById('kb-sound-btn');
+  if(!btn) return;
+  let ctx=null, masterGain=null, started=false;
+  let muted = localStorage.getItem('__kb_sound')==='0';
+
+  function initAudio(){
+    if(ctx) return;
+    ctx = new (window.AudioContext||window.webkitAudioContext)();
+    masterGain = ctx.createGain();
+    masterGain.gain.value = muted ? 0 : 0.18;
+    masterGain.connect(ctx.destination);
+    startDrone();
+  }
+  function startDrone(){
+    if(started) return; started=true;
+    [[111,0],[111,7],[55.5,0]].forEach(([freq,detune])=>{
+      const osc=ctx.createOscillator(), gain=ctx.createGain();
+      osc.type='sine'; osc.frequency.value=freq; osc.detune.value=detune;
+      gain.gain.value = freq<60 ? 0.35 : 0.5;
+      osc.connect(gain); gain.connect(masterGain); osc.start();
+    });
+  }
+  function setMute(m){
+    muted=m; localStorage.setItem('__kb_sound',m?'0':'1');
+    btn.classList.toggle('muted',m);
+    btn.textContent = m ? '♪̶' : '♪';
+    if(masterGain) masterGain.gain.setTargetAtTime(m?0:0.18, ctx.currentTime, 0.3);
+  }
+  window.__KBSound = {
+    flip: function(){
+      if(!ctx||muted) return;
+      const buf=ctx.createBuffer(1,ctx.sampleRate*0.08,ctx.sampleRate);
+      const data=buf.getChannelData(0);
+      for(let i=0;i<data.length;i++) data[i]=(Math.random()*2-1)*(1-i/data.length);
+      const src=ctx.createBufferSource(), filter=ctx.createBiquadFilter(), gain=ctx.createGain();
+      src.buffer=buf; filter.type='bandpass'; filter.frequency.value=1800; filter.Q.value=0.8;
+      gain.gain.value=0.22; src.connect(filter); filter.connect(gain); gain.connect(ctx.destination); src.start();
+    },
+    whoosh: function(){
+      if(!ctx||muted) return;
+      const dur=0.18, buf=ctx.createBuffer(1,ctx.sampleRate*dur,ctx.sampleRate);
+      const data=buf.getChannelData(0);
+      for(let i=0;i<data.length;i++) data[i]=(Math.random()*2-1)*Math.sin(Math.PI*i/data.length);
+      const src=ctx.createBufferSource(), filter=ctx.createBiquadFilter(), gain=ctx.createGain();
+      src.buffer=buf; filter.type='lowpass'; filter.frequency.value=600;
+      gain.gain.value=0.28; src.connect(filter); filter.connect(gain); gain.connect(ctx.destination); src.start();
+    }
+  };
+  function onFirstTap(){ initAudio(); if(muted) setMute(true); document.removeEventListener('pointerdown',onFirstTap); }
+  document.addEventListener('pointerdown', onFirstTap);
+  btn.classList.toggle('muted', muted);
+  btn.textContent = muted ? '♪̶' : '♪';
+  btn.addEventListener('click', e=>{ e.stopPropagation(); initAudio(); setMute(!muted); });
+})();
+
+/* ── ONBOARDING HINT — shows once on first visit ── */
+(function(){
+  if(localStorage.getItem('__kb_hinted')) return;
+  localStorage.setItem('__kb_hinted','1');
+  const style = document.createElement('style');
+  style.textContent = `
+    #kb-hint{position:fixed;bottom:38%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;z-index:99990;opacity:0;transition:opacity .8s;}
+    #kb-hint.visible{opacity:1;}
+    #kb-hint.hiding{opacity:0;}
+    #kb-hint-text{font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:.22em;color:rgba(255,200,40,.85);text-align:center;text-shadow:0 0 12px rgba(255,180,0,.4);}
+    #kb-hint-arrow{width:2px;height:32px;background:linear-gradient(to bottom,rgba(255,200,40,.7),rgba(255,200,40,0));border-radius:2px;animation:kbArrowBob .9s ease-in-out infinite alternate;}
+    @keyframes kbArrowBob{from{transform:translateY(0)}to{transform:translateY(6px)}}
+  `;
+  document.head.appendChild(style);
+  const hint = document.createElement('div');
+  hint.id = 'kb-hint';
+  hint.innerHTML = '<div id="kb-hint-text">TAP BOB · ASK ANYTHING</div><div id="kb-hint-arrow"></div>';
+  document.body.appendChild(hint);
+  setTimeout(()=>hint.classList.add('visible'), 1500);
+  const dismiss = ()=>{ hint.classList.add('hiding'); setTimeout(()=>hint.remove(),800); };
+  setTimeout(dismiss, 6000);
+  document.addEventListener('pointerdown', dismiss, {once:true});
+})();
+
+/* ── SHARE CARD AS IMAGE ── */
+window.__KBShareCard = function(card, lines){
+  const SIZE=1080;
+  const c=document.createElement('canvas');
+  c.width=c.height=SIZE;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,SIZE,SIZE);
+  const vig=ctx.createRadialGradient(SIZE/2,SIZE/2,SIZE*0.2,SIZE/2,SIZE/2,SIZE*0.72);
+  vig.addColorStop(0,'rgba(30,10,60,0)'); vig.addColorStop(1,'rgba(0,0,0,0.72)');
+  ctx.fillStyle=vig; ctx.fillRect(0,0,SIZE,SIZE);
+  ctx.fillStyle='rgba(255,200,40,0.3)'; ctx.fillRect(80,90,SIZE-160,1);
+  ctx.font='180px serif'; ctx.textAlign='center';
+  ctx.fillStyle=card.rare?'rgba(255,215,40,0.9)':'rgba(255,180,40,0.82)';
+  ctx.shadowColor=card.rare?'rgba(255,200,40,0.6)':'rgba(255,140,0,0.4)';
+  ctx.shadowBlur=card.rare?60:30;
+  ctx.fillText(card.g||'✦',SIZE/2,420);
+  ctx.shadowBlur=0;
+  ctx.font='500 28px Courier New,monospace'; ctx.fillStyle='rgba(255,200,40,0.4)';
+  ctx.fillText(card.r||'',SIZE/2,490);
+  ctx.fillStyle='rgba(255,200,40,0.25)'; ctx.fillRect(SIZE/2-60,510,120,1);
+  ctx.font='500 52px Courier New,monospace'; ctx.fillStyle='rgba(255,200,40,0.95)';
+  ctx.shadowColor='rgba(255,180,0,0.3)'; ctx.shadowBlur=20;
+  ctx.fillText((card.n||'').toUpperCase(),SIZE/2,580);
+  ctx.shadowBlur=0;
+  ctx.font='22px Courier New,monospace'; ctx.fillStyle='rgba(255,200,40,0.45)';
+  ctx.fillText(card.k||'',SIZE/2,620);
+  const readingLine=lines&&lines.length?lines[Math.min(1,lines.length-1)]:'';
+  if(readingLine){
+    ctx.font='italic 26px Georgia,serif'; ctx.fillStyle='rgba(255,255,255,0.55)';
+    const words=readingLine.split(' ');
+    let line1='',cur='';
+    words.forEach(w=>{ if((cur+' '+w).trim().length>38){line1=cur.trim();cur=w;}else cur=(cur+' '+w).trim(); });
+    const line2=cur.trim();
+    ctx.fillText('"'+(line1||line2)+(line2&&line1?'':'"'),SIZE/2,700);
+    if(line2&&line1) ctx.fillText(line2+'"',SIZE/2,736);
+  }
+  ctx.fillStyle='rgba(255,200,40,0.3)'; ctx.fillRect(80,SIZE-90,SIZE-160,1);
+  ctx.font='20px Courier New,monospace'; ctx.fillStyle='rgba(255,200,40,0.35)';
+  ctx.fillText('KOZMOBOB.COM',SIZE/2,SIZE-52);
+  c.toBlob(blob=>{
+    const file=new File([blob],'kozmobob-card.png',{type:'image/png'});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:card.n+' · KozmoBob',text:readingLine});
+    } else {
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download='kozmobob-'+(card.n||'card').toLowerCase().replace(/\s+/g,'-')+'.png';
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    }
+  },'image/png');
+};
+
 </script>
 </body>
 </html>
