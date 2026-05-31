@@ -3885,10 +3885,10 @@ const OracleQuery = (() => {
       el.classList.add('landed');
       setTimeout(() => { el.querySelector('.scard-inner').classList.add('flip'); }, 300);
     });
-    /* Tapping the card fires full Bob reading */
+    /* Tapping the card shows tier picker */
     el.addEventListener('click', e => {
       e.stopPropagation();
-      OracleQuery.submit('tarot card ' + card.n);
+      showTarotPicker(card.n, spreadCards.map(sc => sc.card.n));
     });
     /* Slide mini Bob below spread on first card */
     if(spreadCards.length === 1) mbWrap.classList.add('has-cards');
@@ -3951,8 +3951,8 @@ const OracleQuery = (() => {
             setTimeout(() => {
               const hook = document.createElement('span');
               hook.style.cssText = 'display:block;margin-top:14px;font-size:.72rem;letter-spacing:.18em;color:rgba(255,200,40,.45);text-align:center;font-style:italic;cursor:pointer;pointer-events:auto;';
-              hook.textContent = '✦  There is more I see.  Tap the card for a full reading.  ✦';
-              hook.addEventListener('click', () => OracleQuery.submit('tarot card ' + card.n));
+              hook.textContent = '✦  There is more I see.  Tap for a deeper reading.  ✦';
+              hook.addEventListener('click', () => showTarotPicker(card.n, spreadCards.map(sc => sc.card.n)));
               teaser.appendChild(hook);
             }, 400);
           }
@@ -4770,6 +4770,251 @@ const OracleQuery = (() => {
   /* Wait for Mini Bob to init */
   setTimeout(patchDraw, 2000);
 })();
+
+/* ── 12a. TAROT TIER PICKER ── */
+function showTarotPicker(cardName, allCards) {
+  const existing = document.getElementById('__kb_tarot_picker');
+  if (existing) existing.remove();
+
+  const isDevUnlocked = () => localStorage.getItem('__kb_dev') === '1';
+  const allCards3 = (allCards && allCards.length >= 3) ? allCards : null;
+
+  const ov = document.createElement('div');
+  ov.id = '__kb_tarot_picker';
+  ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.92);backdrop-filter:blur(6px);';
+
+  const tiers = [
+    {
+      id:'free', label:'FREE READ', price:'FREE',
+      desc:'4 lines · card meaning only',
+      paid: false
+    },
+    {
+      id:'deep', label:'DEEP READ', price:'$0.99',
+      desc:'6 lines · read for YOUR situation',
+      paid: true
+    },
+    {
+      id:'spread', label:'3-CARD SPREAD', price:'$1.99',
+      desc: allCards3 ? 'Past · Present · Future · 18 lines' : 'Draw 3 cards first to unlock',
+      paid: true,
+      disabled: !allCards3
+    },
+  ];
+
+  ov.innerHTML = `
+    <div style="text-align:center;max-width:400px;width:100%;font-family:'Courier New',monospace;">
+      <div style="font-size:.65rem;letter-spacing:.3em;color:rgba(255,200,40,.5);margin-bottom:6px;">KOZMO BOB READS</div>
+      <div style="font-size:1.3rem;letter-spacing:.12em;color:rgba(255,200,40,.95);text-shadow:0 0 20px rgba(255,200,40,.3);margin-bottom:4px;">${cardName.toUpperCase()}</div>
+      <div style="font-size:.55rem;letter-spacing:.2em;color:rgba(255,255,255,.25);margin-bottom:24px;">CHOOSE YOUR READING</div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+        ${tiers.map(t => `
+          <button data-tier="${t.id}" ${t.disabled ? 'disabled' : ''} style="
+            display:flex;align-items:center;justify-content:space-between;
+            padding:14px 20px;border-radius:10px;cursor:${t.disabled ? 'not-allowed' : 'pointer'};
+            background:${t.paid && !isDevUnlocked() ? 'rgba(255,255,255,.04)' : 'rgba(255,200,40,.1)'};
+            border:1px solid ${t.disabled ? 'rgba(255,255,255,.08)' : t.paid && !isDevUnlocked() ? 'rgba(255,255,255,.15)' : 'rgba(255,200,40,.45)'};
+            color:${t.disabled ? 'rgba(255,255,255,.2)' : t.paid && !isDevUnlocked() ? 'rgba(255,255,255,.4)' : 'rgba(255,200,40,.9)'};
+            font-family:inherit;transition:all .2s;opacity:${t.disabled ? '.4' : '1'};
+          ">
+            <span style="display:flex;flex-direction:column;align-items:flex-start;gap:3px;">
+              <span style="font-size:.7rem;letter-spacing:.2em;">${t.label}</span>
+              <span style="font-size:.52rem;opacity:.55;letter-spacing:.1em;">${t.desc}</span>
+            </span>
+            <span style="font-size:.7rem;letter-spacing:.1em;white-space:nowrap;">
+              ${t.paid && !isDevUnlocked() ? '🔒 ' : ''}${t.price}
+            </span>
+          </button>
+        `).join('')}
+      </div>
+
+      <div id="__kb_tp_dev_toggle" style="font-size:.5rem;letter-spacing:.2em;color:rgba(255,255,255,.15);cursor:pointer;margin-bottom:8px;">[ UNLOCK CODE ]</div>
+      <div id="__kb_tp_dev_wrap" style="display:none;margin-bottom:12px;">
+        <input id="__kb_tp_dev_input" placeholder="ENTER CODE" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:8px 14px;color:rgba(255,255,255,.7);font-family:inherit;font-size:.65rem;letter-spacing:.2em;text-align:center;width:100%;box-sizing:border-box;"/>
+        <div id="__kb_tp_dev_submit" style="margin-top:8px;font-size:.55rem;letter-spacing:.2em;color:rgba(255,200,40,.5);cursor:pointer;">SUBMIT</div>
+      </div>
+      <div id="__kb_tp_close" style="font-size:.55rem;letter-spacing:.25em;color:rgba(255,255,255,.2);cursor:pointer;">✕ &nbsp; CLOSE</div>
+    </div>`;
+
+  document.body.appendChild(ov);
+
+  const close = () => ov.remove();
+  ov.querySelector('#__kb_tp_close').addEventListener('click', close);
+  ov.addEventListener('click', e => { if (e.target === ov) close(); });
+
+  /* Dev toggle */
+  ov.querySelector('#__kb_tp_dev_toggle').addEventListener('click', () => {
+    const w = ov.querySelector('#__kb_tp_dev_wrap');
+    w.style.display = w.style.display === 'none' ? 'block' : 'none';
+  });
+  ov.querySelector('#__kb_tp_dev_submit').addEventListener('click', () => {
+    if (ov.querySelector('#__kb_tp_dev_input').value.trim().toUpperCase() === 'KOZMODEV') {
+      localStorage.setItem('__kb_dev', '1');
+      close();
+      showTarotPicker(cardName, allCards);
+    } else {
+      ov.querySelector('#__kb_tp_dev_input').style.borderColor = 'rgba(255,80,80,.5)';
+    }
+  });
+
+  /* Hover effects */
+  ov.querySelectorAll('[data-tier]').forEach(btn => {
+    if (btn.disabled) return;
+    btn.addEventListener('mouseenter', () => btn.style.filter = 'brightness(1.25)');
+    btn.addEventListener('mouseleave', () => btn.style.filter = '');
+  });
+
+  /* Tier selection */
+  ov.querySelectorAll('[data-tier]').forEach(btn => {
+    if (btn.disabled) return;
+    btn.addEventListener('click', () => {
+      const tier = btn.dataset.tier;
+      const isPaid = tier !== 'free';
+
+      if (isPaid && !isDevUnlocked()) {
+        close();
+        showPaywall(tier === 'deep' ? 'tarot-deep' : 'tarot-spread', cardName, 'rgba(255,200,40');
+        return;
+      }
+
+      close();
+
+      if (tier === 'free') {
+        /* Just fire the standard free tarot read */
+        window.__KBLastMode = null;
+        if (window.OracleQuery) window.OracleQuery.submit('tarot card ' + cardName);
+        return;
+      }
+
+      /* Paid — show context question first */
+      showTarotContext(tier, cardName, allCards3);
+    });
+  });
+}
+
+function showTarotContext(tier, cardName, allCards) {
+  const existing = document.getElementById('__kb_tarot_ctx');
+  if (existing) existing.remove();
+
+  const isSpread = tier === 'spread';
+  const ov = document.createElement('div');
+  ov.id = '__kb_tarot_ctx';
+  ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.95);';
+
+  const cardsDisplay = isSpread && allCards
+    ? allCards.map((c,i) => ['PAST','PRESENT','FUTURE'][i] + ': ' + c).join(' · ')
+    : 'Card: ' + cardName;
+
+  ov.innerHTML = `
+    <div style="text-align:center;max-width:420px;width:100%;font-family:'Courier New',monospace;">
+      <div style="font-size:.6rem;letter-spacing:.3em;color:rgba(255,200,40,.5);margin-bottom:8px;">
+        ${isSpread ? '3-CARD SPREAD' : 'DEEP READ'}
+      </div>
+      <div style="font-size:.65rem;letter-spacing:.12em;color:rgba(255,200,40,.6);margin-bottom:20px;">${cardsDisplay}</div>
+      <div style="font-size:1.1rem;color:rgba(255,255,255,.85);letter-spacing:.05em;margin-bottom:8px;line-height:1.5;">
+        What is on your mind<br>right now?
+      </div>
+      <div style="font-size:.6rem;color:rgba(255,255,255,.3);letter-spacing:.1em;margin-bottom:20px;">
+        Bob reads the card specifically for your situation
+      </div>
+      <textarea id="__kb_ctx_input" placeholder="Love, work, a decision, a fear... anything." style="
+        width:100%;box-sizing:border-box;
+        background:rgba(255,255,255,.05);border:1px solid rgba(255,200,40,.3);
+        border-radius:8px;padding:14px;color:rgba(255,255,255,.85);
+        font-family:inherit;font-size:.75rem;letter-spacing:.05em;
+        resize:none;height:90px;outline:none;line-height:1.5;
+      "></textarea>
+      <button id="__kb_ctx_go" style="
+        margin-top:14px;width:100%;padding:14px;border-radius:10px;cursor:pointer;
+        background:rgba(255,200,40,.15);border:1px solid rgba(255,200,40,.5);
+        color:rgba(255,200,40,.9);font-family:inherit;font-size:.75rem;
+        letter-spacing:.2em;transition:all .2s;
+      ">BOB, READ FOR ME</button>
+      <div id="__kb_ctx_skip" style="margin-top:12px;font-size:.52rem;letter-spacing:.2em;color:rgba(255,255,255,.2);cursor:pointer;">SKIP — READ WITHOUT CONTEXT</div>
+      <div id="__kb_ctx_close" style="margin-top:8px;font-size:.52rem;letter-spacing:.25em;color:rgba(255,255,255,.15);cursor:pointer;">✕ CLOSE</div>
+    </div>`;
+
+  document.body.appendChild(ov);
+
+  ov.querySelector('#__kb_ctx_close').addEventListener('click', () => ov.remove());
+
+  const fireRead = (ctx) => {
+    ov.remove();
+    const mode = isSpread ? 'tarot-spread' : 'tarot-deep';
+    window.__KBLastMode = mode;
+
+    let question;
+    if (isSpread && allCards) {
+      question = (ctx ? 'SITUATION: ' + ctx + ' | ' : '') +
+        'PAST CARD: ' + allCards[0] + ' | ' +
+        'PRESENT CARD: ' + allCards[1] + ' | ' +
+        'FUTURE CARD: ' + allCards[2];
+    } else {
+      question = (ctx ? ctx + ' | ' : '') + 'CARD: ' + cardName;
+    }
+
+    /* Send to API directly — bypass normal submit flow */
+    (async () => {
+      if (window.OracleQuery) window.OracleQuery.setState('THINKING');
+      try {
+        const resp = await fetch('/api/bob', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question,
+            sign: window.__KBSign || 'gemini',
+            mode,
+          }),
+        });
+        const data = await resp.json();
+        if (data.lines && data.lines.length) {
+          /* Display the reading in the oracle panel */
+          window.__KBLastMode = mode;
+          if (window.__clearSpread) window.__clearSpread();
+          if (window.OracleQuery) window.OracleQuery.setState('READING');
+          /* Inject lines directly into oracle reading display */
+          const vsect = document.getElementById('oracle-vault-section');
+          const txt   = vsect ? vsect.querySelector('.oracle-lines') || vsect : vsect;
+          if (txt) {
+            txt.innerHTML = '';
+            /* For spread, show card labels */
+            const labels = isSpread ? ['— PAST —','— PRESENT —','— FUTURE —'] : [];
+            let linesPerCard = isSpread ? Math.ceil(data.lines.length / 3) : data.lines.length;
+            data.lines.forEach((line, i) => {
+              if (isSpread && i % linesPerCard === 0 && labels[Math.floor(i/linesPerCard)]) {
+                const lbl = document.createElement('div');
+                lbl.style.cssText = 'font-size:.55rem;letter-spacing:.3em;color:rgba(255,200,40,.4);text-align:center;margin:14px 0 6px;';
+                lbl.textContent = labels[Math.floor(i/linesPerCard)];
+                txt.appendChild(lbl);
+              }
+              const sp = document.createElement('span');
+              sp.className = 'oracle-line';
+              sp.textContent = line;
+              txt.appendChild(sp);
+            });
+          }
+        }
+      } catch(e) {
+        if (window.OracleQuery) window.OracleQuery.setState('IDLE');
+      }
+    })();
+  };
+
+  ov.querySelector('#__kb_ctx_go').addEventListener('click', () => {
+    const ctx = ov.querySelector('#__kb_ctx_input').value.trim();
+    fireRead(ctx);
+  });
+  ov.querySelector('#__kb_ctx_skip').addEventListener('click', () => fireRead(''));
+
+  /* Go on Enter */
+  ov.querySelector('#__kb_ctx_input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); fireRead(e.target.value.trim()); }
+  });
+
+  /* Focus input */
+  setTimeout(() => ov.querySelector('#__kb_ctx_input').focus(), 100);
+}
 
 /* ── 12b. READING PICKER — daily free / weekly monthly yearly paid ── */
 function showReadingPicker(sign, r, g, b) {
