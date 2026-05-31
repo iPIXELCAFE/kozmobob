@@ -2781,10 +2781,14 @@ const OracleQuery = (() => {
   async function fetchAILines(q) {
     const qLow = q.toLowerCase().trim();
     const isHoroscope = SIGN_NAMES.has(qLow);
-    const mode = isHoroscope ? 'horoscope' : /^tarot/i.test(q) ? 'tarot' : 'oracle';
+    /* Allow reading picker to override mode */
+    const pickerMode = window.__KBReadingMode;
+    if (pickerMode) window.__KBReadingMode = null; /* consume it */
+    const mode = pickerMode || (isHoroscope ? 'horoscope' : /^tarot/i.test(q) ? 'tarot' : 'oracle');
+    const modeLabels = { weekly: 'weekly', monthly: 'monthly', yearly: 'yearly' };
     /* For zodiac clicks, send a real horoscope question */
     const question = isHoroscope
-      ? `Give ${qLow} a powerful, specific daily horoscope reading for today. What do they need to hear right now?`
+      ? (modeLabels[mode] ? `Give ${qLow} a powerful, specific ${mode} reading. What do they need to know?` : `Give ${qLow} a powerful, specific daily horoscope reading for today. What do they need to hear right now?`)
       : q;
     try {
       const res = await Promise.race([
@@ -3182,7 +3186,8 @@ const OracleQuery = (() => {
       el.style.background=`rgba(${r},${g},${b},.13)`;
       /* Lock billboard to this sign's color for the duration of the reading */
       if (window.Billboard) window.Billboard.setAccentColor(r/255, g/255, b/255);
-      (window.OracleQuery ? window.OracleQuery.submit : OracleQuery.submit)(s.n.toLowerCase());
+      /* Show reading picker — daily free, paid tiers locked */
+      showReadingPicker(s.n.toLowerCase(), r, g, b);
     });
 
     ring.appendChild(el);
@@ -4759,6 +4764,144 @@ const OracleQuery = (() => {
   /* Wait for Mini Bob to init */
   setTimeout(patchDraw, 2000);
 })();
+
+/* ── 12b. READING PICKER — daily free / weekly monthly yearly paid ── */
+function showReadingPicker(sign, r, g, b) {
+  const existing = document.getElementById('__kb_picker');
+  if (existing) existing.remove();
+
+  const col = `rgba(${r},${g},${b}`;
+  const signUp = sign.charAt(0).toUpperCase() + sign.slice(1);
+
+  /* Dev unlock — enter KOZMODEV to test paid readings without Stripe */
+  const DEV_CODE = 'KOZMODEV';
+  const isDevUnlocked = () => localStorage.getItem('__kb_dev') === '1';
+
+  const tiers = [
+    { id: 'daily',   label: 'DAILY',   price: 'FREE',   mode: 'horoscope', lines: '4 lines',  paid: false },
+    { id: 'weekly',  label: 'WEEKLY',  price: '$1.99',  mode: 'weekly',    lines: '6 lines',  paid: true  },
+    { id: 'monthly', label: 'MONTHLY', price: '$4.99',  mode: 'monthly',   lines: '5 sections', paid: true },
+    { id: 'yearly',  label: 'YEARLY',  price: '$9.99',  mode: 'yearly',    lines: '8 sections', paid: true },
+  ];
+
+  const ov = document.createElement('div');
+  ov.id = '__kb_picker';
+  ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.88);backdrop-filter:blur(6px);';
+
+  ov.innerHTML = `
+    <div style="text-align:center;max-width:400px;width:100%;font-family:'Courier New',monospace;">
+      <div style="font-size:.65rem;letter-spacing:.3em;color:${col},.5);margin-bottom:6px;">KOZMO BOB READS</div>
+      <div style="font-size:1.6rem;letter-spacing:.15em;color:${col},.95);text-shadow:0 0 20px ${col},.4);margin-bottom:4px;">${signUp.toUpperCase()}</div>
+      <div style="font-size:.55rem;letter-spacing:.2em;color:rgba(255,255,255,.25);margin-bottom:24px;">CHOOSE YOUR READING</div>
+
+      <div id="__kb_tier_btns" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+        ${tiers.map(t => `
+          <button data-mode="${t.mode}" data-paid="${t.paid}" style="
+            display:flex;align-items:center;justify-content:space-between;
+            padding:14px 20px;border-radius:10px;cursor:pointer;
+            background:${t.paid && !isDevUnlocked() ? 'rgba(255,255,255,.04)' : `${col},.12)`};
+            border:1px solid ${t.paid && !isDevUnlocked() ? 'rgba(255,255,255,.12)' : `${col},.45)`};
+            color:${t.paid && !isDevUnlocked() ? 'rgba(255,255,255,.35)' : `${col},.9)`};
+            font-family:inherit;transition:all .2s;
+          ">
+            <span style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:.7rem;letter-spacing:.2em;">${t.label}</span>
+              <span style="font-size:.55rem;opacity:.6;">${t.lines}</span>
+            </span>
+            <span style="font-size:.7rem;letter-spacing:.1em;">
+              ${t.paid && !isDevUnlocked() ? '🔒 ' : ''}${t.price}
+            </span>
+          </button>
+        `).join('')}
+      </div>
+
+      <div id="__kb_dev_section" style="margin-bottom:16px;">
+        <div id="__kb_dev_toggle" style="font-size:.5rem;letter-spacing:.2em;color:rgba(255,255,255,.15);cursor:pointer;margin-bottom:8px;">[ UNLOCK CODE ]</div>
+        <div id="__kb_dev_input_wrap" style="display:none;">
+          <input id="__kb_dev_input" placeholder="ENTER CODE" style="
+            background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);
+            border-radius:6px;padding:8px 14px;color:rgba(255,255,255,.7);
+            font-family:inherit;font-size:.65rem;letter-spacing:.2em;text-align:center;width:100%;box-sizing:border-box;
+          "/>
+          <div id="__kb_dev_submit" style="margin-top:8px;font-size:.55rem;letter-spacing:.2em;color:rgba(255,200,40,.5);cursor:pointer;">SUBMIT</div>
+        </div>
+      </div>
+
+      <div id="__kb_picker_close" style="font-size:.55rem;letter-spacing:.25em;color:rgba(255,255,255,.2);cursor:pointer;">✕ &nbsp; CLOSE</div>
+    </div>`;
+
+  document.body.appendChild(ov);
+
+  const close = () => ov.remove();
+  ov.querySelector('#__kb_picker_close').addEventListener('click', close);
+  ov.addEventListener('click', e => { if (e.target === ov) close(); });
+
+  /* Dev code toggle */
+  ov.querySelector('#__kb_dev_toggle').addEventListener('click', () => {
+    const wrap = ov.querySelector('#__kb_dev_input_wrap');
+    wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+  });
+
+  ov.querySelector('#__kb_dev_submit').addEventListener('click', () => {
+    const val = ov.querySelector('#__kb_dev_input').value.trim().toUpperCase();
+    if (val === DEV_CODE) {
+      localStorage.setItem('__kb_dev', '1');
+      close();
+      showReadingPicker(sign, r, g, b); /* reopen with paid unlocked */
+    } else {
+      ov.querySelector('#__kb_dev_input').style.borderColor = 'rgba(255,80,80,.5)';
+    }
+  });
+
+  /* Tier button clicks */
+  ov.querySelectorAll('[data-mode]').forEach(btn => {
+    btn.addEventListener('mouseenter', () => {
+      btn.style.filter = 'brightness(1.2)';
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.filter = '';
+    });
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.mode;
+      const isPaid = btn.dataset.paid === 'true';
+
+      if (isPaid && !isDevUnlocked()) {
+        /* Stripe not yet wired — show coming soon */
+        showPaywall(mode, sign, col);
+        close();
+        return;
+      }
+
+      close();
+      /* Build question and submit with correct mode */
+      const question = 'Give ' + sign + ' a ' + mode + ' reading.';
+      /* Temporarily override fetchAILines mode by injecting into window */
+      window.__KBReadingMode = mode;
+      if (window.OracleQuery) window.OracleQuery.submit(sign);
+    });
+  });
+}
+
+function showPaywall(mode, sign, col) {
+  const existing = document.getElementById('__kb_paywall');
+  if (existing) existing.remove();
+  const labels = { weekly: 'WEEKLY — $1.99', monthly: 'MONTHLY — $4.99', yearly: 'YEARLY — $9.99' };
+  const ov = document.createElement('div');
+  ov.id = '__kb_paywall';
+  ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.92);';
+  ov.innerHTML = `
+    <div style="text-align:center;font-family:'Courier New',monospace;max-width:340px;">
+      <div style="font-size:2.5rem;margin-bottom:16px;">✦</div>
+      <div style="font-size:.8rem;letter-spacing:.2em;color:rgba(255,200,40,.9);margin-bottom:10px;">${labels[mode]}</div>
+      <div style="font-size:.65rem;letter-spacing:.1em;color:rgba(255,255,255,.45);margin-bottom:28px;">PAYMENTS COMING SOON</div>
+      <div style="font-size:.55rem;color:rgba(255,255,255,.2);letter-spacing:.1em;margin-bottom:24px;">Bob is getting his payment terminal ready.<br>Check back soon.</div>
+      <div id="__kb_pw_close" style="font-size:.55rem;letter-spacing:.25em;color:rgba(255,200,40,.4);cursor:pointer;">✕ &nbsp; CLOSE</div>
+    </div>`;
+  document.body.appendChild(ov);
+  ov.querySelector('#__kb_pw_close').addEventListener('click', () => ov.remove());
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  setTimeout(() => ov.remove(), 6000);
+}
 
 /* ── 13. READING LIMIT — 1 horoscope + 1 question free per day ── */
 (function(){
