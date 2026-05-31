@@ -1023,42 +1023,43 @@ html,body{
   box-shadow:0 8px 30px rgba(255,200,20,.42),0 0 44px rgba(255,200,20,.10);
 }
 
-.aslot-num{font-size:11px;letter-spacing:.20em;color:rgba(255,175,40,.65);text-transform:uppercase;}
+.aslot-num{font-size:13px;letter-spacing:.18em;color:rgba(255,175,40,.8);text-transform:uppercase;}
 .aslot.unknown .aslot-num{color:rgba(255,255,255,.07);}
 
-.aslot-glyph{font-size:42px;line-height:1;}
+.aslot-glyph{font-size:58px;line-height:1;}
 .aslot.unknown .aslot-glyph{color:rgba(255,255,255,.05);filter:blur(1.5px);}
 .aslot.collected .aslot-glyph{animation:aslotGlow 3s ease-in-out infinite;}
 .aslot.rare.collected .aslot-glyph{animation:aslotGlowRare 2.2s ease-in-out infinite;}
-@keyframes aslotGlow{0%,100%{filter:drop-shadow(0 0 5px currentColor);}50%{filter:drop-shadow(0 0 14px currentColor);}}
-@keyframes aslotGlowRare{0%,100%{filter:drop-shadow(0 0 8px gold) drop-shadow(0 0 18px gold);}50%{filter:drop-shadow(0 0 20px gold) drop-shadow(0 0 38px rgba(255,200,0,.5));}}
+@keyframes aslotGlow{0%,100%{filter:drop-shadow(0 0 6px currentColor);}50%{filter:drop-shadow(0 0 18px currentColor);}}
+@keyframes aslotGlowRare{0%,100%{filter:drop-shadow(0 0 10px gold) drop-shadow(0 0 22px gold);}50%{filter:drop-shadow(0 0 26px gold) drop-shadow(0 0 48px rgba(255,200,0,.5));}}
 
-.aslot-div{width:65%;height:1px;background:linear-gradient(to right,transparent,rgba(255,175,40,.42),transparent);}
+.aslot-div{width:70%;height:1px;background:linear-gradient(to right,transparent,rgba(255,175,40,.55),transparent);margin:2px 0;}
 .aslot.unknown .aslot-div{background:linear-gradient(to right,transparent,rgba(255,255,255,.04),transparent);}
 
 .aslot-name{
-  font-family:'Georgia',serif;font-size:16px;letter-spacing:.03em;
-  color:rgba(255,222,105,.95);text-align:center;line-height:1.25;
+  font-family:'Georgia',serif;font-size:18px;letter-spacing:.04em;
+  color:rgba(255,222,105,.98);text-align:center;line-height:1.2;
+  text-shadow:0 0 12px rgba(255,200,40,.35);
 }
-.aslot.unknown .aslot-name{color:rgba(255,255,255,.07);}
-.aslot-key{font-size:11px;letter-spacing:.18em;color:rgba(200,172,255,.85);text-transform:uppercase;}
+.aslot.unknown .aslot-name{color:rgba(255,255,255,.07);text-shadow:none;}
+.aslot-key{font-size:12px;letter-spacing:.22em;color:rgba(200,172,255,.9);text-transform:uppercase;}
 .aslot.unknown .aslot-key{color:rgba(255,255,255,.05);}
 
 .aslot-pull-count{
-  position:absolute;top:4px;left:4px;
-  font-size:.26rem;letter-spacing:1px;
-  color:rgba(255,200,40,.70);
-  background:rgba(255,200,40,.08);
-  border:1px solid rgba(255,200,40,.20);
-  border-radius:3px;padding:1px 4px;
+  position:absolute;top:5px;left:5px;
+  font-size:.32rem;letter-spacing:1.5px;
+  color:rgba(255,200,40,.85);
+  background:rgba(255,200,40,.12);
+  border:1px solid rgba(255,200,40,.30);
+  border-radius:4px;padding:2px 6px;
 }
 .aslot-rare-badge{
-  position:absolute;top:4px;right:4px;
-  font-size:.24rem;letter-spacing:1.5px;
-  color:rgba(255,215,0,.80);text-transform:uppercase;
-  background:rgba(255,180,0,.10);
-  border:1px solid rgba(255,215,0,.22);
-  border-radius:3px;padding:1px 4px;
+  position:absolute;top:5px;right:5px;
+  font-size:.32rem;letter-spacing:1.5px;
+  color:rgba(255,215,0,.95);text-transform:uppercase;
+  background:rgba(255,180,0,.15);
+  border:1px solid rgba(255,215,0,.40);
+  border-radius:4px;padding:2px 6px;
 }
 
 /* ── Download / print button inside album ── */
