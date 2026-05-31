@@ -1663,7 +1663,8 @@ window.__KB = (() => {
 
   const save = () => { try { localStorage.setItem('__kb', JSON.stringify(s)); } catch(e){} };
 
-  /* Migrate old array format to count object — runs on every load */
+  /* v2 migration: wipe old 22-card collection, start fresh with 78-card deck */
+  if(s.cardVer !== 2){ s.cards = {}; s.cardVer = 2; save(); }
   if(!s.cards) s.cards = {};
   if(Array.isArray(s.cards)){
     const arr = s.cards;
@@ -3756,30 +3757,15 @@ const OracleQuery = (() => {
 
 /* ── 7. MINI BOB — right-side oracle sphere, slow top-to-bottom patrol ── */
 (function(){
-  const DECK = [
-    {n:'The Star',         k:'HOPE',        r:'XVII',  g:'✦'},
-    {n:'The Moon',         k:'MYSTERY',     r:'XVIII', g:'☽'},
-    {n:'The Sun',          k:'JOY',         r:'XIX',   g:'☀'},
-    {n:'The World',        k:'COMPLETION',  r:'XXI',   g:'⊕'},
-    {n:'The Fool',         k:'NEW PATH',    r:'0',     g:'◈'},
-    {n:'The Magician',     k:'POWER',       r:'I',     g:'⚡'},
-    {n:'High Priestess',   k:'INTUITION',   r:'II',    g:'☽'},
-    {n:'The Empress',      k:'ABUNDANCE',   r:'III',   g:'♀'},
-    {n:'The Emperor',      k:'AUTHORITY',   r:'IV',    g:'♦'},
-    {n:'The Hierophant',   k:'TRADITION',   r:'V',     g:'✝'},
-    {n:'The Lovers',       k:'UNION',       r:'VI',    g:'♡'},
-    {n:'The Chariot',      k:'VICTORY',     r:'VII',   g:'⊗'},
-    {n:'Strength',         k:'COURAGE',     r:'VIII',  g:'∞'},
-    {n:'The Hermit',       k:'REFLECTION',  r:'IX',    g:'◎'},
-    {n:'Wheel of Fortune', k:'DESTINY',     r:'X',     g:'☸'},
-    {n:'Justice',          k:'BALANCE',     r:'XI',    g:'⚖'},
-    {n:'The Hanged Man',   k:'SURRENDER',   r:'XII',   g:'⊥'},
-    {n:'Death',            k:'TRANSITION',  r:'XIII',  g:'☠'},
-    {n:'The Tower',        k:'REVELATION',  r:'XVI',   g:'⚡'},
-    {n:'The Devil',        k:'FREEDOM',     r:'XV',    g:'Δ'},
-    {n:'Temperance',       k:'PATIENCE',    r:'XIV',   g:'∿'},
-    {n:'Judgement',        k:'REBIRTH',     r:'XX',    g:'◉'},
-  ];
+  /* Pull uses the shared 78-card FULL_DECK (defined in album section below).
+     Weighted random: rare cards (14) = weight 0.25, common (64) = weight 1.0
+     → ~5% chance per pull to land on any rare card. */
+  function weightedPick(deck){
+    const total = deck.reduce((s,c) => s + (c.rare ? 0.25 : 1), 0);
+    let r = Math.random() * total;
+    for(const c of deck){ r -= c.rare ? 0.25 : 1; if(r <= 0) return c; }
+    return deck[deck.length-1];
+  }
 
   const mbWrap   = document.getElementById('mini-bob-wrap');
   const mbRend   = document.getElementById('mini-bob-renderer');
@@ -3951,7 +3937,7 @@ const OracleQuery = (() => {
       return;
     }
     cooldown = true;
-    const card = DECK[Math.floor(Math.random()*DECK.length)];
+    const card = weightedPick(FULL_DECK);
     drawnCardName = card.n;
     window.__KB.addCard(card.n);                       /* save to collection */
     if(window.__KBAlbum) window.__KBAlbum.refresh();   /* live-update album if open */
