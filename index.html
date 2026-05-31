@@ -921,8 +921,96 @@ html,body{
 }
 #kb-sound-btn:hover{color:rgba(255,200,40,.95);border-color:rgba(255,200,40,.6);}
 #kb-sound-btn.muted{color:rgba(255,255,255,.2);border-color:rgba(255,255,255,.1);}
+#kb-weekly-btn{
+  position:fixed;left:14px;bottom:88px;
+  z-index:18;width:200px;
+  background:rgba(0,0,0,.88);
+  border:1px solid rgba(180,120,255,.3);
+  border-radius:24px;padding:10px 0;
+  font-family:'Courier New',monospace;
+  font-size:.62rem;letter-spacing:2.5px;
+  color:rgba(180,120,255,.7);text-align:center;
+  cursor:pointer;pointer-events:all;
+  transition:border-color .25s,color .25s;
+  display:none;
+}
+#kb-weekly-btn:hover{border-color:rgba(180,120,255,.65);color:rgba(200,150,255,.98);}
+@media(max-width:900px){
+  #kb-weekly-btn{position:fixed;bottom:152px;left:4px;width:calc(50vw - 8px);padding:9px 0;}
+}
+#kb-compat-btn{
+  position:fixed;bottom:80px;right:14px;
+  z-index:18;
+  width:44px;height:44px;border-radius:50%;
+  background:rgba(0,0,0,.88);
+  border:1px solid rgba(255,120,180,.3);
+  color:rgba(255,120,180,.6);
+  font-size:1.1rem;cursor:pointer;
+  transition:color .2s,border-color .2s;
+  pointer-events:all;
+  display:flex;align-items:center;justify-content:center;
+}
+#kb-compat-btn:hover{color:rgba(255,160,200,.95);border-color:rgba(255,120,180,.7);}
+/* Compat overlay */
+#kb-compat-overlay{
+  position:fixed;inset:0;z-index:99970;
+  background:rgba(0,0,0,.75);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s;
+}
+#kb-compat-overlay.visible{opacity:1;pointer-events:all;}
+#kb-compat-panel{
+  position:relative;
+  width:min(340px,88vw);
+  background:rgba(0,0,0,.96);
+  border:1px solid rgba(255,120,180,.3);
+  border-radius:18px;
+  padding:36px 28px 28px;
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+}
+#kb-compat-close{
+  position:absolute;top:12px;right:14px;
+  background:none;border:none;
+  color:rgba(255,255,255,.25);font-family:'Courier New',monospace;
+  font-size:.7rem;letter-spacing:2px;cursor:pointer;
+}
+#kb-compat-close:hover{color:rgba(255,255,255,.6);}
+#kb-compat-title{
+  font-family:'Courier New',monospace;font-size:.75rem;letter-spacing:4px;
+  color:rgba(255,120,180,.85);
+}
+#kb-compat-sub{
+  font-family:'Courier New',monospace;font-size:.58rem;letter-spacing:1.5px;
+  color:rgba(255,255,255,.3);text-align:center;line-height:1.6;
+}
+#kb-compat-a, #kb-compat-b{
+  width:100%;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,120,180,.2);border-radius:10px;
+  padding:11px 14px;
+  font-family:'Courier New',monospace;font-size:.72rem;letter-spacing:2px;
+  color:rgba(255,255,255,.85);
+  outline:none;text-align:center;
+  transition:border-color .2s;
+}
+#kb-compat-a:focus,#kb-compat-b:focus{border-color:rgba(255,120,180,.55);}
+#kb-compat-and{
+  font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:3px;
+  color:rgba(255,120,180,.35);
+}
+#kb-compat-go{
+  width:100%;margin-top:6px;
+  background:rgba(255,120,180,.1);
+  border:1px solid rgba(255,120,180,.35);border-radius:24px;
+  padding:12px 0;
+  font-family:'Courier New',monospace;font-size:.62rem;letter-spacing:2.5px;
+  color:rgba(255,120,180,.85);cursor:pointer;
+  transition:background .2s,border-color .2s,color .2s;
+}
+#kb-compat-go:hover{background:rgba(255,120,180,.2);border-color:rgba(255,120,180,.65);color:rgba(255,160,200,.98);}
 @media(max-width:900px){
   #kb-sound-btn{bottom:104px;right:4px;}
+  #kb-compat-btn{bottom:156px;right:4px;}
 }
 @media(max-width:900px){
   #album-btn{
@@ -1079,6 +1167,16 @@ html,body{
   border-radius:4px;padding:3px 7px;
   text-shadow:0 0 8px rgba(255,200,0,.6);
 }
+.aslot-convert-btn{
+  position:absolute;bottom:6px;left:50%;transform:translateX(-50%);
+  font-size:8px;letter-spacing:1.2px;font-family:'Courier New',monospace;
+  color:rgba(140,220,255,.85);white-space:nowrap;
+  background:rgba(0,180,255,.12);
+  border:1px solid rgba(0,200,255,.35);
+  border-radius:4px;padding:3px 8px;cursor:pointer;z-index:10;
+  transition:background .2s,border-color .2s;
+}
+.aslot-convert-btn:hover{background:rgba(0,200,255,.25);border-color:rgba(0,220,255,.65);}
 
 /* ── Download / print button inside album ── */
 #album-actions{
@@ -1417,8 +1515,25 @@ select.adv-input option{background:#111;}
 <!-- ── COLLECTION ALBUM BUTTON ── -->
 <button id="album-btn">✦ MY CARDS <span id="album-count"></span></button>
 <button id="readings-btn" style="display:none;">✦ MY READINGS</button>
+<!-- ── WEEKLY READING BUTTON ── -->
+<button id="kb-weekly-btn" title="This week's collective reading">✦ THIS WEEK</button>
+<!-- ── COMPATIBILITY READING BUTTON ── -->
+<button id="kb-compat-btn" title="Compatibility reading">♡</button>
 <!-- ── SOUND TOGGLE ── -->
 <button id="kb-sound-btn" title="Toggle sound">♪</button>
+
+<!-- ── COMPATIBILITY READING OVERLAY ── -->
+<div id="kb-compat-overlay">
+  <div id="kb-compat-panel">
+    <button id="kb-compat-close">✕</button>
+    <div id="kb-compat-title">✦ COMPATIBILITY</div>
+    <div id="kb-compat-sub">Enter two names. Bob reads the energy between them.</div>
+    <input id="kb-compat-a" type="text" placeholder="First name" maxlength="30" autocomplete="off" spellcheck="false"/>
+    <div id="kb-compat-and">and</div>
+    <input id="kb-compat-b" type="text" placeholder="Second name" maxlength="30" autocomplete="off" spellcheck="false"/>
+    <button id="kb-compat-go">✦ READ THE ENERGY</button>
+  </div>
+</div>
 
 <!-- ── COLLECTION ALBUM OVERLAY ── -->
 <div id="album-overlay">
@@ -1662,6 +1777,7 @@ select.adv-input option{background:#111;}
 /* ══════════════════════════════════════════════════════════════
    KB — KozmoBob global state: domain, free limits, streaks, cards
    ══════════════════════════════════════════════════════════════ */
+window.CARD_BACK_TEXT_EXT = {}; /* extended lore for seasonal cards */
 window.__KB = (() => {
   /* Domain detection — kozmobob.com vs kosmobob.com (no z) */
   const host = window.location.hostname;
@@ -1734,6 +1850,15 @@ window.__KB = (() => {
     },
     getCards:    ()  => Object.keys(s.cards||{}),
     getCardCount:(c) => (s.cards||{})[c] || 0,
+    convertCard: (c) => {
+      /* Spend 3 copies of a card → earn 1 bonus pull */
+      if((s.cards[c]||0) < 3) return false;
+      s.cards[c] -= 3;
+      if(s.cards[c] <= 0) delete s.cards[c];
+      s.bonusPulls = (s.bonusPulls||0) + 1;
+      save();
+      return true;
+    },
     streak:      ()  => s.streak||1,
     joined:      ()  => s.joined||today(),
     pullsLeft:   ()  => Math.max(0, pullLimit() - (s.pulls||0)),
@@ -2948,6 +3073,22 @@ const OracleQuery = (() => {
         onDone();
         /* Auto-save reading to KV */
         const _cleanLines = lines.filter(l => !l.startsWith('__SPONSOR__') && !l.startsWith('__LABEL__'));
+        /* ── Share reading button ── */
+        setTimeout(() => {
+          if(document.getElementById('kb-oracle-share-btn')) return; /* don't double-add */
+          const shareBtn = document.createElement('button');
+          shareBtn.id = 'kb-oracle-share-btn';
+          shareBtn.textContent = '✦ SHARE THIS READING';
+          shareBtn.style.cssText = 'display:block;margin:18px auto 0;background:none;border:1px solid rgba(255,200,40,.3);border-radius:20px;padding:7px 20px;font-family:Courier New,monospace;font-size:.58rem;letter-spacing:2px;color:rgba(255,200,40,.55);cursor:pointer;transition:color .2s,border-color .2s;';
+          shareBtn.addEventListener('mouseenter',()=>{shareBtn.style.color='rgba(255,200,40,.95)';shareBtn.style.borderColor='rgba(255,200,40,.7)';});
+          shareBtn.addEventListener('mouseleave',()=>{shareBtn.style.color='rgba(255,200,40,.55)';shareBtn.style.borderColor='rgba(255,200,40,.3)';});
+          shareBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            if(window.__KBShareReading) window.__KBShareReading(q, _cleanLines);
+          });
+          txt.appendChild(shareBtn);
+          ctr.scrollTop = ctr.scrollHeight;
+        }, 700);
         /* Paid tarot reads store their own save info */
         if (window.__KBPaidReadSave) {
           const _prs = window.__KBPaidReadSave;
@@ -3796,9 +3937,11 @@ const OracleQuery = (() => {
      → ~5% chance per pull to land on any rare card. */
   function weightedPick(){
     const deck = window.FULL_DECK || [];
-    const total = deck.reduce((s,c) => s + (c.rare ? 0.25 : 1), 0);
+    /* seasonal = 0.08, rare = 0.25, common = 1.0 */
+    const w = c => c.seasonal ? 0.08 : c.rare ? 0.25 : 1;
+    const total = deck.reduce((s,c) => s + w(c), 0);
     let r = Math.random() * total;
-    for(const c of deck){ r -= c.rare ? 0.25 : 1; if(r <= 0) return c; }
+    for(const c of deck){ r -= w(c); if(r <= 0) return c; }
     return deck[deck.length-1];
   }
 
@@ -5477,7 +5620,46 @@ function showPaywall(mode, sign, col) {
     {n:'Queen of Pentacles',  k:'NURTURING',  r:'P·Q',  g:'🌿', rare:true },
     {n:'King of Pentacles',   k:'WEALTH',     r:'P·K',  g:'🌿', rare:true },
   ];
-  const TOTAL = FULL_DECK.length; // 78
+
+  /* ── Seasonal limited cards — injected only during their window ── */
+  (function(){
+    const now = new Date();
+    const mo  = now.getMonth() + 1; /* 1-12 */
+    const dy  = now.getDate();
+    const inRange = (m1,d1,m2,d2) => {
+      const n = mo*100+dy, s = m1*100+d1, e = m2*100+d2;
+      return s<=e ? (n>=s && n<=e) : (n>=s || n<=e); /* handles year-wrap */
+    };
+    const SEASONAL = [
+      { n:'The Harvest',   k:'ABUNDANCE',  r:'☽·H', g:'🎃', rare:true, seasonal:true,
+        window:[10,1,10,31],
+        lore:'The veil is at its thinnest. What was hidden all year comes forward now. Listen differently tonight.' },
+      { n:'The Veil',      k:'BETWEEN',    r:'☽·V', g:'👁', rare:true, seasonal:true,
+        window:[10,25,11,5],
+        lore:'Two worlds overlap. The messages you receive in the next days are not coincidences.' },
+      { n:'The Solstice',  k:'STILLNESS',  r:'☽·S', g:'❄', rare:true, seasonal:true,
+        window:[12,19,1,3],
+        lore:'The longest night holds the most light inside it. What you begin in the dark takes root by spring.' },
+      { n:'The Reborn',    k:'RENEWAL',    r:'☽·R', g:'🌱', rare:true, seasonal:true,
+        window:[3,18,4,1],
+        lore:'Everything that died in winter was practicing. The version of you emerging now has learned from all of it.' },
+      { n:'The Zenith',    k:'POWER',      r:'☽·Z', g:'☀', rare:true, seasonal:true,
+        window:[6,18,7,5],
+        lore:'At the peak of the year, your energy is at its peak too. This is the moment to act on what you have been carrying.' },
+      { n:'The Eclipse',   k:'SHIFT',      r:'☽·E', g:'🌑', rare:true, seasonal:true,
+        window:[3,20,3,26],
+        lore:'An eclipse does not destroy the light — it reveals what was always behind it. What is being revealed to you now?' },
+    ];
+    SEASONAL.forEach(card => {
+      if(inRange(...card.window)){
+        FULL_DECK.push(card);
+        /* Also add lore */
+        if(window.CARD_BACK_TEXT_EXT) window.CARD_BACK_TEXT_EXT[card.n] = card.lore;
+      }
+    });
+  })();
+
+  const TOTAL = FULL_DECK.length; // 78 + active seasonal cards
 
   const overlay   = document.getElementById('album-overlay');
   const grid      = document.getElementById('album-grid');
@@ -5518,11 +5700,14 @@ function showPaywall(mode, sign, col) {
         const glyphColor = card.rare ? 'gold' : 'rgba(255,175,40,.90)';
         const pullCount = window.__KB ? window.__KB.getCardCount(card.n) : 0;
         const countBadge = pullCount > 1 ? `<div class="aslot-pull-count">×${pullCount}</div>` : '';
-        const meaning = CARD_BACK_TEXT[card.n] || (card.k + '. This card carries a truth you already know.');
+        const canConvert = pullCount >= 3;
+        const convertBadge = canConvert ? `<div class="aslot-convert-btn" data-card="${card.n.replace(/"/g,'&quot;')}">⇌ CONVERT ×3</div>` : '';
+        const meaning = CARD_BACK_TEXT[card.n] || (window.CARD_BACK_TEXT_EXT && window.CARD_BACK_TEXT_EXT[card.n]) || (card.k + '. This card carries a truth you already know.');
         slot.innerHTML = `<div class="aslot-flip">
           <div class="aslot-face front">
             ${card.rare ? '<div class="aslot-rare-badge">RARE</div>' : ''}
             ${countBadge}
+            ${convertBadge}
             <div class="aslot-num">${card.r}</div>
             <div class="aslot-glyph" style="color:${glyphColor}">${card.g}</div>
             <div class="aslot-div"></div>
@@ -5537,6 +5722,24 @@ function showPaywall(mode, sign, col) {
             <div class="aslot-back-key">${card.k}</div>
           </div>
         </div>`;
+        /* Convert button intercepts click before flip */
+        if(canConvert){
+          const cvtBtn = slot.querySelector('.aslot-convert-btn');
+          if(cvtBtn) cvtBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const ok = window.__KB && window.__KB.convertCard(card.n);
+            if(ok){
+              if(window.__KBAlbum) window.__KBAlbum.refresh();
+              /* Toast */
+              const toast = document.createElement('div');
+              toast.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.92);border:1px solid rgba(0,200,255,.4);border-radius:24px;padding:12px 24px;z-index:99995;font-family:Courier New,monospace;font-size:.62rem;letter-spacing:2px;color:rgba(0,200,255,.9);text-align:center;pointer-events:none;opacity:0;transition:opacity .4s;white-space:nowrap;';
+              toast.textContent = '⇌ CONVERTED — 1 BONUS PULL EARNED';
+              document.body.appendChild(toast);
+              setTimeout(()=>toast.style.opacity='1',50);
+              setTimeout(()=>{ toast.style.opacity='0'; setTimeout(()=>toast.remove(),500); },3500);
+            }
+          });
+        }
         slot.addEventListener('click', (e) => {
           e.stopPropagation();
           const flipEl = slot.querySelector('.aslot-flip');
@@ -6827,24 +7030,22 @@ document.addEventListener('keydown',     boot, { once: true });
   if(payBtn){
     payBtn.onclick = function(){
       const biz     = (document.getElementById('advert-biz')||{}).value||'';
-      const msgTxt  = (document.getElementById('advert-msg')||{}).value||'';
-      const urlVal  = (document.getElementById('advert-url')||{}).value||'';
       const subEl   = document.getElementById('advert-success-msg');
       const succDiv = document.getElementById('advert-success');
       const frmDiv  = document.getElementById('advert-form-body');
       const shareUrl = 'https://www.kozmobob.com';
       if(frmDiv) frmDiv.style.display = 'none';
-      if(succDiv){ succDiv.style.display='block'; }
+      if(succDiv) succDiv.style.display = 'block';
       if(selBill==='right'){
         if(subEl) subEl.innerHTML =
-          '✦ <b>'+(biz.trim()||'Your ad')+'</b> — Premium slot booked.<br>Goes live at your scheduled time.'
+          '\u2726 <b>'+(biz.trim()||'Your ad')+'</b> — Premium slot booked.<br>Goes live at your scheduled time.'
           +'<br><br><div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:12px;">'
           +'<a href="sms:?body='+encodeURIComponent(shareUrl)+'" style="font-family:Courier New,monospace;font-size:.62rem;letter-spacing:1.5px;color:rgba(0,207,255,.9);border:1px solid rgba(0,207,255,.4);border-radius:20px;padding:8px 16px;text-decoration:none;">SMS</a>'
           +'<a href="mailto:?subject=A message for you&body='+encodeURIComponent(shareUrl)+'" style="font-family:Courier New,monospace;font-size:.62rem;letter-spacing:1.5px;color:rgba(255,200,40,.9);border:1px solid rgba(255,200,40,.4);border-radius:20px;padding:8px 16px;text-decoration:none;">Email</a>'
           +'</div>';
       } else {
         const dur = selHours===1?'1 hour':selHours+' hours';
-        if(subEl) subEl.innerHTML = '✦ <b>'+(biz.trim()||'Your ad')+'</b> is now in the queue.<br>Goes live when it\'s your turn. Duration: '+dur+'.';
+        if(subEl) subEl.innerHTML = '\u2726 <b>'+(biz.trim()||'Your ad')+'</b> is now in the queue.<br>Goes live when it\'s your turn. Duration: '+dur+'.';
         setTimeout(()=>{
           const ov3 = overlay||document.getElementById('advert-overlay');
           if(ov3) ov3.classList.remove('visible');
@@ -6858,184 +7059,323 @@ document.addEventListener('keydown',     boot, { once: true });
 </script>
 
 <script>
+/* Seasonal card lore + global init */
+window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
+
+/* ── WEEKLY COLLECTIVE READING ── */
+(function(){
+  const btn = document.getElementById('kb-weekly-btn');
+  if(!btn) return;
+  function isoWeek(d){
+    const date = new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+    date.setUTCDate(date.getUTCDate()+4-(date.getUTCDay()||7));
+    const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+    return Math.ceil((((date-yearStart)/86400000)+1)/7);
+  }
+  const now  = new Date();
+  const week = now.getFullYear()+'-W'+String(isoWeek(now)).padStart(2,'0');
+  const cacheKey = '__kb_weekly_'+week;
+  btn.style.display = 'block';
+  async function getWeeklyLines(){
+    const cached = localStorage.getItem(cacheKey);
+    if(cached){ try{ return JSON.parse(cached); }catch(e){} }
+    try {
+      const res = await Promise.race([
+        fetch('/api/bob',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            question:'Give a collective weekly oracle reading for everyone in the world for the week of '+now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'. What does the universe want all of humanity to know and feel this week? Make it powerful, specific, and cosmic. 5 lines.',
+            sign: window.__KBSign||'gemini',
+            mode:'weekly'
+          })
+        }),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),10000))
+      ]);
+      if(!res.ok) return null;
+      const data = await res.json();
+      if(data.lines&&data.lines.length){
+        localStorage.setItem(cacheKey,JSON.stringify(data.lines));
+        return data.lines;
+      }
+    }catch(e){}
+    return null;
+  }
+  btn.addEventListener('click', async e=>{
+    e.stopPropagation();
+    btn.textContent = '· · ·';
+    btn.style.pointerEvents = 'none';
+    const lines = await getWeeklyLines();
+    btn.textContent = '\u2726 THIS WEEK';
+    btn.style.pointerEvents = '';
+    if(!lines) return;
+    const ctr = document.getElementById('oracle-container');
+    const txt = document.getElementById('oracle-micro-text');
+    if(!ctr||!txt) return;
+    txt.innerHTML=''; ctr.scrollTop=0; ctr.classList.add('visible');
+    const hdr=document.createElement('div');
+    hdr.style.cssText='font-size:.55rem;letter-spacing:.3em;color:rgba(180,120,255,.5);text-align:center;margin-bottom:18px;';
+    hdr.textContent='\u2726 THIS WEEK \u00B7 '+week.replace('-',' ')+' \u2726';
+    txt.appendChild(hdr);
+    let i=0;
+    function nextLine(){
+      if(i>=lines.length) return;
+      const p=document.createElement('p');
+      p.className='oracle-line';
+      p.style.cssText='opacity:0;transition:opacity 1s;margin:0 0 .85em;';
+      p.textContent=lines[i++];
+      txt.appendChild(p);
+      ctr.scrollTop=ctr.scrollHeight;
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{ p.style.opacity='1'; }));
+      setTimeout(nextLine,2200);
+    }
+    nextLine();
+  });
+})();
+
+/* ── COMPATIBILITY READING ── */
+(function(){
+  const btn     = document.getElementById('kb-compat-btn');
+  const overlay = document.getElementById('kb-compat-overlay');
+  const closeBtn= document.getElementById('kb-compat-close');
+  const goBtn   = document.getElementById('kb-compat-go');
+  const inputA  = document.getElementById('kb-compat-a');
+  const inputB  = document.getElementById('kb-compat-b');
+  if(!btn||!overlay) return;
+  btn.addEventListener('click',e=>{e.stopPropagation();overlay.classList.add('visible');inputA.focus();});
+  closeBtn.addEventListener('click',()=>overlay.classList.remove('visible'));
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('visible');});
+  function fireReading(){
+    const a=(inputA.value||'').trim();
+    const b=(inputB.value||'').trim();
+    if(!a||!b){
+      [inputA,inputB].forEach(el=>{if(!el.value.trim()){el.style.borderColor='rgba(255,80,80,.6)';setTimeout(()=>el.style.borderColor='',1200);}});
+      return;
+    }
+    overlay.classList.remove('visible');
+    inputA.value=''; inputB.value='';
+    const question='Compatibility reading between '+a+' and '+b+'. What is the energy between them? What works, what challenges them, and what the universe sees for their connection.';
+    if(window.OracleQuery) window.OracleQuery.submit(question);
+  }
+  goBtn.addEventListener('click',fireReading);
+  [inputA,inputB].forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter')fireReading();}));
+})();
+
 /* ── COLLECTION MILESTONE READINGS ── */
 (function(){
   const READINGS = {
-    22: [
+    22:[
       'The Major Arcana is complete within you.',
       'Twenty-two forces. Each one a truth you have now touched.',
       'The world, the fool, the tower, the star — all yours.',
       'The full story of consciousness lives in this deck. You have walked its path.',
       'What comes next is the detail inside the journey. The minor cards await.',
     ],
-    78: [
+    78:[
       'The full deck. All 78 cards. The complete map of the human soul.',
       'Every archetype. Every season. Every moment of joy, loss, power, and surrender.',
       'You have pulled them all. The universe has nothing left to hide from you.',
       'This is not an end. It is the moment you realize you were always the oracle.',
-      '✦ The collection is complete. ✦',
+      '\u2726 The collection is complete. \u2726',
     ],
   };
-  const DELAYS = [0, 2200, 4800, 7600, 10800];
+  const DELAYS=[0,2200,4800,7600,10800];
   function showMilestoneReading(lines){
-    const container = document.getElementById('oracle-container');
-    const readingEl = document.getElementById('oracle-reading');
+    const container=document.getElementById('oracle-container');
+    const readingEl=document.getElementById('oracle-micro-text');
     if(!container||!readingEl) return;
-    readingEl.innerHTML = '';
-    container.classList.add('visible');
-    lines.forEach((line,i) => {
-      setTimeout(() => {
-        const p = document.createElement('p');
-        p.style.cssText = 'opacity:0;transition:opacity 1.2s ease;margin:0 0 .9em;font-size:.82rem;letter-spacing:.06em;line-height:1.7;text-align:center;color:rgba(255,200,40,.92)';
-        p.textContent = line;
-        readingEl.appendChild(p);
+    readingEl.innerHTML=''; container.classList.add('visible');
+    lines.forEach((line,i)=>{
+      setTimeout(()=>{
+        const p=document.createElement('p');
+        p.style.cssText='opacity:0;transition:opacity 1.2s ease;margin:0 0 .9em;font-size:.82rem;letter-spacing:.06em;line-height:1.7;text-align:center;color:rgba(255,200,40,.92)';
+        p.textContent=line; readingEl.appendChild(p);
         requestAnimationFrame(()=>requestAnimationFrame(()=>{ p.style.opacity='1'; }));
       }, DELAYS[i]||i*2400);
     });
   }
-  window.__KBMilestone = function(total){
-    if(READINGS[total]) setTimeout(()=>showMilestoneReading(READINGS[total]), 1200);
+  window.__KBMilestone=function(total){
+    if(READINGS[total]) setTimeout(()=>showMilestoneReading(READINGS[total]),1200);
   };
 })();
 
 /* ── STREAK BONUS TOAST ── */
 (function(){
   if(!window.__KB) return;
-  const streakN = window.__KB.claimStreakBonus();
+  const streakN=window.__KB.claimStreakBonus();
   if(!streakN) return;
-  const toast = document.createElement('div');
-  toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.92);border:1px solid rgba(255,200,40,.45);border-radius:24px;padding:14px 28px;z-index:99995;font-family:Courier New,monospace;font-size:.65rem;letter-spacing:2px;color:rgba(255,200,40,.95);text-align:center;pointer-events:none;opacity:0;transition:opacity .5s';
-  toast.innerHTML = '✦ '+streakN+'-DAY STREAK ✦<br><span style="font-size:.55rem;color:rgba(255,200,40,.6);letter-spacing:1.5px">BONUS PULL UNLOCKED</span>';
+  const toast=document.createElement('div');
+  toast.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.92);border:1px solid rgba(255,200,40,.45);border-radius:24px;padding:14px 28px;z-index:99995;font-family:Courier New,monospace;font-size:.65rem;letter-spacing:2px;color:rgba(255,200,40,.95);text-align:center;pointer-events:none;opacity:0;transition:opacity .5s';
+  toast.innerHTML='\u2726 '+streakN+'-DAY STREAK \u2726<br><span style="font-size:.55rem;color:rgba(255,200,40,.6);letter-spacing:1.5px">BONUS PULL UNLOCKED</span>';
   document.body.appendChild(toast);
-  setTimeout(()=>{ toast.style.opacity='1'; }, 100);
-  setTimeout(()=>{ toast.style.opacity='0'; setTimeout(()=>toast.remove(),600); }, 5000);
+  setTimeout(()=>{toast.style.opacity='1';},100);
+  setTimeout(()=>{toast.style.opacity='0';setTimeout(()=>toast.remove(),600);},5000);
 })();
 
-/* ── SOUND SYSTEM — ambient drone + card flip ── */
+/* ── SOUND SYSTEM ── */
 (function(){
-  const btn = document.getElementById('kb-sound-btn');
+  const btn=document.getElementById('kb-sound-btn');
   if(!btn) return;
-  let ctx=null, masterGain=null, started=false;
-  let muted = localStorage.getItem('__kb_sound')==='0';
-
+  let ctx=null,masterGain=null,started=false;
+  let muted=localStorage.getItem('__kb_sound')==='0';
   function initAudio(){
     if(ctx) return;
-    ctx = new (window.AudioContext||window.webkitAudioContext)();
-    masterGain = ctx.createGain();
-    masterGain.gain.value = muted ? 0 : 0.18;
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    masterGain=ctx.createGain();
+    masterGain.gain.value=muted?0:0.18;
     masterGain.connect(ctx.destination);
     startDrone();
   }
   function startDrone(){
     if(started) return; started=true;
     [[111,0],[111,7],[55.5,0]].forEach(([freq,detune])=>{
-      const osc=ctx.createOscillator(), gain=ctx.createGain();
-      osc.type='sine'; osc.frequency.value=freq; osc.detune.value=detune;
-      gain.gain.value = freq<60 ? 0.35 : 0.5;
-      osc.connect(gain); gain.connect(masterGain); osc.start();
+      const osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.type='sine';osc.frequency.value=freq;osc.detune.value=detune;
+      gain.gain.value=freq<60?0.35:0.5;
+      osc.connect(gain);gain.connect(masterGain);osc.start();
     });
   }
   function setMute(m){
-    muted=m; localStorage.setItem('__kb_sound',m?'0':'1');
+    muted=m;localStorage.setItem('__kb_sound',m?'0':'1');
     btn.classList.toggle('muted',m);
-    btn.textContent = m ? '♪̶' : '♪';
-    if(masterGain) masterGain.gain.setTargetAtTime(m?0:0.18, ctx.currentTime, 0.3);
+    btn.textContent=m?'\u266a\u0336':'\u266a';
+    if(masterGain) masterGain.gain.setTargetAtTime(m?0:0.18,ctx.currentTime,0.3);
   }
-  window.__KBSound = {
-    flip: function(){
+  window.__KBSound={
+    flip:function(){
       if(!ctx||muted) return;
       const buf=ctx.createBuffer(1,ctx.sampleRate*0.08,ctx.sampleRate);
-      const data=buf.getChannelData(0);
-      for(let i=0;i<data.length;i++) data[i]=(Math.random()*2-1)*(1-i/data.length);
-      const src=ctx.createBufferSource(), filter=ctx.createBiquadFilter(), gain=ctx.createGain();
-      src.buffer=buf; filter.type='bandpass'; filter.frequency.value=1800; filter.Q.value=0.8;
-      gain.gain.value=0.22; src.connect(filter); filter.connect(gain); gain.connect(ctx.destination); src.start();
+      const d=buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1-i/d.length);
+      const src=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();
+      src.buffer=buf;filter.type='bandpass';filter.frequency.value=1800;filter.Q.value=0.8;
+      gain.gain.value=0.22;src.connect(filter);filter.connect(gain);gain.connect(ctx.destination);src.start();
     },
-    whoosh: function(){
+    whoosh:function(){
       if(!ctx||muted) return;
-      const dur=0.18, buf=ctx.createBuffer(1,ctx.sampleRate*dur,ctx.sampleRate);
-      const data=buf.getChannelData(0);
-      for(let i=0;i<data.length;i++) data[i]=(Math.random()*2-1)*Math.sin(Math.PI*i/data.length);
-      const src=ctx.createBufferSource(), filter=ctx.createBiquadFilter(), gain=ctx.createGain();
-      src.buffer=buf; filter.type='lowpass'; filter.frequency.value=600;
-      gain.gain.value=0.28; src.connect(filter); filter.connect(gain); gain.connect(ctx.destination); src.start();
+      const dur=0.18,buf=ctx.createBuffer(1,ctx.sampleRate*dur,ctx.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.sin(Math.PI*i/d.length);
+      const src=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();
+      src.buffer=buf;filter.type='lowpass';filter.frequency.value=600;
+      gain.gain.value=0.28;src.connect(filter);filter.connect(gain);gain.connect(ctx.destination);src.start();
     }
   };
-  function onFirstTap(){ initAudio(); if(muted) setMute(true); document.removeEventListener('pointerdown',onFirstTap); }
-  document.addEventListener('pointerdown', onFirstTap);
-  btn.classList.toggle('muted', muted);
-  btn.textContent = muted ? '♪̶' : '♪';
-  btn.addEventListener('click', e=>{ e.stopPropagation(); initAudio(); setMute(!muted); });
+  function onFirstTap(){initAudio();if(muted)setMute(true);document.removeEventListener('pointerdown',onFirstTap);}
+  document.addEventListener('pointerdown',onFirstTap);
+  btn.classList.toggle('muted',muted);
+  btn.textContent=muted?'\u266a\u0336':'\u266a';
+  btn.addEventListener('click',e=>{e.stopPropagation();initAudio();setMute(!muted);});
 })();
 
-/* ── ONBOARDING HINT — shows once on first visit ── */
+/* ── ONBOARDING HINT ── */
 (function(){
   if(localStorage.getItem('__kb_hinted')) return;
   localStorage.setItem('__kb_hinted','1');
-  const style = document.createElement('style');
-  style.textContent = `
-    #kb-hint{position:fixed;bottom:38%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;z-index:99990;opacity:0;transition:opacity .8s;}
-    #kb-hint.visible{opacity:1;}
-    #kb-hint.hiding{opacity:0;}
-    #kb-hint-text{font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:.22em;color:rgba(255,200,40,.85);text-align:center;text-shadow:0 0 12px rgba(255,180,0,.4);}
-    #kb-hint-arrow{width:2px;height:32px;background:linear-gradient(to bottom,rgba(255,200,40,.7),rgba(255,200,40,0));border-radius:2px;animation:kbArrowBob .9s ease-in-out infinite alternate;}
-    @keyframes kbArrowBob{from{transform:translateY(0)}to{transform:translateY(6px)}}
-  `;
+  const style=document.createElement('style');
+  style.textContent='#kb-hint{position:fixed;bottom:38%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;z-index:99990;opacity:0;transition:opacity .8s;}#kb-hint.visible{opacity:1;}#kb-hint-text{font-family:Courier New,monospace;font-size:.6rem;letter-spacing:.22em;color:rgba(255,200,40,.85);text-align:center;}#kb-hint-arrow{width:2px;height:32px;background:linear-gradient(to bottom,rgba(255,200,40,.7),rgba(255,200,40,0));border-radius:2px;animation:kbArrowBob .9s ease-in-out infinite alternate;}@keyframes kbArrowBob{from{transform:translateY(0)}to{transform:translateY(6px)}}';
   document.head.appendChild(style);
-  const hint = document.createElement('div');
-  hint.id = 'kb-hint';
-  hint.innerHTML = '<div id="kb-hint-text">TAP BOB · ASK ANYTHING</div><div id="kb-hint-arrow"></div>';
+  const hint=document.createElement('div');
+  hint.id='kb-hint';
+  hint.innerHTML='<div id="kb-hint-text">TAP BOB \u00B7 ASK ANYTHING</div><div id="kb-hint-arrow"></div>';
   document.body.appendChild(hint);
-  setTimeout(()=>hint.classList.add('visible'), 1500);
-  const dismiss = ()=>{ hint.classList.add('hiding'); setTimeout(()=>hint.remove(),800); };
-  setTimeout(dismiss, 6000);
-  document.addEventListener('pointerdown', dismiss, {once:true});
+  setTimeout(()=>hint.classList.add('visible'),1500);
+  const dismiss=()=>{hint.style.opacity='0';setTimeout(()=>hint.remove(),800);};
+  setTimeout(dismiss,6000);
+  document.addEventListener('pointerdown',dismiss,{once:true});
 })();
 
-/* ── SHARE CARD AS IMAGE ── */
-window.__KBShareCard = function(card, lines){
+/* ── SHARE ORACLE READING AS IMAGE ── */
+window.__KBShareReading=function(query,lines){
   const SIZE=1080;
   const c=document.createElement('canvas');
   c.width=c.height=SIZE;
   const ctx=c.getContext('2d');
-  ctx.fillStyle='#000'; ctx.fillRect(0,0,SIZE,SIZE);
+  ctx.fillStyle='#000';ctx.fillRect(0,0,SIZE,SIZE);
+  const vig=ctx.createRadialGradient(SIZE/2,SIZE/2,SIZE*0.15,SIZE/2,SIZE/2,SIZE*0.75);
+  vig.addColorStop(0,'rgba(20,0,40,0)');vig.addColorStop(1,'rgba(0,0,0,0.8)');
+  ctx.fillStyle=vig;ctx.fillRect(0,0,SIZE,SIZE);
+  ctx.fillStyle='rgba(255,200,40,0.25)';ctx.fillRect(80,80,SIZE-160,1);
+  const isHoro=/^(aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)$/i.test((query||'').trim());
+  const isTarot=/^tarot/i.test(query||'');
+  const label=isTarot?'TAROT \u00B7 KOZMOBOB':isHoro?((query||'').toUpperCase()+' \u00B7 KOZMOBOB'):'BOB SAID \u00B7 KOZMOBOB';
+  ctx.font='18px Courier New,monospace';ctx.textAlign='center';ctx.fillStyle='rgba(255,200,40,0.35)';
+  ctx.fillText(label,SIZE/2,115);
+  ctx.font='90px serif';ctx.fillStyle='rgba(255,200,40,0.7)';
+  ctx.shadowColor='rgba(255,180,0,0.4)';ctx.shadowBlur=40;
+  ctx.fillText('\u2726',SIZE/2,230);ctx.shadowBlur=0;
+  const cleanLines=(lines||[]).filter(l=>l&&!l.startsWith('__'));
+  const displayLines=cleanLines.slice(0,4);
+  let y=310;
+  displayLines.forEach((line,idx)=>{
+    const words=line.split(' ');
+    let row='',rows=[];
+    words.forEach(w=>{if((row+' '+w).trim().length>36){rows.push(row.trim());row=w;}else row=(row+' '+w).trim();});
+    if(row) rows.push(row.trim());
+    ctx.font='italic 28px Georgia,serif';
+    ctx.fillStyle='rgba(255,255,255,'+(0.82-idx*0.12)+')';
+    rows.forEach(r=>{ctx.fillText(r,SIZE/2,y);y+=44;});
+    y+=14;
+  });
+  ctx.fillStyle='rgba(255,200,40,0.25)';ctx.fillRect(80,SIZE-90,SIZE-160,1);
+  ctx.font='18px Courier New,monospace';ctx.fillStyle='rgba(255,200,40,0.35)';
+  ctx.fillText('KOZMOBOB.COM',SIZE/2,SIZE-52);
+  c.toBlob(blob=>{
+    const file=new File([blob],'kozmobob-reading.png',{type:'image/png'});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:'KozmoBob Reading',text:cleanLines[0]||''});
+    }else{
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download='kozmobob-reading.png';
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    }
+  },'image/png');
+};
+
+/* ── SHARE CARD AS IMAGE ── */
+window.__KBShareCard=function(card,lines){
+  const SIZE=1080;
+  const c=document.createElement('canvas');
+  c.width=c.height=SIZE;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#000';ctx.fillRect(0,0,SIZE,SIZE);
   const vig=ctx.createRadialGradient(SIZE/2,SIZE/2,SIZE*0.2,SIZE/2,SIZE/2,SIZE*0.72);
-  vig.addColorStop(0,'rgba(30,10,60,0)'); vig.addColorStop(1,'rgba(0,0,0,0.72)');
-  ctx.fillStyle=vig; ctx.fillRect(0,0,SIZE,SIZE);
-  ctx.fillStyle='rgba(255,200,40,0.3)'; ctx.fillRect(80,90,SIZE-160,1);
-  ctx.font='180px serif'; ctx.textAlign='center';
+  vig.addColorStop(0,'rgba(30,10,60,0)');vig.addColorStop(1,'rgba(0,0,0,0.72)');
+  ctx.fillStyle=vig;ctx.fillRect(0,0,SIZE,SIZE);
+  ctx.fillStyle='rgba(255,200,40,0.3)';ctx.fillRect(80,90,SIZE-160,1);
+  ctx.font='180px serif';ctx.textAlign='center';
   ctx.fillStyle=card.rare?'rgba(255,215,40,0.9)':'rgba(255,180,40,0.82)';
   ctx.shadowColor=card.rare?'rgba(255,200,40,0.6)':'rgba(255,140,0,0.4)';
   ctx.shadowBlur=card.rare?60:30;
-  ctx.fillText(card.g||'✦',SIZE/2,420);
-  ctx.shadowBlur=0;
-  ctx.font='500 28px Courier New,monospace'; ctx.fillStyle='rgba(255,200,40,0.4)';
+  ctx.fillText(card.g||'\u2726',SIZE/2,420);ctx.shadowBlur=0;
+  ctx.font='500 28px Courier New,monospace';ctx.fillStyle='rgba(255,200,40,0.4)';
   ctx.fillText(card.r||'',SIZE/2,490);
-  ctx.fillStyle='rgba(255,200,40,0.25)'; ctx.fillRect(SIZE/2-60,510,120,1);
-  ctx.font='500 52px Courier New,monospace'; ctx.fillStyle='rgba(255,200,40,0.95)';
-  ctx.shadowColor='rgba(255,180,0,0.3)'; ctx.shadowBlur=20;
-  ctx.fillText((card.n||'').toUpperCase(),SIZE/2,580);
-  ctx.shadowBlur=0;
-  ctx.font='22px Courier New,monospace'; ctx.fillStyle='rgba(255,200,40,0.45)';
+  ctx.fillStyle='rgba(255,200,40,0.25)';ctx.fillRect(SIZE/2-60,510,120,1);
+  ctx.font='500 52px Courier New,monospace';ctx.fillStyle='rgba(255,200,40,0.95)';
+  ctx.shadowColor='rgba(255,180,0,0.3)';ctx.shadowBlur=20;
+  ctx.fillText((card.n||'').toUpperCase(),SIZE/2,580);ctx.shadowBlur=0;
+  ctx.font='22px Courier New,monospace';ctx.fillStyle='rgba(255,200,40,0.45)';
   ctx.fillText(card.k||'',SIZE/2,620);
   const readingLine=lines&&lines.length?lines[Math.min(1,lines.length-1)]:'';
   if(readingLine){
-    ctx.font='italic 26px Georgia,serif'; ctx.fillStyle='rgba(255,255,255,0.55)';
+    ctx.font='italic 26px Georgia,serif';ctx.fillStyle='rgba(255,255,255,0.55)';
     const words=readingLine.split(' ');
     let line1='',cur='';
-    words.forEach(w=>{ if((cur+' '+w).trim().length>38){line1=cur.trim();cur=w;}else cur=(cur+' '+w).trim(); });
+    words.forEach(w=>{if((cur+' '+w).trim().length>38){line1=cur.trim();cur=w;}else cur=(cur+' '+w).trim();});
     const line2=cur.trim();
     ctx.fillText('"'+(line1||line2)+(line2&&line1?'':'"'),SIZE/2,700);
     if(line2&&line1) ctx.fillText(line2+'"',SIZE/2,736);
   }
-  ctx.fillStyle='rgba(255,200,40,0.3)'; ctx.fillRect(80,SIZE-90,SIZE-160,1);
-  ctx.font='20px Courier New,monospace'; ctx.fillStyle='rgba(255,200,40,0.35)';
+  ctx.fillStyle='rgba(255,200,40,0.3)';ctx.fillRect(80,SIZE-90,SIZE-160,1);
+  ctx.font='20px Courier New,monospace';ctx.fillStyle='rgba(255,200,40,0.35)';
   ctx.fillText('KOZMOBOB.COM',SIZE/2,SIZE-52);
   c.toBlob(blob=>{
     const file=new File([blob],'kozmobob-card.png',{type:'image/png'});
     if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-      navigator.share({files:[file],title:card.n+' · KozmoBob',text:readingLine});
-    } else {
+      navigator.share({files:[file],title:card.n+' \u00B7 KozmoBob',text:readingLine});
+    }else{
       const a=document.createElement('a');
       a.href=URL.createObjectURL(blob);
       a.download='kozmobob-'+(card.n||'card').toLowerCase().replace(/\s+/g,'-')+'.png';
