@@ -4875,7 +4875,7 @@ function showTarotPicker(cardName, allCards) {
     w.style.display = w.style.display === 'none' ? 'block' : 'none';
   });
   ov.querySelector('#__kb_tp_dev_submit').addEventListener('click', () => {
-    if (ov.querySelector('#__kb_tp_dev_input').value.trim().toUpperCase() === 'KOZMODEV') {
+    if (ov.querySelector('#__kb_tp_dev_input').value.trim().toUpperCase() === 'KOZMOBOB') {
       localStorage.setItem('__kb_dev', '1');
       close();
       showTarotPicker(cardName, allCards);
@@ -5061,8 +5061,8 @@ function showReadingPicker(sign, r, g, b) {
   const col = `rgba(${r},${g},${b}`;
   const signUp = sign.charAt(0).toUpperCase() + sign.slice(1);
 
-  /* Dev unlock — enter KOZMODEV to test paid readings without Stripe */
-  const DEV_CODE = 'KOZMODEV';
+  /* Dev unlock — enter KOZMOBOB to test paid readings without Stripe */
+  const DEV_CODE = 'KOZMOBOB';
   const isDevUnlocked = () => localStorage.getItem('__kb_dev') === '1';
 
   const tiers = [
