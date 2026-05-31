@@ -5379,8 +5379,6 @@ function showPaywall(mode, sign, col) {
     {n:'Queen of Pentacles',  k:'NURTURING',  r:'P·Q',  g:'🌿', rare:true },
     {n:'King of Pentacles',   k:'WEALTH',     r:'P·K',  g:'🌿', rare:true },
   ];
-  // Shuffle the full deck so Major/Minor Arcana are mixed
-  for(let i=FULL_DECK.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[FULL_DECK[i],FULL_DECK[j]]=[FULL_DECK[j],FULL_DECK[i]];}
   const TOTAL = FULL_DECK.length; // 78
 
   const overlay   = document.getElementById('album-overlay');
