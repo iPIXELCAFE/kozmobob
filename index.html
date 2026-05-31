@@ -2892,12 +2892,19 @@ const OracleQuery = (() => {
       if (li >= lines.length) {
         onDone();
         /* Auto-save reading to KV */
-        const _cleanLines = lines.filter(l => !l.startsWith('__SPONSOR__'));
-        if (window.__saveReading) window.__saveReading(
-          SIGN_NAMES.has((q||'').toLowerCase().trim()) ? q.toLowerCase().trim() : (window.__KBSign||'unknown'),
-          _isTarotRead ? 'tarot' : SIGN_NAMES.has((q||'').toLowerCase().trim()) ? 'horoscope' : 'oracle',
-          _cleanLines
-        );
+        const _cleanLines = lines.filter(l => !l.startsWith('__SPONSOR__') && !l.startsWith('__LABEL__'));
+        /* Paid tarot reads store their own save info */
+        if (window.__KBPaidReadSave) {
+          const _prs = window.__KBPaidReadSave;
+          window.__KBPaidReadSave = null;
+          if (window.__saveReading) window.__saveReading(_prs.sign, _prs.mode, _prs.lines);
+        } else if (window.__saveReading) {
+          window.__saveReading(
+            SIGN_NAMES.has((q||'').toLowerCase().trim()) ? q.toLowerCase().trim() : (window.__KBSign||'unknown'),
+            _isTarotRead ? 'tarot' : SIGN_NAMES.has((q||'').toLowerCase().trim()) ? 'horoscope' : 'oracle',
+            _cleanLines
+          );
+        }
         /* Hook — tease paid reading for free users, oracle only, not tarot or paid sessions */
         if (!_isPaidSession && !_isTarotRead && !SIGN_NAMES.has((q||'').toLowerCase().trim())) {
           setTimeout(() => {
@@ -4973,9 +4980,14 @@ function showTarotContext(tier, cardName, allCards) {
       question = (ctx ? ctx + ' | ' : '') + 'CARD: ' + cardName;
     }
 
-    /* Send to API directly — bypass normal submit flow */
+    /* Show a loading hint while fetching (don't change state — submit() needs IDLE) */
+    const _loadHint = document.createElement('div');
+    _loadHint.id = '__kb_paid_loading';
+    _loadHint.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);font-family:Courier New,monospace;font-size:.6rem;letter-spacing:.25em;color:rgba(255,200,40,.5);z-index:9999;pointer-events:none;';
+    _loadHint.textContent = 'BOB IS READING...';
+    document.body.appendChild(_loadHint);
+
     (async () => {
-      if (window.OracleQuery) window.OracleQuery.setState('THINKING');
       try {
         const resp = await fetch('/api/bob', {
           method: 'POST',
@@ -4987,29 +4999,40 @@ function showTarotContext(tier, cardName, allCards) {
           }),
         });
         const data = await resp.json();
+        const hint = document.getElementById('__kb_paid_loading');
+        if (hint) hint.remove();
+
         if (data.lines && data.lines.length) {
           /* For spread, inject section labels between card groups */
           let finalLines = data.lines;
           if (isSpread && data.lines.length >= 3) {
             const lpc = Math.ceil(data.lines.length / 3);
-            const labels = ['— PAST —','— PRESENT —','— FUTURE —'];
+            const labels = ['-- PAST --','-- PRESENT --','-- FUTURE --'];
             finalLines = [];
             data.lines.forEach((line, i) => {
               if (i % lpc === 0) finalLines.push('__LABEL__' + labels[Math.floor(i/lpc)]);
               finalLines.push(line);
             });
           }
-          /* Store lines — read() will pick them up and run full voice+typewriter flow */
+          /* Store lines + save info — read() picks them up for voice+typewriter */
           window.__KBPrefetchedLines = finalLines;
           window.__KBSuppressPortal = true;
           window.__KBLastMode = mode;
-          /* Submit a dummy tarot query to trigger the oracle panel + voice */
-          if (window.OracleQuery) window.OracleQuery.submit('tarot card ' + (isSpread ? (allCards ? allCards[0] : cardName) : cardName));
+          /* Store clean lines for MY READINGS save */
+          window.__KBPaidReadSave = {
+            sign: window.__KBSign || 'unknown',
+            mode: mode,
+            lines: data.lines
+          };
+          /* submit() needs IDLE state — it will handle everything from here */
+          if (window.OracleQuery) window.OracleQuery.submit('tarot card ' + cardName);
         } else {
           if (window.OracleQuery) window.OracleQuery.setState('IDLE');
         }
       } catch(e) {
         console.error('Tarot paid read error:', e);
+        const hint = document.getElementById('__kb_paid_loading');
+        if (hint) hint.remove();
         if (window.OracleQuery) window.OracleQuery.setState('IDLE');
       }
     })();
