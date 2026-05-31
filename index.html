@@ -908,7 +908,7 @@ html,body{
 #album-btn:hover{border-color:rgba(255,200,40,.70);color:rgba(255,200,40,.98);box-shadow:0 0 28px rgba(255,185,20,.28);}
 #album-count{color:rgba(255,200,40,.50);margin-left:4px;}
 #kb-sound-btn{
-  position:fixed;bottom:14px;left:calc(50% + 4px);
+  position:fixed;top:80px;right:14px;
   z-index:25;
   width:40px;height:40px;border-radius:50%;
   background:rgba(0,0,0,.88);
@@ -922,24 +922,26 @@ html,body{
 #kb-sound-btn:hover{color:rgba(255,200,40,.95);border-color:rgba(255,200,40,.6);}
 #kb-sound-btn.muted{color:rgba(255,255,255,.2);border-color:rgba(255,255,255,.1);}
 #kb-weekly-btn{
-  position:fixed;left:14px;bottom:88px;
-  z-index:25;width:200px;
+  position:fixed;top:14px;right:14px;
+  z-index:25;
+  width:40px;height:40px;border-radius:50%;
   background:rgba(0,0,0,.88);
   border:1px solid rgba(180,120,255,.3);
-  border-radius:24px;padding:10px 0;
+  border-radius:50%;
   font-family:'Courier New',monospace;
-  font-size:.62rem;letter-spacing:2.5px;
+  font-size:.55rem;letter-spacing:0;
   color:rgba(180,120,255,.7);text-align:center;
   cursor:pointer;pointer-events:all;
   transition:border-color .25s,color .25s;
   display:none;
+  align-items:center;justify-content:center;
 }
 #kb-weekly-btn:hover{border-color:rgba(180,120,255,.65);color:rgba(200,150,255,.98);}
 @media(max-width:900px){
-  #kb-weekly-btn{position:fixed;bottom:152px;left:4px;width:calc(50vw - 8px);padding:9px 0;}
+  #kb-weekly-btn{top:14px;right:14px;}
 }
 #kb-compat-btn{
-  position:fixed;bottom:14px;left:calc(50% - 48px);
+  position:fixed;top:47px;right:14px;
   z-index:25;
   width:40px;height:40px;border-radius:50%;
   background:rgba(0,0,0,.88);
@@ -1009,8 +1011,8 @@ html,body{
 }
 #kb-compat-go:hover{background:rgba(255,120,180,.2);border-color:rgba(255,120,180,.65);color:rgba(255,160,200,.98);}
 @media(max-width:900px){
-  #kb-sound-btn{bottom:14px;left:calc(50% + 4px);}
-  #kb-compat-btn{bottom:14px;left:calc(50% - 48px);}
+  #kb-sound-btn{top:80px;right:14px;}
+  #kb-compat-btn{top:47px;right:14px;}
 }
 @media(max-width:900px){
   #album-btn{
@@ -7075,7 +7077,7 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
   const now  = new Date();
   const week = now.getFullYear()+'-W'+String(isoWeek(now)).padStart(2,'0');
   const cacheKey = '__kb_weekly_'+week;
-  btn.style.display = 'block';
+  btn.style.display = 'flex';
   async function getWeeklyLines(){
     const cached = localStorage.getItem(cacheKey);
     if(cached){ try{ return JSON.parse(cached); }catch(e){} }
@@ -7103,10 +7105,10 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
   }
   btn.addEventListener('click', async e=>{
     e.stopPropagation();
-    btn.textContent = '· · ·';
+    btn.textContent = '···';
     btn.style.pointerEvents = 'none';
     const lines = await getWeeklyLines();
-    btn.textContent = '\u2726 THIS WEEK';
+    btn.textContent = '\u2726';
     btn.style.pointerEvents = '';
     if(!lines) return;
     const ctr = document.getElementById('oracle-container');
