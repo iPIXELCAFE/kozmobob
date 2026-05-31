@@ -5418,11 +5418,11 @@ function showPaywall(mode, sign, col) {
             transition:opacity .35s ease, transform .35s ease;
           `;
           flip.innerHTML = `
-            <div style="font-size:11px;letter-spacing:.25em;color:rgba(255,200,40,.7);margin-bottom:8px;text-transform:uppercase;">\${card.n}</div>
+            <div style="font-size:11px;letter-spacing:.25em;color:rgba(255,200,40,.7);margin-bottom:8px;text-transform:uppercase;">${card.n}</div>
             <div style="width:30px;height:1px;background:rgba(255,200,40,.35);margin-bottom:10px;"></div>
-            <div style="font-size:13px;line-height:1.6;color:rgba(255,255,255,.95);text-align:center;font-family:Georgia,serif;letter-spacing:.02em;">\${meaning}</div>
+            <div style="font-size:13px;line-height:1.6;color:rgba(255,255,255,.95);text-align:center;font-family:Georgia,serif;letter-spacing:.02em;">${meaning}</div>
             <div style="width:30px;height:1px;background:rgba(255,200,40,.35);margin-top:10px;margin-bottom:8px;"></div>
-            <div style="font-size:10px;letter-spacing:.2em;color:rgba(255,200,40,.5);">\${card.k}</div>
+            <div style="font-size:10px;letter-spacing:.2em;color:rgba(255,200,40,.5);">${card.k}</div>
           `;
           document.body.appendChild(flip);
           requestAnimationFrame(() => requestAnimationFrame(() => {
