@@ -3760,7 +3760,8 @@ const OracleQuery = (() => {
   /* Pull uses the shared 78-card FULL_DECK (defined in album section below).
      Weighted random: rare cards (14) = weight 0.25, common (64) = weight 1.0
      → ~5% chance per pull to land on any rare card. */
-  function weightedPick(deck){
+  function weightedPick(){
+    const deck = window.FULL_DECK || [];
     const total = deck.reduce((s,c) => s + (c.rare ? 0.25 : 1), 0);
     let r = Math.random() * total;
     for(const c of deck){ r -= c.rare ? 0.25 : 1; if(r <= 0) return c; }
@@ -3937,7 +3938,7 @@ const OracleQuery = (() => {
       return;
     }
     cooldown = true;
-    const card = weightedPick(FULL_DECK);
+    const card = weightedPick();
     drawnCardName = card.n;
     window.__KB.addCard(card.n);                       /* save to collection */
     if(window.__KBAlbum) window.__KBAlbum.refresh();   /* live-update album if open */
@@ -5281,7 +5282,8 @@ function showPaywall(mode, sign, col) {
 
 /* ── 15. CARD COLLECTION ALBUM ── */
 (function(){
-  const FULL_DECK = [
+  window.FULL_DECK = window.FULL_DECK || [];
+  const FULL_DECK = window.FULL_DECK = [
     {n:'The Fool',         k:'NEW PATH',    r:'0',     g:'◈',  rare:true },
     {n:'The Magician',     k:'POWER',       r:'I',     g:'⚡', rare:false},
     {n:'High Priestess',   k:'INTUITION',   r:'II',    g:'☽',  rare:false},
