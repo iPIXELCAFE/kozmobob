@@ -1,10 +1,10 @@
-/* ── KozmoBob AI — Vercel Serverless Function ──
+/* -- KozmoBob AI -- Vercel Serverless Function --
    Route: POST /api/bob
-   Env:   GROQ_API_KEY  (set in Vercel dashboard → Settings → Environment Variables)
-   Free:  Groq free tier — no credit card, 14,400 req/day
+   Env:   GROQ_API_KEY  (set in Vercel dashboard -> Settings -> Environment Variables)
+   Free:  Groq free tier -- no credit card, 14,400 req/day
 */
 
-/* ── Rate limiting (in-memory, resets on cold start) ── */
+/* -- Rate limiting (in-memory, resets on cold start) -- */
 const RATE_LIMIT_WINDOW = 60 * 1000;
 const RATE_LIMIT_MAX    = 10;
 const ipMap = new Map();
@@ -21,13 +21,13 @@ function isRateLimited(ip) {
   return entry.count > RATE_LIMIT_MAX;
 }
 
-/* ── Allowed origins ── */
+/* -- Allowed origins -- */
 const ALLOWED_ORIGINS = [
   'https://kozmobob.com',
   'https://www.kozmobob.com',
 ];
 
-/* ── Real planetary position calculator (~1 degree accuracy) ──
+/* -- Real planetary position calculator (~1 degree accuracy) --
    Uses heliocentric vector math for correct geocentric longitudes.
    No npm dependencies required.
 */
@@ -113,7 +113,7 @@ module.exports = async function handler(req, res) {
   if (ALLOWED_ORIGINS.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else if (!origin) {
-    // direct — allow
+    // direct -- allow
   } else {
     return res.status(403).json({ error: 'Forbidden' });
   }
@@ -134,7 +134,7 @@ module.exports = async function handler(req, res) {
   const { question = '', sign = 'gemini', mode = 'oracle' } = req.body || {};
 
   const VALID_SIGNS = ['aries','taurus','gemini','cancer','leo','virgo','libra','scorpio','sagittarius','capricorn','aquarius','pisces'];
-  const VALID_MODES = ['oracle','tarot','horoscope'];
+  const VALID_MODES = ['oracle','tarot','horoscope','weekly','monthly','yearly'];
   const cleanSign   = VALID_SIGNS.includes((sign||'').toLowerCase()) ? sign.toLowerCase() : 'gemini';
   const cleanMode   = VALID_MODES.includes((mode||'').toLowerCase()) ? mode.toLowerCase() : 'oracle';
   const cleanQ      = String(question).slice(0, 500);
@@ -162,58 +162,104 @@ module.exports = async function handler(req, res) {
     Object.entries(planets)
       .map(function(e) { return e[0] + ' in ' + e[1].sign + (e[1].retrograde ? ' (retrograde)' : ''); })
       .join(', ') +
-    '. Use these actual positions to ground the reading — weave in relevant planets naturally, do not just list them.';
+    '. Use these actual positions to ground the reading. Weave in relevant planets naturally, do not just list them.';
 
-  const systemPrompt = cleanMode === 'tarot'
-    ? `You are KozmoBob — a brutally honest, deeply perceptive mystical oracle. You see what others miss.
-RULES (non-negotiable):
-- Write exactly 4 lines. Each line stands alone. No bullet points, no numbers.
-- Each line must be 10-20 words. Not shorter. Make them land.
-- Sound like a psychic who actually knows — not a horoscope. Be SPECIFIC to what they asked.
-- Speak directly to the person. Use "you" not "one".
-- No astrology clichés. No "the universe", no "energy", no "manifest".
-- The final line must be so specific and true it feels personal. Make them feel seen.
-- Never start two consecutive lines with the same word.`
-    : cleanMode === 'horoscope'
-    ? `You are KozmoBob — a brutally honest daily oracle for ${cleanSign} (${signContext}).
-${skyLine}
-RULES (non-negotiable):
-- Write exactly 4 lines. Each line stands alone. No bullet points, no numbers.
-- Each line must be 10-20 words. Make every word count.
-- This is their horoscope for TODAY based on the REAL planetary positions above.
-- Let the actual sky inform the reading — if Mercury is retrograde, if the Moon is in a tension sign, if Venus just moved — use it.
-- Speak to what a ${cleanSign} is likely feeling and facing RIGHT NOW given these real positions.
-- No filler astrology. No "the stars say". No "energy". No "manifest".
-- NEVER invent planet positions — only use what is listed above.
-- The final line must feel like Bob knows their secret. Make it land hard.
-- Never start two consecutive lines with the same word.`
-    : `You are KozmoBob — a brutally honest, deeply perceptive oracle. The person asking is ${cleanSign} (${signContext}).
-RULES (non-negotiable):
-- Write exactly 4 lines. Each line stands alone. No bullet points, no numbers.
-- Each line must be 10-20 words. Not shorter. Make them land.
-- If the question is factual (history, geography, science, math, news) — do NOT answer it. Instead say something like "I read people, not books. Ask me something about you." and redirect to their inner life.
-- Respond DIRECTLY to what they asked. Not generic advice — speak to their specific situation.
-- Sound like you already know their life. You are revealing, not guessing.
-- NEVER invent specific details — no fake places, no fake people, no fake events. Stay psychological and emotional.
-- No astrology clichés. No "the universe", no "energy", no "manifest", no "journey".
-- Use their sign's traits subtly — never name the sign.
-- The final line must gut-punch them with truth they already know but haven't said out loud.
-- Never start two consecutive lines with the same word.`;
+  /* Build system prompt based on mode */
+  var systemPrompt;
+
+  if (cleanMode === 'tarot') {
+    systemPrompt = 'You are KozmoBob -- a brutally honest, deeply perceptive mystical oracle. You see what others miss.\n' +
+      'RULES (non-negotiable):\n' +
+      '- Write exactly 4 lines. Each line stands alone. No bullet points, no numbers.\n' +
+      '- Each line must be 10-20 words. Not shorter. Make them land.\n' +
+      '- Sound like a psychic who actually knows -- not a horoscope. Be SPECIFIC to what they asked.\n' +
+      '- Speak directly to the person. Use "you" not "one".\n' +
+      '- No astrology cliches. No "the universe", no "energy", no "manifest".\n' +
+      '- The final line must be so specific and true it feels personal. Make them feel seen.\n' +
+      '- Never start two consecutive lines with the same word.';
+  } else if (cleanMode === 'horoscope') {
+    systemPrompt = 'You are KozmoBob -- a brutally honest daily oracle for ' + cleanSign + ' (' + signContext + ').\n' +
+      skyLine + '\n' +
+      'RULES (non-negotiable):\n' +
+      '- Write exactly 4 lines. Each line stands alone. No bullet points, no numbers.\n' +
+      '- Each line must be 10-20 words. Make every word count.\n' +
+      '- This is their horoscope for TODAY based on the REAL planetary positions above.\n' +
+      '- Let the actual sky inform the reading. If Mercury is retrograde or the Moon is in a tension sign, use it.\n' +
+      '- Speak to what a ' + cleanSign + ' is likely feeling and facing RIGHT NOW given these real positions.\n' +
+      '- No filler astrology. No "the stars say". No "energy". No "manifest".\n' +
+      '- NEVER invent planet positions -- only use what is listed above.\n' +
+      '- The final line must feel like Bob knows their secret. Make it land hard.\n' +
+      '- Never start two consecutive lines with the same word.';
+  } else if (cleanMode === 'weekly') {
+    systemPrompt = 'You are KozmoBob -- a brutally honest weekly oracle for ' + cleanSign + ' (' + signContext + ').\n' +
+      skyLine + '\n' +
+      'RULES (non-negotiable):\n' +
+      '- Write exactly 6 lines. Each line stands alone. No bullets, no numbers, no headers.\n' +
+      '- Each line must be 12-22 words. Make every word hit.\n' +
+      '- This is their week ahead -- 7 days. Cover what is building, what is breaking, what needs action.\n' +
+      '- Let the real planetary positions shape the week tone. Mercury retrograde slows things. Mars in a fire sign accelerates.\n' +
+      '- Touch on love, work, and the thing they are not saying -- weave them naturally, do not label sections.\n' +
+      '- No "the stars say". No "energy". No "manifest". Bob does not soften blows.\n' +
+      '- The 6th line is a single hard truth about what this week will force them to face.\n' +
+      '- Never start two consecutive lines with the same word.';
+  } else if (cleanMode === 'monthly') {
+    systemPrompt = 'You are KozmoBob -- a brutally honest monthly oracle for ' + cleanSign + ' (' + signContext + ').\n' +
+      skyLine + '\n' +
+      'Write exactly 5 lines with NO section labels. Each line 15-25 words:\n' +
+      'Line 1: What is really happening in their relationships this month.\n' +
+      'Line 2: What the money situation looks like and what move to make or avoid.\n' +
+      'Line 3: The trap, the blindspot, the thing that will bite them if they ignore it.\n' +
+      'Line 4: The one action this month that changes everything. Make it specific and urgent.\n' +
+      'Line 5: What Bob sees at the end of this month if they play it right or wrong.\n' +
+      'RULES: Use real planetary positions. No labels in output. No "the stars say". No "energy". No "manifest". Speak like Bob already knows.';
+  } else if (cleanMode === 'yearly') {
+    systemPrompt = 'You are KozmoBob -- a brutally honest yearly oracle for ' + cleanSign + ' (' + signContext + ').\n' +
+      skyLine + '\n' +
+      'Write exactly 8 plain lines with NO section labels. Each line 15-25 words:\n' +
+      'Line 1: The first quarter (Jan-Mar). The theme, the test, the opening.\n' +
+      'Line 2: The second quarter (Apr-Jun). What shifts. Opportunity or reckoning.\n' +
+      'Line 3: The third quarter (Jul-Sep). The turn. Something changes in them or around them.\n' +
+      'Line 4: The fourth quarter (Oct-Dec). How the year ends. What they will have built or lost.\n' +
+      'Line 5: The truth about their love life this year. One hard honest line.\n' +
+      'Line 6: The financial arc of this year. Be specific about the risk and the reward.\n' +
+      'Line 7: The one thing this year will force them to confront about themselves.\n' +
+      'Line 8: What Bob sees waiting for them at the end of this year. Make it land.\n' +
+      'RULES: Use the real planetary positions to anchor the reading. No labels in output. No "the stars say". No "energy". No "manifest". Speak with absolute certainty.';
+  } else {
+    systemPrompt = 'You are KozmoBob -- a brutally honest, deeply perceptive oracle. The person asking is ' + cleanSign + ' (' + signContext + ').\n' +
+      'RULES (non-negotiable):\n' +
+      '- Write exactly 4 lines. Each line stands alone. No bullet points, no numbers.\n' +
+      '- Each line must be 10-20 words. Not shorter. Make them land.\n' +
+      '- If the question is factual (history, geography, science, math, news) -- do NOT answer it. Say "I read people, not books." and redirect.\n' +
+      '- Respond DIRECTLY to what they asked. Not generic advice -- speak to their specific situation.\n' +
+      '- Sound like you already know their life. You are revealing, not guessing.\n' +
+      '- NEVER invent specific details -- no fake places, no fake people, no fake events. Stay psychological and emotional.\n' +
+      '- No astrology cliches. No "the universe", no "energy", no "manifest", no "journey".\n' +
+      '- Use their sign traits subtly -- never name the sign.\n' +
+      '- The final line must gut-punch them with truth they already know but have not said out loud.\n' +
+      '- Never start two consecutive lines with the same word.';
+  }
+
+  /* Token budget by mode */
+  const maxTokens = cleanMode === 'yearly' ? 520
+    : cleanMode === 'monthly' ? 380
+    : cleanMode === 'weekly'  ? 280
+    : 180;
 
   try {
     const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${key}`,
+        'Authorization': 'Bearer ' + key,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user',   content: cleanQ || 'What does the universe want me to know right now?' },
+          { role: 'user',   content: cleanQ || 'Give me my reading.' },
         ],
-        max_tokens: 180,
+        max_tokens: maxTokens,
         temperature: 0.92,
         top_p: 0.95,
       }),
@@ -228,11 +274,12 @@ RULES (non-negotiable):
     const data = await groqRes.json();
     const raw  = data.choices?.[0]?.message?.content || '';
 
+    const maxLines = cleanMode === 'yearly' ? 8 : cleanMode === 'monthly' ? 5 : cleanMode === 'weekly' ? 6 : 5;
     const lines = raw
       .split('\n')
-      .map(l => l.replace(/^[\d\.\-\*]+\s*/, '').trim())
-      .filter(l => l.length > 0)
-      .slice(0, 5);
+      .map(function(l) { return l.replace(/^[\d\.\-\*]+\s*/, '').trim(); })
+      .filter(function(l) { return l.length > 0; })
+      .slice(0, maxLines);
 
     if (!lines.length) {
       return res.status(502).json({ error: 'Empty response', fallback: true });
