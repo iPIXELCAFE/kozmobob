@@ -5253,6 +5253,31 @@ function showPaywall(mode, sign, col) {
   if(window.OracleQuery) window.OracleQuery.submit = limitedSubmit;
 })();
 
+  const CARD_BACK_TEXT = {
+    'The Fool':        'A leap into the unknown. You stand at the edge of something new with nothing but faith.',
+    'The Magician':    'You have every tool you need. The power to create or destroy is already in your hands.',
+    'High Priestess':  'What you know but have not said. Trust what you feel before you see the proof.',
+    'The Empress':     'Abundance comes through patience. What you have been nurturing is about to bear fruit.',
+    'The Emperor':     'Structure is not a prison. The discipline you resist is the thing that sets you free.',
+    'The Hierophant':  'The rules you follow and the ones you break both define you. Know which is which.',
+    'The Lovers':      'Every choice is a marriage to its consequences. Choose what you can live with fully.',
+    'The Chariot':     'Victory through will, not luck. You move forward by controlling what is inside you.',
+    'Strength':        'The real battle is not out there. Courage is not the absence of fear, it is the decision.',
+    'The Hermit':      'The answer you seek will not come from outside. Go in. It is already waiting there.',
+    'Wheel of Fortune':'Nothing that is happening to you is permanent. The wheel always turns. Always.',
+    'Justice':         'The truth you have been avoiding is the exact thing that will free you when you face it.',
+    'The Hanged Man':  'Surrender is not weakness. The thing blocking you dissolves the moment you stop fighting it.',
+    'Death':           'Something is ending and it cannot be stopped. What grows in its place is what matters now.',
+    'Temperance':      'You are closer than you think. What is missing is not more effort. It is more patience.',
+    'The Devil':       'The chain you wear was put there by you. You know exactly what it is. You always have.',
+    'The Tower':       'The collapse happening is clearing ground. What fell was never solid. Now you can build.',
+    'The Star':        'After the fall, this. Hope is not naive. It is the most defiant thing you can carry.',
+    'The Moon':        'Not everything you feel right now is real. Fear distorts. Wait for the light before you act.',
+    'The Sun':         'This is the part where it gets good. Let yourself have this. You earned it.',
+    'Judgement':       'You are being called to become who you said you would be. No more preparation. Now.',
+    'The World':       'You finished something real. Most people never get here. Take a moment and feel that.',
+  };
+
 /* ── 15. CARD COLLECTION ALBUM ── */
 (function(){
   const FULL_DECK = [
