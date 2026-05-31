@@ -2858,9 +2858,15 @@ const OracleQuery = (() => {
     txt.innerHTML = '';
     ctr.scrollTop = 0;
 
-    /* Try AI first, fall back to pre-written generateLines() */
-    const aiLines = await fetchAILines(q);
-    const lines = aiLines || generateLines(q);
+    /* Paid tarot reads pre-fetch lines and store them — use directly */
+    let lines;
+    if (window.__KBPrefetchedLines) {
+      lines = window.__KBPrefetchedLines;
+      window.__KBPrefetchedLines = null;
+    } else {
+      const aiLines = await fetchAILines(q);
+      lines = aiLines || generateLines(q);
+    }
 
     /* ── Mid-reading sponsor injection — after line 3, before final line ── */
     const _isTarotRead = /^tarot/i.test(q);
@@ -2915,6 +2921,16 @@ const OracleQuery = (() => {
         return;
       }
       const rawLine = lines[li];
+      /* Section label (spread headers) — render silently, no voice */
+      if (rawLine.startsWith('__LABEL__')) {
+        const lbl = document.createElement('div');
+        lbl.style.cssText = 'font-size:.55rem;letter-spacing:.3em;color:rgba(255,200,40,.35);text-align:center;margin:18px 0 8px;';
+        lbl.textContent = rawLine.slice(9);
+        txt.appendChild(lbl);
+        li++;
+        setTimeout(showLine, 80);
+        return;
+      }
       const isSponsor = rawLine.startsWith('__SPONSOR__');
       let line = rawLine, sponsorLink = '', sponsorTts = '';
       if (isSponsor) {
@@ -4972,50 +4988,23 @@ function showTarotContext(tier, cardName, allCards) {
         });
         const data = await resp.json();
         if (data.lines && data.lines.length) {
-          /* Show the oracle glass panel */
-          const ctr   = document.getElementById('oracle-container');
-          const vsect = document.getElementById('oracle-vault-section');
-          const txt   = document.getElementById('oracle-micro-text');
-          const wrap  = document.getElementById('oracle-input-wrap');
-          if (wrap)  wrap.classList.add('hidden');
-          if (ctr)   ctr.classList.add('visible');
-          if (vsect) vsect.classList.add('visible');
-          if (window.__clearSpread) window.__clearSpread();
-          window.__KBSuppressPortal = true; /* no personal msg portal on paid reads */
-          if (window.OracleQuery) window.OracleQuery.setState('THINKING');
-
-          if (txt) {
-            txt.innerHTML = '';
-            const labels = isSpread ? ['— PAST —','— PRESENT —','— FUTURE —'] : [];
-            const lpc = isSpread ? Math.ceil(data.lines.length / 3) : data.lines.length;
-
-            /* Typewriter-style reveal with delays */
-            let delay = 300;
+          /* For spread, inject section labels between card groups */
+          let finalLines = data.lines;
+          if (isSpread && data.lines.length >= 3) {
+            const lpc = Math.ceil(data.lines.length / 3);
+            const labels = ['— PAST —','— PRESENT —','— FUTURE —'];
+            finalLines = [];
             data.lines.forEach((line, i) => {
-              /* Insert spread label before each card's first line */
-              if (isSpread && i % lpc === 0 && labels[Math.floor(i/lpc)]) {
-                const lblDelay = delay;
-                setTimeout(() => {
-                  const lbl = document.createElement('div');
-                  lbl.style.cssText = 'font-size:.55rem;letter-spacing:.3em;color:rgba(255,200,40,.35);text-align:center;margin:18px 0 8px;';
-                  lbl.textContent = labels[Math.floor(i/lpc)];
-                  txt.appendChild(lbl);
-                }, lblDelay);
-                delay += 400;
-              }
-              setTimeout(() => {
-                const sp = document.createElement('span');
-                sp.className = 'oracle-line';
-                sp.style.opacity = '0';
-                sp.style.transition = 'opacity 0.6s ease';
-                sp.textContent = line;
-                txt.appendChild(sp);
-                requestAnimationFrame(() => { sp.style.opacity = '1'; });
-                if (window.OracleQuery) window.OracleQuery.setState('LOCKED');
-              }, delay);
-              delay += 900;
+              if (i % lpc === 0) finalLines.push('__LABEL__' + labels[Math.floor(i/lpc)]);
+              finalLines.push(line);
             });
           }
+          /* Store lines — read() will pick them up and run full voice+typewriter flow */
+          window.__KBPrefetchedLines = finalLines;
+          window.__KBSuppressPortal = true;
+          window.__KBLastMode = mode;
+          /* Submit a dummy tarot query to trigger the oracle panel + voice */
+          if (window.OracleQuery) window.OracleQuery.submit('tarot card ' + (isSpread ? (allCards ? allCards[0] : cardName) : cardName));
         } else {
           if (window.OracleQuery) window.OracleQuery.setState('IDLE');
         }
