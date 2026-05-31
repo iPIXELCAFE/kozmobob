@@ -2904,9 +2904,12 @@ const OracleQuery = (() => {
             ctr.scrollTop = ctr.scrollHeight;
           }, 900);
         }
-        /* ── Personal message portal — fires after reading if a paid message is live ── */
+        /* ── Personal message portal — fires after FREE readings only ── */
+        if (window.__KBSuppressPortal) { window.__KBSuppressPortal = false; return; }
         const _liveMsg = window.__getCurrentPersonalMsg && window.__getCurrentPersonalMsg();
-        if (_liveMsg) {
+        const _isFreeTarot = _isTarotRead && !_isPaidSession;
+        const _isFreeDailyHoro = SIGN_NAMES.has((q||'').toLowerCase().trim()) && !_isPaidSession;
+        if (_liveMsg && (_isFreeTarot || _isFreeDailyHoro || (!_isTarotRead && !SIGN_NAMES.has((q||'').toLowerCase().trim()) && !_isPaidSession))) {
           setTimeout(() => showPersonalMsgPortal(_liveMsg, ctr), 1200);
         }
         return;
@@ -4978,6 +4981,7 @@ function showTarotContext(tier, cardName, allCards) {
           if (ctr)   ctr.classList.add('visible');
           if (vsect) vsect.classList.add('visible');
           if (window.__clearSpread) window.__clearSpread();
+          window.__KBSuppressPortal = true; /* no personal msg portal on paid reads */
           if (window.OracleQuery) window.OracleQuery.setState('THINKING');
 
           if (txt) {
