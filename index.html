@@ -1270,11 +1270,12 @@ select.adv-input option{background:#111;}
 .aslot-flip { width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .5s ease;cursor:pointer; }
 .aslot-flip.flipped { transform:rotateY(180deg); }
 .aslot-face { position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;border-radius:10px; }
-.aslot-face.back { transform:rotateY(180deg);background:linear-gradient(135deg,#14082a,#280a3c);border:1px solid rgba(255,200,40,.6);box-shadow:inset 0 0 20px rgba(255,150,0,.08); }
-.aslot-back-title { font-size:10px;letter-spacing:.2em;color:rgba(255,200,40,.8);margin-bottom:8px;font-family:Courier New,monospace;text-align:center; }
-.aslot-back-line { width:28px;height:1px;background:rgba(255,200,40,.3);margin:6px auto; }
-.aslot-back-text { font-size:11px;line-height:1.55;color:rgba(255,255,255,.93);text-align:center;font-family:Georgia,serif; }
-.aslot-back-key  { font-size:9px;letter-spacing:.2em;color:rgba(255,200,40,.5);font-family:Courier New,monospace;text-align:center; }
+/* see aslot-back-key */
+.aslot-back-title { font-size:13px;letter-spacing:.18em;color:rgba(255,200,40,.95);margin-bottom:6px;font-family:Courier New,monospace;text-align:center;text-shadow:0 0 12px rgba(255,200,40,.6); }
+.aslot-back-line { width:36px;height:1px;background:linear-gradient(to right,transparent,rgba(255,200,40,.6),transparent);margin:8px auto; }
+.aslot-back-text { font-size:14px;line-height:1.6;color:#fff;text-align:center;font-family:Georgia,serif;text-shadow:0 0 8px rgba(255,255,255,.2);padding:0 4px; }
+.aslot-back-key  { font-size:10px;letter-spacing:.3em;color:rgba(255,200,40,.7);font-family:Courier New,monospace;text-align:center;text-shadow:0 0 8px rgba(255,200,40,.4); }
+.aslot-face.back { transform:rotateY(180deg);background:linear-gradient(135deg,#0e0520,#1a0835,#0e0520);border:1px solid rgba(255,200,40,.7);box-shadow:inset 0 0 30px rgba(120,0,200,.25),0 0 20px rgba(255,200,40,.15); }
 
 </style>
 </head>
@@ -5441,7 +5442,25 @@ function showPaywall(mode, sign, col) {
         slot.addEventListener('click', (e) => {
           e.stopPropagation();
           const flipEl = slot.querySelector('.aslot-flip');
-          if (flipEl) flipEl.classList.toggle('flipped');
+          if (!flipEl) return;
+          const isFlipped = flipEl.classList.contains('flipped');
+          if (isFlipped) {
+            /* Flip back and shrink */
+            flipEl.classList.remove('flipped');
+            slot.style.transition = 'transform .4s ease, z-index 0s .4s, box-shadow .4s ease';
+            slot.style.transform = '';
+            slot.style.zIndex = '';
+            slot.style.boxShadow = '';
+            slot.style.position = '';
+          } else {
+            /* Flip and expand */
+            flipEl.classList.add('flipped');
+            slot.style.transition = 'transform .4s ease, box-shadow .4s ease';
+            slot.style.transform = 'scale(1.45)';
+            slot.style.zIndex = '9999';
+            slot.style.boxShadow = '0 0 60px rgba(255,200,40,.5), 0 0 120px rgba(180,50,255,.25)';
+            slot.style.position = 'relative';
+          }
         });
       } else {
         slot.innerHTML =
