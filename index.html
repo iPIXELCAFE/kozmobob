@@ -5393,46 +5393,24 @@ function showPaywall(mode, sign, col) {
         /* Tap a collected card → flip to show meaning */
         slot.addEventListener('click', (e) => {
           e.stopPropagation();
-          /* Remove any existing flip card */
-          const existingFlip = document.getElementById('__kb_card_flip');
-          if (existingFlip) { existingFlip.remove(); return; }
-
-          const meaning = CARD_BACK_TEXT[card.n] || ('The ' + card.k.charAt(0) + card.k.slice(1).toLowerCase() + '. This card carries a truth you already know.');
-          const rect = slot.getBoundingClientRect();
-
-          const flip = document.createElement('div');
-          flip.id = '__kb_card_flip';
-          flip.style.cssText = `
-            position:fixed;
-            top:${rect.top}px; left:${rect.left}px;
-            width:${rect.width}px; height:${rect.height}px;
-            z-index:99999;
-            border-radius:12px;
-            background:linear-gradient(135deg,rgba(20,8,40,.98),rgba(40,10,60,.98));
-            border:1px solid rgba(255,200,40,.6);
-            box-shadow:0 0 40px rgba(255,200,40,.3),inset 0 0 20px rgba(255,150,0,.08);
-            display:flex; flex-direction:column; align-items:center; justify-content:center;
-            padding:16px 14px; box-sizing:border-box;
-            cursor:pointer;
-            opacity:0;
-            transform:perspective(600px) rotateY(90deg);
-            transition:opacity .35s ease, transform .35s ease;
-          `;
-          flip.innerHTML = `
-            <div style="font-size:11px;letter-spacing:.25em;color:rgba(255,200,40,.7);margin-bottom:8px;text-transform:uppercase;">${card.n}</div>
-            <div style="width:30px;height:1px;background:rgba(255,200,40,.35);margin-bottom:10px;"></div>
-            <div style="font-size:13px;line-height:1.6;color:rgba(255,255,255,.95);text-align:center;font-family:Georgia,serif;letter-spacing:.02em;">${meaning}</div>
-            <div style="width:30px;height:1px;background:rgba(255,200,40,.35);margin-top:10px;margin-bottom:8px;"></div>
-            <div style="font-size:10px;letter-spacing:.2em;color:rgba(255,200,40,.5);">${card.k}</div>
-          `;
-          document.body.appendChild(flip);
-          requestAnimationFrame(() => requestAnimationFrame(() => {
-            flip.style.opacity = '1';
-            flip.style.transform = 'perspective(600px) rotateY(0deg)';
-          }));
-          flip.addEventListener('click', () => flip.remove());
-          /* Auto-dismiss after 8s */
-          setTimeout(() => { if(flip.parentNode) flip.remove(); }, 8000);
+          const existing = document.getElementById('__kb_card_flip');
+          if (existing) { existing.remove(); return; }
+          const meaning = CARD_BACK_TEXT[card.n] || (card.k + '. This card carries a truth you already know.');
+          const ov = document.createElement('div');
+          ov.id = '__kb_card_flip';
+          ov.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.85);';
+          ov.innerHTML = `<div style="background:linear-gradient(135deg,#14082a,#280a3c);border:1px solid rgba(255,200,40,.7);border-radius:16px;padding:32px 28px;max-width:340px;width:100%;text-align:center;font-family:Courier New,monospace;box-shadow:0 0 60px rgba(255,200,40,.25);">
+            <div style="font-size:.6rem;letter-spacing:.3em;color:rgba(255,200,40,.6);margin-bottom:6px;">${card.r}</div>
+            <div style="font-size:2rem;margin-bottom:10px;">${card.g}</div>
+            <div style="font-size:1rem;letter-spacing:.15em;color:#fff;margin-bottom:4px;">${card.n}</div>
+            <div style="font-size:.6rem;letter-spacing:.25em;color:rgba(255,200,40,.55);margin-bottom:20px;">${card.k}</div>
+            <div style="width:40px;height:1px;background:rgba(255,200,40,.3);margin:0 auto 20px;"></div>
+            <div style="font-size:.85rem;line-height:1.7;color:rgba(255,255,255,.92);font-family:Georgia,serif;">${meaning}</div>
+            <div style="margin-top:24px;font-size:.5rem;letter-spacing:.3em;color:rgba(255,200,40,.3);cursor:pointer;" onclick="document.getElementById('__kb_card_flip').remove()">✕ &nbsp; CLOSE</div>
+          </div>`;
+          document.body.appendChild(ov);
+          ov.addEventListener('click', (ev) => { if(ev.target===ov) ov.remove(); });
+          setTimeout(() => { if(ov.parentNode) ov.remove(); }, 10000);
         });
       } else {
         slot.innerHTML =
