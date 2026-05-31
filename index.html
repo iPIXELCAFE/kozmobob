@@ -3940,15 +3940,30 @@ const OracleQuery = (() => {
     addToSpread(card);
     /* ── 4-line voice-synced free reading ── */
     cardReadAbort = false;                             /* fresh read — clear any old abort */
-    setTimeout(() => {
+    setTimeout(async () => {
       const teaser = document.getElementById('card-teaser');
       if (!teaser || cardReadAbort) return;
-      const fullReading = CARD_READINGS[card.n] || (card.n + '. ' + card.k + '.');
-      /* Split into up to 4 sentences */
-      const rawSents = fullReading.match(/[^.!?]+[.!?]+/g) || [fullReading];
-      const lines = rawSents.map(s => s.trim()).filter(Boolean).slice(0, 4);
+      /* AI-generated free teaser — fresh every draw */
+      teaser.innerHTML = '<div style="font-size:.6rem;letter-spacing:.2em;color:rgba(255,200,40,.35);text-align:center;padding:18px 0;font-family:Courier New,monospace;">BOB SEES…</div>';
+      teaser.classList.add('visible');
+      let lines = [];
+      try {
+        const _r = await fetch('/api/bob', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ question:'tarot card ' + card.n, sign: window.__KBSign||'gemini', mode:'tarot' })
+        });
+        const _d = await _r.json();
+        lines = (_d.lines || []).slice(0, 4);
+      } catch(e) {}
+      if (!lines.length) {
+        const fb = CARD_READINGS[card.n] || (card.n + '. ' + card.k + '.');
+        const rawSents = fb.match(/[^.!?]+[.!?]+/g) || [fb];
+        lines = rawSents.map(s => s.trim()).filter(Boolean).slice(0, 4);
+      }
+      if (cardReadAbort) { cooldown = false; return; }
       teaser.innerHTML = '';
       teaser.classList.add('visible');
+      
       /* X close button */
       const teaserX = document.createElement('button');
       teaserX.textContent = '✕';
@@ -4817,7 +4832,7 @@ function showTarotPicker(cardName, allCards) {
     },
     {
       id:'deep', label:'DEEP READ', price:'$0.99',
-      desc:'6 lines · read for YOUR situation',
+      desc:'8 lines · read for YOUR situation',
       paid: true
     },
     {
