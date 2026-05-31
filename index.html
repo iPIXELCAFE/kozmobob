@@ -1259,6 +1259,11 @@ select.adv-input option{background:#111;}
   flex-shrink:0;
 }
 .adv-chip:hover{background:rgba(255,200,40,.07);color:rgba(255,200,40,.9);}
+
+@keyframes __kb_flipIn {
+  from { opacity:0; transform:perspective(600px) rotateY(90deg) scale(.9); }
+  to   { opacity:1; transform:perspective(600px) rotateY(0deg)  scale(1);  }
+}
 </style>
 </head>
 <body>
@@ -5408,7 +5413,7 @@ function showPaywall(mode, sign, col) {
             display:flex; flex-direction:column; align-items:center; justify-content:center;
             padding:16px 14px; box-sizing:border-box;
             cursor:pointer;
-            animation:__kb_flipIn .35s ease;
+            animation:__kb_flipIn .4s ease forwards;
           `;
           flip.innerHTML = `
             <div style="font-size:11px;letter-spacing:.25em;color:rgba(255,200,40,.7);margin-bottom:8px;text-transform:uppercase;">\${card.n}</div>
