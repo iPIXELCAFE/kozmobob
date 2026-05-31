@@ -2864,7 +2864,13 @@ const OracleQuery = (() => {
 
     /* ── Mid-reading sponsor injection — after line 3, before final line ── */
     const _isTarotRead = /^tarot/i.test(q);
-    if (!_isTarotRead && !window.__KB.isPaid()) {
+    /* No ads on paid readings (Stripe paid, dev unlocked, or paid tier modes) */
+    const _lastMode = window.__KBLastMode || '';
+    window.__KBLastMode = null; /* consume it */
+    const _isPaidSession = window.__KB.isPaid()
+      || localStorage.getItem('__kb_dev') === '1'
+      || ['weekly','monthly','yearly'].includes(_lastMode);
+    if (!_isTarotRead && !_isPaidSession) {
       const SPONSORS = [
         { msg:'Seal your story forever at iPIXEL CAFE — digital time capsules for every moment.', url:'https://www.ipixelcafe.com', tts:'Seal your story forever at iPixel Cafe — digital time capsules for every moment.' },
         { msg:'Authentic Italian, Las Vegas. Pizza and pasta perfection at Novella.', url:'https://www.novellalv.com' },
@@ -2886,8 +2892,8 @@ const OracleQuery = (() => {
           _isTarotRead ? 'tarot' : SIGN_NAMES.has((q||'').toLowerCase().trim()) ? 'horoscope' : 'oracle',
           _cleanLines
         );
-        /* Hook — tease paid reading for free users, oracle/horoscope only, not tarot */
-        if (!window.__KB.isPaid() && !_isTarotRead && !SIGN_NAMES.has((q||'').toLowerCase().trim())) {
+        /* Hook — tease paid reading for free users, oracle only, not tarot or paid sessions */
+        if (!_isPaidSession && !_isTarotRead && !SIGN_NAMES.has((q||'').toLowerCase().trim())) {
           setTimeout(() => {
             const hook = document.createElement('span');
             hook.className = 'oracle-line';
@@ -4873,10 +4879,9 @@ function showReadingPicker(sign, r, g, b) {
       }
 
       close();
-      /* Build question and submit with correct mode */
-      const question = 'Give ' + sign + ' a ' + mode + ' reading.';
       /* Temporarily override fetchAILines mode by injecting into window */
       window.__KBReadingMode = mode;
+      window.__KBLastMode = mode; /* used to suppress ads on paid reads */
       if (window.OracleQuery) window.OracleQuery.submit(sign);
     });
   });
