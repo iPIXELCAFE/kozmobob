@@ -171,7 +171,7 @@ module.exports = async function handler(req, res) {
       _deepSituation ? 'The person told you this is on their mind: ' + _deepSituation : 'No situation given -- read the card for their general state right now.',
       'RULES:',
       '- Write exactly 6 lines. Each line stands alone. No bullets, no numbers.',
-      '- Each line must be 12-22 words. Make them cut deep.',
+      '- Each line must be 12-20 words. Make them cut deep.',
       '- Lead with what ' + _deepCardName + ' is truly saying -- its archetype, its shadow, its gift.',
       '- Then bring in their situation and show how the card speaks directly to it.',
       '- Speak like a psychic who SEES them, not a life coach giving advice.',
@@ -311,7 +311,74 @@ module.exports = async function handler(req, res) {
       .replace('SIGN', cleanSign);
   }
 
-  const maxTokens = cleanMode === "yearly" ? 520 : cleanMode === "monthly" ? 380 : cleanMode === "weekly" ? 280 : 180;
+  const maxTokens = cleanMode === "yearly" ? 520 : cleanMode === "monthly" ? 380 : cleanMode === "weekly" ? 280 : cleanMode === "tarot-deep" ? 360 : 180;
+
+  /* tarot-spread: 3 separate API calls, one per card, guaranteed 6 lines each */
+  if (cleanMode === "tarot-spread") {
+    var _pastM    = cleanQ.match(/PAST CARD:\s*([^|]+)/i);
+    var _presM    = cleanQ.match(/PRESENT CARD:\s*([^|]+)/i);
+    var _futM     = cleanQ.match(/FUTURE CARD:\s*([^|]+)/i);
+    var _pastCard = _pastM ? _pastM[1].trim() : "Card 1";
+    var _presCard = _presM ? _presM[1].trim() : "Card 2";
+    var _futCard  = _futM  ? _futM[1].trim()  : "Card 3";
+    var _sit      = cleanQ.replace(/\|?\s*(PAST|PRESENT|FUTURE) CARD:[^|]*/gi,"").replace(/^SITUATION:\s*/i,"").trim();
+
+    async function readOneCard(cardName, position, posDesc) {
+      var p = [
+        "You are KozmoBob -- a brutally honest tarot reader.",
+        _sit ? "The person said: " + _sit : "",
+        "Card: " + cardName + " — position: " + position.toUpperCase(),
+        "This position is about: " + posDesc,
+        "",
+        "Write EXACTLY 6 lines. You must count them. 6 lines. Not 4. Not 5. SIX.",
+        "Each line: 12-22 words. No bullets. No numbers. No headers.",
+        "Speak DIRECTLY to the person. YOU and YOUR only. Never say they/their/them.",
+        "Read " + cardName + " specifically — its archetype and shadow applied to this position.",
+        "Speak like a psychic who sees — not a life coach.",
+        "NEVER invent dates, years, names, or places.",
+        "Line 6 must land hard — the truth they cannot avoid.",
+        "Never start two consecutive lines with the same word.",
+      ].filter(Boolean).join("\n");
+
+      var r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + key, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            { role: "system", content: p },
+            { role: "user",   content: "Read " + cardName + " for the " + position + "." },
+          ],
+          max_tokens: 300,
+          temperature: 0.92,
+          top_p: 0.95,
+        }),
+      });
+      if (!r.ok) throw new Error("Groq " + r.status);
+      var d = await r.json();
+      var raw = (d.choices?.[0]?.message?.content || "");
+      return raw.split("\n")
+        .map(function(l){ return l.replace(/^[\d\.\-\*]+\s*/,"").trim(); })
+        .filter(function(l){ return l.length > 0; })
+        .slice(0, 6);
+    }
+
+    try {
+      var results = await Promise.all([
+        readOneCard(_pastCard, "past",    "what brought them here, what they lived through, what shaped them"),
+        readOneCard(_presCard, "present", "exactly where they stand right now, what is unavoidably true today"),
+        readOneCard(_futCard,  "future",  "where this path leads, what is coming, what they need to face"),
+      ]);
+      return res.status(200).json({ lines: [
+        "__LABEL__-- PAST --",    ...results[0],
+        "__LABEL__-- PRESENT --", ...results[1],
+        "__LABEL__-- FUTURE --",  ...results[2],
+      ]});
+    } catch(e) {
+      console.error("Spread error:", e);
+      return res.status(502).json({ error: "AI unavailable", fallback: true });
+    }
+  }
 
   try {
     const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -321,7 +388,7 @@ module.exports = async function handler(req, res) {
         model: "llama-3.3-70b-versatile",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: cleanQ || "Give me my reading." },
+          { role: "user",   content: cleanQ || "Give me my reading." },
         ],
         max_tokens: maxTokens,
         temperature: 0.92,
@@ -334,15 +401,15 @@ module.exports = async function handler(req, res) {
       return res.status(502).json({ error: "AI unavailable", fallback: true });
     }
     const data = await groqRes.json();
-    const raw = data.choices?.[0]?.message?.content || "";
-    const maxLines = cleanMode === "yearly" ? 8 : cleanMode === "monthly" ? 5 : cleanMode === "weekly" ? 6 : 5;
+    const raw  = data.choices?.[0]?.message?.content || "";
+    const maxLines = cleanMode === "yearly" ? 8 : cleanMode === "monthly" ? 5 : cleanMode === "weekly" ? 6 : cleanMode === "tarot-deep" ? 8 : 5;
     const ls = raw.split("\n")
-      .map(function(l) { return l.replace(/^[\d\.\-\*]+\s*/, "").trim(); })
-      .filter(function(l) { return l.length > 0; })
+      .map(function(l){ return l.replace(/^[\d\.\-\*]+\s*/,"").trim(); })
+      .filter(function(l){ return l.length > 0; })
       .slice(0, maxLines);
     if (!ls.length) return res.status(502).json({ error: "Empty response", fallback: true });
     return res.status(200).json({ lines: ls });
-  } catch (err) {
+  } catch(err) {
     console.error("Bob API error:", err);
     return res.status(502).json({ error: "Network error", fallback: true });
   }
