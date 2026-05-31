@@ -5356,14 +5356,14 @@ function showPaywall(mode, sign, col) {
   if(!overlay || !grid) return;
 
   const MILESTONES = {
-    1:  'Your collection begins. The cards are watching.',
-    3:  'Three cards. The pattern starts to emerge.',
-    5:  'Five cards discovered. KozmoBob sees your dedication.',
-    10: 'Ten cards. Halfway through the Major Arcana.',
-    15: 'Fifteen cards. The Vault of Knowledge opens before you.',
-    20: 'Twenty cards. Two remain. The rarest of all.',
-    21: 'Twenty-one. One card left. It will find you when you are ready.',
-    78: '✦ COMPLETE ✦  You have collected all 78 cards. The full deck is yours.',
+    1:  'Your first card. The deck is watching.',
+    5:  'Five cards. The pattern starts to emerge.',
+    10: 'Ten cards pulled. Something is shifting.',
+    22: 'All Major Arcana discovered. Now the Minor cards await.',
+    40: 'Forty cards. More than half the deck is yours.',
+    60: 'Sixty cards. The full picture is nearly revealed.',
+    77: 'Seventy-seven. One card remains. It will find you.',
+    78: '✦ COMPLETE ✦  All 78 cards collected. The full deck is yours.',
   };
 
   function getCollected(){ return window.__KB ? window.__KB.getCards() : []; }
@@ -5413,7 +5413,9 @@ function showPaywall(mode, sign, col) {
             display:flex; flex-direction:column; align-items:center; justify-content:center;
             padding:16px 14px; box-sizing:border-box;
             cursor:pointer;
-            animation:__kb_flipIn .4s ease forwards;
+            opacity:0;
+            transform:perspective(600px) rotateY(90deg);
+            transition:opacity .35s ease, transform .35s ease;
           `;
           flip.innerHTML = `
             <div style="font-size:11px;letter-spacing:.25em;color:rgba(255,200,40,.7);margin-bottom:8px;text-transform:uppercase;">\${card.n}</div>
@@ -5423,6 +5425,10 @@ function showPaywall(mode, sign, col) {
             <div style="font-size:10px;letter-spacing:.2em;color:rgba(255,200,40,.5);">\${card.k}</div>
           `;
           document.body.appendChild(flip);
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            flip.style.opacity = '1';
+            flip.style.transform = 'perspective(600px) rotateY(0deg)';
+          }));
           flip.addEventListener('click', () => flip.remove());
           /* Auto-dismiss after 8s */
           setTimeout(() => { if(flip.parentNode) flip.remove(); }, 8000);
