@@ -5385,10 +5385,42 @@ function showPaywall(mode, sign, col) {
           `<div class="aslot-div"></div>` +
           `<div class="aslot-name">${card.n}</div>` +
           `<div class="aslot-key">${card.k}</div>`;
-        /* Tap a collected card → full Bob reading for that card */
+        /* Tap a collected card → flip to show meaning */
         slot.addEventListener('click', () => {
-          closeAlbum();
-          setTimeout(() => { if(window.OracleQuery) window.OracleQuery.submit('tarot card ' + card.n); }, 420);
+          /* Remove any existing flip card */
+          const existingFlip = document.getElementById('__kb_card_flip');
+          if (existingFlip) { existingFlip.remove(); return; }
+
+          const meaning = CARD_BACK_TEXT[card.n] || ('The ' + card.k.charAt(0) + card.k.slice(1).toLowerCase() + '. This card carries a truth you already know.');
+          const rect = slot.getBoundingClientRect();
+
+          const flip = document.createElement('div');
+          flip.id = '__kb_card_flip';
+          flip.style.cssText = `
+            position:fixed;
+            top:${rect.top}px; left:${rect.left}px;
+            width:${rect.width}px; height:${rect.height}px;
+            z-index:99999;
+            border-radius:12px;
+            background:linear-gradient(135deg,rgba(20,8,40,.98),rgba(40,10,60,.98));
+            border:1px solid rgba(255,200,40,.6);
+            box-shadow:0 0 40px rgba(255,200,40,.3),inset 0 0 20px rgba(255,150,0,.08);
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            padding:16px 14px; box-sizing:border-box;
+            cursor:pointer;
+            animation:__kb_flipIn .35s ease;
+          `;
+          flip.innerHTML = `
+            <div style="font-size:11px;letter-spacing:.25em;color:rgba(255,200,40,.7);margin-bottom:8px;text-transform:uppercase;">\${card.n}</div>
+            <div style="width:30px;height:1px;background:rgba(255,200,40,.35);margin-bottom:10px;"></div>
+            <div style="font-size:13px;line-height:1.6;color:rgba(255,255,255,.95);text-align:center;font-family:Georgia,serif;letter-spacing:.02em;">\${meaning}</div>
+            <div style="width:30px;height:1px;background:rgba(255,200,40,.35);margin-top:10px;margin-bottom:8px;"></div>
+            <div style="font-size:10px;letter-spacing:.2em;color:rgba(255,200,40,.5);">\${card.k}</div>
+          `;
+          document.body.appendChild(flip);
+          flip.addEventListener('click', () => flip.remove());
+          /* Auto-dismiss after 8s */
+          setTimeout(() => { if(flip.parentNode) flip.remove(); }, 8000);
         });
       } else {
         slot.innerHTML =
