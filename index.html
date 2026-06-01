@@ -7841,7 +7841,7 @@ window.__KBShareCard=function(card,lines){
             /* Fly to letter target */
             s.x += (s.tx-s.x)*0.06;
             s.y += (s.ty-s.y)*0.06;
-            const glow = 1+e*2;
+            const glow = 1+e*0.5;
             drawStar(ctx, s.x, s.y, s.size*glow, s.col, Math.min(1,s.alpha*tw*1.4));
           } else if(s.isWin){
             /* Win bg stars drift and twinkle */
@@ -7854,7 +7854,7 @@ window.__KBShareCard=function(card,lines){
 
       /* Center radial glow in winning color during phase 2+ */
       if(phase>=2){
-        const gIntensity = phase===2 ? Math.min(1,(t-(p2Start||t))/80)*0.15 : 0.12;
+        const gIntensity = phase===2 ? Math.min(1,(t-(p2Start||t))/80)*0.07 : 0.05;
         const grd=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.min(W,H)*0.45);
         grd.addColorStop(0,`rgba(${winCol.r},${winCol.g},${winCol.b},${gIntensity})`);
         grd.addColorStop(1,'rgba(0,0,0,0)');
@@ -7867,7 +7867,7 @@ window.__KBShareCard=function(card,lines){
       ctx.save();
       ctx.globalAlpha = Math.min(1,alpha);
       ctx.shadowColor = `rgb(${col.r},${col.g},${col.b})`;
-      ctx.shadowBlur  = size*4;
+      ctx.shadowBlur  = size*1.8;
       ctx.fillStyle   = `rgb(${col.r},${col.g},${col.b})`;
       ctx.beginPath();
       ctx.arc(x,y,size,0,Math.PI*2);
