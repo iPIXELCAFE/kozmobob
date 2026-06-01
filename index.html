@@ -7775,19 +7775,12 @@ window.__KBShareCard=function(card,lines){
       const d=document.createElement('div');
       d.className='kb-reveal-line'; d.textContent=txt; textDiv.appendChild(d);
     });
-    const subEl=document.createElement('div');
-    subEl.className='kb-reveal-line';
-    subEl.style.marginTop='1.5em';
-    subEl.style.color='rgba(255,255,255,0.35)';
-    subEl.style.fontSize='clamp(.5rem,2vw,.7rem)';
-    subEl.style.letterSpacing='.3em';
-    subEl.textContent='TAP TO REVEAL';
-    textDiv.appendChild(subEl);
+
 
     setTimeout(()=>{textDiv.querySelectorAll('.kb-reveal-line')[0]?.classList.add('show');},600);
     setTimeout(()=>{textDiv.querySelectorAll('.kb-reveal-line')[1]?.classList.add('show');},2600);
     setTimeout(()=>{textDiv.querySelectorAll('.kb-reveal-line')[2]?.classList.add('show');},4600);
-    setTimeout(()=>{subEl.classList.add('show');},6200);
+
 
     /* ── Phase control ── */
     /* Phase 1: stars drift (0-?s, ends on tap or 8s auto)
@@ -7806,8 +7799,7 @@ window.__KBShareCard=function(card,lines){
     }
     /* Auto-trigger at 8s */
     setTimeout(triggerReveal, 8000);
-    canvas.addEventListener('click', triggerReveal);
-    overlay.addEventListener('click', e=>{if(e.target===canvas)triggerReveal();});
+
 
     function easeOut(t){return 1-(1-Math.min(1,t))*(1-Math.min(1,t));}
     function easeInOut(t){t=Math.min(1,t);return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
