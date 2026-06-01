@@ -207,6 +207,28 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;}
   align-items:center;justify-content:center;
   color:rgba(255,200,40,.6);font-family:'Courier New',monospace;
   font-size:.75rem;letter-spacing:.15em;text-align:center;}
+/* ── Cookie consent banner ── */
+#cookie-banner{
+  position:fixed;bottom:0;left:0;right:0;z-index:99999;
+  background:rgba(5,2,16,.97);
+  border-top:1px solid rgba(255,200,40,.2);
+  padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:14px;flex-wrap:wrap;
+  font-family:'Courier New',monospace;font-size:.58rem;letter-spacing:.08em;
+  color:rgba(255,255,255,.6);
+  transform:translateY(0);transition:transform .4s ease;
+}
+#cookie-banner.hidden{transform:translateY(110%);}
+#cookie-banner a{color:rgba(255,200,40,.7);text-decoration:none;}
+#cookie-banner a:hover{color:rgba(255,200,40,1);}
+#cookie-accept{
+  background:rgba(255,200,40,.12);border:1px solid rgba(255,200,40,.5);
+  border-radius:20px;padding:8px 20px;color:rgba(255,200,40,.95);
+  font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:2px;
+  cursor:pointer;white-space:nowrap;transition:background .2s;flex-shrink:0;
+}
+#cookie-accept:hover{background:rgba(255,200,40,.22);}
 </style>
 </head>
 <body>
@@ -216,6 +238,12 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;}
 
 <!-- Close button -->
 <button id="close-btn" onclick="history.length>1 ? history.back() : window.location.href='https://kozmobob.com'">CLOSE</button>
+
+<!-- Cookie consent banner -->
+<div id="cookie-banner" style="display:none;">
+  <span>We use cookies for ads &amp; analytics. <a href="/privacy" target="_blank">Privacy Policy</a></span>
+  <button id="cookie-accept">I AGREE</button>
+</div>
 
 <!-- Normal message card -->
 <div id="msg-card">
@@ -706,14 +734,4 @@ function copyRevealLink(){
       if(t-phaseStart > 1.5){ phase='done'; }
     }
     if(phase==='done'){
-      ball.scale.setScalar(1);
-      mat.uniforms.uPortalOpen.value = 0;
-      mat.uniforms.uLightningFlash.value = 0;
-      mat.uniforms.uRippleStrength.value = Math.sin(t*.3)*.1;
-    }
-    renderer.render(scene,cam);
-  })();
-})();
-</script>
-</body>
-</html>
+      ball.scale.
