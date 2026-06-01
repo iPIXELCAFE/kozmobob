@@ -7785,48 +7785,96 @@ window.__KBShareCard=function(card,lines){
       ctx.restore();
     }
 
+    function blobPath(radius, angle, lobes){
+      /* Organic blob like the real Bob — lobed pulsing shape */
+      ctx.beginPath();
+      const pts=12;
+      for(let i=0;i<=pts;i++){
+        const a=(i/pts)*Math.PI*2;
+        const lobe=1+lobes*(
+          0.18*Math.sin(2*a+angle*0.7)+
+          0.12*Math.sin(3*a-angle*0.5)+
+          0.08*Math.sin(5*a+angle*0.9)
+        );
+        const r=radius*lobe;
+        const x=cx+Math.cos(a)*r, y=cy+Math.sin(a)*r;
+        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.closePath();
+    }
+
     function drawBob(radius,mixT,intensity){
-      /* Outer atmospheric glow */
-      const og=ctx.createRadialGradient(cx,cy,radius*.5,cx,cy,radius*2.5);
-      const mc=mixT<0.5?loseCol:winCol;
-      og.addColorStop(0,`rgba(${mc.r},${mc.g},${mc.b},${0.12*intensity})`);
+      const lobe=0.6+0.4*Math.sin(bobAngle*0.4); /* breathing */
+      const winC=mixT>0.5?winCol:loseCol;
+      const loseC=mixT>0.5?loseCol:winCol;
+      const colorA=Math.abs(mixT*2-1); /* 0=balanced, 1=one color winning */
+
+      /* ── Outer atmospheric blob glow ── */
+      const og=ctx.createRadialGradient(cx,cy,radius*0.6,cx,cy,radius*3);
+      og.addColorStop(0,`rgba(${winC.r},${winC.g},${winC.b},${0.18*intensity*colorA})`);
+      og.addColorStop(0.4,`rgba(${loseC.r},${loseC.g},${loseC.b},${0.08*intensity*(1-colorA)})`);
       og.addColorStop(1,'rgba(0,0,0,0)');
       ctx.fillStyle=og;ctx.fillRect(0,0,W,H);
 
-      /* Core sphere */
-      const sg=ctx.createRadialGradient(cx-radius*.3,cy-radius*.3,0,cx,cy,radius);
-      sg.addColorStop(0,`rgba(255,255,255,${0.95*intensity})`);
-      sg.addColorStop(0.25,`rgba(${BLUE.r},${BLUE.g},${BLUE.b},${(1-mixT)*0.9*intensity})`);
-      sg.addColorStop(0.25,`rgba(${PINK.r},${PINK.g},${PINK.b},${mixT*0.9*intensity})`);
-      sg.addColorStop(0.7,`rgba(${winCol.r},${winCol.g},${winCol.b},${0.5*intensity})`);
-      sg.addColorStop(1,`rgba(0,0,0,${0.6*intensity})`);
-      ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);
-      ctx.fillStyle=sg;ctx.fill();
+      /* ── Main organic blob body ── */
+      ctx.save();
+      blobPath(radius, bobAngle, lobe*0.4);
+      const bg=ctx.createRadialGradient(cx-radius*0.25,cy-radius*0.25,0,cx,cy,radius*1.1);
+      bg.addColorStop(0,`rgba(255,220,100,${0.9*intensity})`);   /* golden center */
+      bg.addColorStop(0.3,`rgba(${winC.r},${winC.g},${winC.b},${0.75*intensity*colorA})`);
+      bg.addColorStop(0.3,`rgba(${loseC.r},${loseC.g},${loseC.b},${0.55*intensity*(1-colorA)})`);
+      bg.addColorStop(0.75,`rgba(${winC.r/2|0},${winC.g/2|0},${winC.b/2|0},${0.4*intensity})`);
+      bg.addColorStop(1,`rgba(0,0,0,0.7)`);
+      ctx.fillStyle=bg;ctx.fill();
+      ctx.restore();
 
-      /* Swirling inner segments — color war */
-      if(mixT<0.95){
-        const segs=12;
-        for(let i=0;i<segs;i++){
-          const a1=(i/segs)*Math.PI*2+bobAngle;
-          const a2=((i+.5)/segs)*Math.PI*2+bobAngle;
+      /* ── Inner dark orbit ring (like real Bob) ── */
+      ctx.save();
+      ctx.globalAlpha=0.55*intensity;
+      const ringR=radius*0.55;
+      const rg=ctx.createRadialGradient(cx,cy,ringR*0.5,cx,cy,ringR*1.1);
+      rg.addColorStop(0,'rgba(0,0,0,0)');
+      rg.addColorStop(0.5,'rgba(0,0,0,0.6)');
+      rg.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.beginPath();ctx.arc(cx,cy,ringR*1.15,0,Math.PI*2);
+      ctx.fillStyle=rg;ctx.fill();
+      ctx.restore();
+
+      /* ── Inner color war swirl ── */
+      if(colorA<0.92){
+        ctx.save();
+        const nSegs=10;
+        for(let i=0;i<nSegs;i++){
+          const a1=(i/nSegs)*Math.PI*2+bobAngle*1.4;
+          const a2=((i+0.45)/nSegs)*Math.PI*2+bobAngle*1.4;
           const c=i%2===0?PINK:BLUE;
-          const segA=i%2===0?mixT*(1-Math.min(1,warT/60))*0.35:
-                              (1-mixT)*(1-Math.min(1,warT/60))*0.35;
-          ctx.save();ctx.globalAlpha=segA*intensity;
+          const sA=(i%2===0?mixT:(1-mixT))*(1-colorA)*0.5*intensity;
+          ctx.globalAlpha=sA;
           ctx.beginPath();ctx.moveTo(cx,cy);
-          ctx.arc(cx,cy,radius*.75,a1,a2);ctx.closePath();
+          ctx.arc(cx,cy,radius*0.5,a1,a2);ctx.closePath();
           ctx.fillStyle=`rgb(${c.r},${c.g},${c.b})`;ctx.fill();
-          ctx.restore();
         }
+        ctx.restore();
       }
 
-      /* Rim glow */
-      ctx.save();ctx.globalAlpha=0.4*intensity;
-      ctx.shadowColor=`rgb(${winCol.r},${winCol.g},${winCol.b})`;
-      ctx.shadowBlur=radius*0.6;
-      ctx.strokeStyle=`rgba(${winCol.r},${winCol.g},${winCol.b},0.5)`;
-      ctx.lineWidth=2;
-      ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.stroke();
+      /* ── Inner core sphere (tiny like real Bob) ── */
+      ctx.save();
+      const cg=ctx.createRadialGradient(cx-radius*.08,cy-radius*.08,0,cx,cy,radius*0.22);
+      cg.addColorStop(0,'rgba(220,230,255,0.95)');
+      cg.addColorStop(0.5,`rgba(${winC.r},${winC.g},${winC.b},0.7)`);
+      cg.addColorStop(1,'rgba(20,20,40,0.9)');
+      ctx.globalAlpha=intensity;
+      ctx.beginPath();ctx.arc(cx,cy,radius*0.22,0,Math.PI*2);
+      ctx.fillStyle=cg;ctx.fill();
+      ctx.restore();
+
+      /* ── Pulse ring ── */
+      ctx.save();
+      ctx.globalAlpha=0.3*intensity*Math.abs(Math.sin(bobAngle*0.8));
+      ctx.strokeStyle=`rgba(${winC.r},${winC.g},${winC.b},0.8)`;
+      ctx.lineWidth=2.5;
+      blobPath(radius*1.08, bobAngle*0.6, lobe*0.25);
+      ctx.stroke();
       ctx.restore();
     }
 
@@ -7936,18 +7984,27 @@ window.__KBShareCard=function(card,lines){
             }
           });
         }
-        /* Congratulations text */
-        if(prog>0.6&&!document.getElementById('kb-congrats')){
-          const cg=document.createElement('div');
-          cg.id='kb-congrats';
-          cg.style.cssText='position:absolute;left:50%;transform:translateX(-50%);'+
-            'top:calc(50% + '+Math.round(DOT*3.2)+'px);'+
-            'font-family:Courier New,monospace;font-size:clamp(.65rem,2.5vw,.95rem);'+
-            'letter-spacing:3px;color:rgba(255,255,255,0.85);text-align:center;'+
-            'opacity:0;transition:opacity 2s;white-space:nowrap;pointer-events:none;z-index:5;';
-          cg.textContent='Congratulations '+p1+' & '+p2;
-          overlay.appendChild(cg);
-          setTimeout(()=>cg.style.opacity='1',100);
+        /* Congratulations — flies from behind (scale 0→1 in star color) */
+        if(prog>0.55){
+          const cp=Math.min(1,(prog-0.55)/0.45);
+          const scale=0.05+cp*0.95;
+          const alpha=cp*cp;
+          const txt='Congratulations  '+p1.toUpperCase()+' & '+p2.toUpperCase();
+          const fSize=Math.round(Math.min(W,H)*0.038*scale);
+          ctx.save();
+          ctx.globalAlpha=alpha;
+          ctx.font='500 '+fSize+'px Courier New,monospace';
+          ctx.textAlign='center';
+          ctx.shadowColor=`rgb(${winCol.r},${winCol.g},${winCol.b})`;
+          ctx.shadowBlur=fSize*0.8*cp;
+          ctx.fillStyle=`rgb(${winCol.r},${winCol.g},${winCol.b})`;
+          ctx.fillText(txt, cx, cy+DOT*3.8);
+          /* White letter cores */
+          ctx.shadowBlur=0;
+          ctx.fillStyle=`rgba(255,255,255,${0.7*cp})`;
+          ctx.font='500 '+fSize+'px Courier New,monospace';
+          ctx.fillText(txt, cx, cy+DOT*3.8);
+          ctx.restore();
         }
       }
     }
