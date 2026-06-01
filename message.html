@@ -12,16 +12,16 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;}
 #canvas-container{position:fixed;inset:0;z-index:0;}
 #starfield{position:fixed;inset:0;z-index:1;pointer-events:none;}
 
-/* ── Close / back button ── */
+/* ── Close button ── */
 #close-btn{
   position:fixed;top:16px;left:16px;z-index:50;
-  background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.15);
-  border-radius:50%;width:40px;height:40px;
-  color:rgba(255,255,255,.45);font-size:1.1rem;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:color .2s,border-color .2s;
+  background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.25);
+  border-radius:20px;padding:8px 18px;
+  color:rgba(255,255,255,.7);font-size:.65rem;letter-spacing:2px;
+  font-family:'Courier New',monospace;cursor:pointer;
+  transition:color .2s,border-color .2s,box-shadow .2s;
 }
-#close-btn:hover{color:rgba(255,200,40,.9);border-color:rgba(255,200,40,.4);}
+#close-btn:hover{color:#fff;border-color:rgba(255,200,40,.6);box-shadow:0 0 16px rgba(255,200,40,.2);}
 
 /* ── Normal message card ── */
 #msg-card{
@@ -121,10 +121,11 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;}
 
 #reveal-names{
   font-family:'Georgia',serif;
-  font-size:clamp(1.4rem,5vw,2rem);
+  font-size:clamp(1.1rem,4vw,1.8rem);
   color:#fff;
   text-shadow:0 0 40px currentColor;
   text-align:center;letter-spacing:.05em;
+  max-width:90vw;word-break:break-word;
 }
 #reveal-congrats{
   font-family:'Courier New',monospace;
@@ -133,15 +134,15 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;}
 }
 
 /* ── Social share buttons ── */
-#social-share{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;width:100%;max-width:420px;}
+#social-share{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;width:100%;max-width:520px;}
 .soc-btn{
-  display:flex;align-items:center;gap:6px;
-  font-family:'Courier New',monospace;font-size:.55rem;letter-spacing:1.5px;
-  border-radius:20px;padding:9px 14px;text-decoration:none;cursor:pointer;
+  display:flex;align-items:center;gap:5px;
+  font-family:'Courier New',monospace;font-size:.56rem;letter-spacing:1px;
+  border-radius:20px;padding:8px 13px;text-decoration:none;cursor:pointer;
   border:1px solid;background:none;transition:opacity .2s,box-shadow .2s;
   white-space:nowrap;
 }
-.soc-btn:hover{opacity:.8;box-shadow:0 0 18px rgba(255,255,255,.1);}
+.soc-btn:hover{opacity:.8;box-shadow:0 0 18px rgba(255,255,255,.15);}
 .soc-wa{color:rgba(37,211,102,.95);border-color:rgba(37,211,102,.45);}
 .soc-x{color:rgba(255,255,255,.85);border-color:rgba(255,255,255,.3);}
 .soc-fb{color:rgba(100,149,237,.95);border-color:rgba(100,149,237,.45);}
@@ -152,24 +153,24 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;}
 
 /* ── KozmoBob Promo ── */
 #kozmo-promo{
-  display:flex;flex-direction:column;align-items:center;gap:4px;
-  border-top:1px solid rgba(255,200,40,.12);
-  padding-top:14px;width:100%;max-width:420px;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  border-top:1px solid rgba(255,200,40,.2);
+  padding-top:14px;width:100%;max-width:500px;
 }
 #kozmo-promo-label{
-  font-family:'Courier New',monospace;font-size:.48rem;letter-spacing:.25em;
-  color:rgba(255,200,40,.35);text-transform:uppercase;
+  font-family:'Courier New',monospace;font-size:.55rem;letter-spacing:.25em;
+  color:rgba(255,200,40,.65);text-transform:uppercase;
 }
 #kozmo-promo-link{
-  font-family:'Georgia',serif;font-size:clamp(1.1rem,4vw,1.5rem);
-  color:rgba(255,200,40,.95);text-decoration:none;letter-spacing:.08em;
-  text-shadow:0 0 30px rgba(255,200,40,.4);
+  font-family:'Georgia',serif;font-size:clamp(1.3rem,4.5vw,1.8rem);
+  color:rgba(255,215,60,1);text-decoration:none;letter-spacing:.08em;
+  text-shadow:0 0 30px rgba(255,200,40,.7),0 0 60px rgba(255,150,0,.3);
   transition:text-shadow .3s;
 }
-#kozmo-promo-link:hover{text-shadow:0 0 50px rgba(255,200,40,.8);}
+#kozmo-promo-link:hover{text-shadow:0 0 60px rgba(255,200,40,1),0 0 120px rgba(255,150,0,.5);}
 #kozmo-promo-sub{
-  font-family:'Courier New',monospace;font-size:.5rem;letter-spacing:.18em;
-  color:rgba(255,200,40,.3);text-align:center;
+  font-family:'Courier New',monospace;font-size:.58rem;letter-spacing:.15em;
+  color:rgba(255,200,40,.7);text-align:center;
 }
 
 /* ── Not found ── */
@@ -185,7 +186,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;}
 <div id="canvas-container"></div>
 
 <!-- Close button -->
-<button id="close-btn" onclick="history.length>1 ? history.back() : window.location.href='https://kozmobob.com'" title="Back">✕</button>
+<button id="close-btn" onclick="history.length>1 ? history.back() : window.location.href='https://kozmobob.com'">CLOSE</button>
 
 <!-- Normal message card -->
 <div id="msg-card">
@@ -246,13 +247,14 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;}
     c.width = innerWidth; c.height = innerHeight;
     stars = [];
     for(let i=0;i<220;i++){
+      const palette = ['#ff80cc','#80b4ff','#ff60bb','#60a0ff','#ffaaee','#aaccff','#ffffff'];
       stars.push({
         x: Math.random()*c.width, y: Math.random()*c.height,
-        r: Math.random()*1.6+0.3,
+        r: Math.random()*1.8+0.3,
         a: Math.random(),
-        da: (Math.random()-.5)*.008,
-        speed: Math.random()*.15+.04,
-        dy: -(Math.random()*.08+.02),
+        da: (Math.random()-.5)*.009,
+        dy: -(Math.random()*.1+.02),
+        color: palette[Math.floor(Math.random()*palette.length)],
       });
     }
   }
@@ -267,8 +269,11 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;}
       s.y += s.dy;
       if(s.y < -2) s.y = c.height+2;
       ctx.globalAlpha = Math.max(0,Math.min(1,s.a));
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = s.color;
+      ctx.shadowColor = s.color;
+      ctx.shadowBlur = s.r * 3;
       ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur = 0;
     });
     ctx.globalAlpha=1;
   })();
@@ -399,9 +404,9 @@ function copyRevealLink(){
     const W=grCanvas.width=window.innerWidth;
     const H=grCanvas.height=window.innerHeight;
     const ctx=grCanvas.getContext('2d');
-    /* Position word in lower-center of Bob (Bob center = screen center) */
-    const cx=W/2, cy=H/2+H*0.04;
-    const DOT=Math.min(W,H)*0.075;
+    const DOT=Math.min(W,H)*0.068;
+    /* Center the 5-row word vertically on Bob (screen center) */
+    const cx=W/2, cy=H/2 - 2*DOT;
     const letters=word.split('');
     let totalW=0;
     letters.forEach(ch=>{totalW+=(GLYPHS[ch][0].length*DOT)+DOT;});
@@ -422,14 +427,12 @@ function copyRevealLink(){
     }));
     const cr=Math.round(winC.r*255), cg=Math.round(winC.g*255), cb=Math.round(winC.b*255);
 
-    /* "IT'S A" text above the word */
-    const itsAColor = isGirl ? 'rgba(255,150,210,.92)' : 'rgba(140,200,255,.92)';
+    /* "IT'S A" text — sits just above the star word */
+    const itsAColor = isGirl ? 'rgba(255,140,210,1)' : 'rgba(120,190,255,1)';
     itsAEl.textContent = "IT'S A";
     itsAEl.style.color = itsAColor;
-    /* Position above the star word */
-    const wordTopY = cy - H*0.01;
-    itsAEl.style.top = (wordTopY - DOT*5.5 - 40)+'px';
-    itsAEl.style.fontSize = clamp(1.1, 5, 1.8)+'rem';
+    itsAEl.style.top = Math.max(8, cy - 58)+'px';
+    itsAEl.style.fontSize = 'clamp(1rem,3.5vw,1.4rem)';
     setTimeout(()=>itsAEl.classList.add('show'), 600);
 
     let ft=0;
