@@ -105,6 +105,31 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;}
   color:rgba(255,200,40,.22);z-index:20;text-align:center;
   transition:opacity .5s;
 }
+/* ── Gender Reveal ── */
+#gr-lines{
+  position:fixed;inset:0;z-index:15;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  pointer-events:none;gap:1.4em;padding:20px;
+}
+.gr-line{
+  font-family:'Courier New',monospace;font-size:clamp(.8rem,3vw,1.1rem);
+  letter-spacing:.1em;color:rgba(255,255,255,.9);text-align:center;
+  opacity:0;transition:opacity 1.4s ease;line-height:1.6;
+}
+.gr-line.show{opacity:1;}
+#gr-reveal-btn{
+  position:fixed;bottom:22%;left:50%;transform:translateX(-50%);
+  z-index:16;background:none;
+  border:1px solid rgba(255,200,40,.6);border-radius:30px;
+  padding:14px 44px;font-family:'Courier New',monospace;
+  font-size:.75rem;letter-spacing:3px;color:rgba(255,200,40,.9);
+  cursor:pointer;opacity:0;transition:opacity 1s;pointer-events:none;
+}
+#gr-reveal-btn.show{opacity:1;pointer-events:all;}
+#gr-canvas{
+  position:fixed;inset:0;z-index:14;
+  pointer-events:none;display:none;
+}
 </style>
 </head>
 <body>
@@ -134,6 +159,9 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;}
 </div>
 
 <div id="phase-label">BOB IS RECEIVING A MESSAGE FROM THE COSMOS</div>
+<div id="gr-lines" style="display:none;"></div>
+<button id="gr-reveal-btn">✦ REVEAL</button>
+<canvas id="gr-canvas"></canvas>
 
 <script>
 /* ── Read URL params ── */
@@ -142,8 +170,19 @@ const emoji  = params.get('e') || '✨';
 const text   = params.get('t') || '';
 const from   = params.get('f') || '';
 const link   = params.get('l') || '';
+const gGender= params.get('gender') || '';  /* 'boy' or 'girl' */
+const gP1    = params.get('p1') || '';
+const gP2    = params.get('p2') || '';
+const gDue   = params.get('due') || '';
+const IS_REVEAL = !!gGender;
 
-if(!text){
+if(IS_REVEAL){
+  /* Gender reveal mode — handled by the reveal engine below */
+  document.getElementById('phase-label').textContent = 'THE COSMOS IS PREPARING…';
+  const pageUrl = window.location.href;
+  document.getElementById('share-wa').href  = 'https://wa.me/?text='+encodeURIComponent(pageUrl);
+  document.getElementById('share-sms').href = 'sms:?body='+encodeURIComponent(pageUrl);
+} else if(!text){
   document.getElementById('not-found').style.display = 'flex';
 } else {
   document.getElementById('msg-sym').textContent  = emoji;
@@ -167,6 +206,167 @@ function copyLink(){
     setTimeout(()=>{ btn.textContent='Copy Link'; btn.style.color=''; },2000);
   });
 }
+
+/* ── Gender Reveal Engine ── */
+(function(){
+  if(!IS_REVEAL) return;
+
+  const PINK   = {r:1.0, g:0.35, b:0.75};
+  const BLUE   = {r:0.25,g:0.60, b:1.0 };
+  const GOLD   = {r:1.0, g:0.62, b:0.08};
+  const isGirl = gGender==='girl';
+  const winC   = isGirl ? PINK : BLUE;
+  const loseC  = isGirl ? BLUE : PINK;
+  const word   = isGirl ? 'GIRL' : 'BOY';
+
+  /* Tension lines */
+  const linesDiv = document.getElementById('gr-lines');
+  const revBtn   = document.getElementById('gr-reveal-btn');
+  const grCanvas = document.getElementById('gr-canvas');
+  linesDiv.style.display = 'flex';
+
+  const LINES = [
+    gP1 && gP2 ? gP1+' and '+gP2+'…' : 'Two souls, one question…',
+    gDue ? 'A soul arriving '+gDue+'.' : 'A soul is arriving.',
+    'The stars have always known.',
+  ];
+  LINES.forEach(txt=>{
+    const el=document.createElement('div');
+    el.className='gr-line'; el.textContent=txt; linesDiv.appendChild(el);
+  });
+  setTimeout(()=>linesDiv.querySelectorAll('.gr-line')[0]?.classList.add('show'),1800);
+  setTimeout(()=>linesDiv.querySelectorAll('.gr-line')[1]?.classList.add('show'),3600);
+  setTimeout(()=>linesDiv.querySelectorAll('.gr-line')[2]?.classList.add('show'),5400);
+  setTimeout(()=>revBtn.classList.add('show'), 6800);
+
+  /* Bob color state — read/write by Three.js tick */
+  window.__grState = {
+    mode: 'idle', /* idle → war → winner → done */
+    warT: 0,
+    glowR: GOLD.r, glowG: GOLD.g, glowB: GOLD.b,
+  };
+
+  let revealTriggered = false;
+  function triggerReveal(){
+    if(revealTriggered) return; revealTriggered = true;
+    revBtn.classList.remove('show'); revBtn.style.display='none';
+    linesDiv.querySelectorAll('.gr-line').forEach(el=>{el.style.transition='opacity 1.2s';el.style.opacity='0';});
+    setTimeout(()=>linesDiv.style.display='none', 1400);
+    window.__grState.mode = 'war';
+  }
+  revBtn.addEventListener('click', triggerReveal);
+
+  /* ── Star word canvas ── */
+  const GLYPHS={
+    G:[[0,1,1,1],[1,0,0,0],[1,0,1,1],[1,0,0,1],[0,1,1,1]],
+    I:[[1,1,1],[0,1,0],[0,1,0],[0,1,0],[1,1,1]],
+    R:[[1,1,0],[1,0,1],[1,1,0],[1,0,1],[1,0,1]],
+    L:[[1,0,0],[1,0,0],[1,0,0],[1,0,0],[1,1,1]],
+    B:[[1,1,0],[1,0,1],[1,1,0],[1,0,1],[1,1,0]],
+    O:[[0,1,1,0],[1,0,0,1],[1,0,0,1],[1,0,0,1],[0,1,1,0]],
+    Y:[[1,0,1],[1,0,1],[0,1,0],[0,1,0],[0,1,0]],
+  };
+
+  function showStarWord(){
+    grCanvas.style.display='block';
+    const W=grCanvas.width=window.innerWidth;
+    const H=grCanvas.height=window.innerHeight;
+    const ctx=grCanvas.getContext('2d');
+    const cx=W/2, cy=H/2-H*0.06;
+    const DOT=Math.min(W,H)*0.068;
+    const letters=word.split('');
+    let totalW=0;
+    letters.forEach(ch=>{totalW+=(GLYPHS[ch][0].length*DOT)+DOT;});
+    totalW-=DOT;
+    let lx=cx-totalW/2, targets=[], groups=[];
+    letters.forEach(ch=>{
+      const g=GLYPHS[ch],pts=[];
+      for(let r=0;r<g.length;r++) for(let c=0;c<g[r].length;c++)
+        if(g[r][c]){const pt={x:lx+c*DOT,y:cy+r*DOT};targets.push(pt);pts.push(pt);}
+      groups.push(pts);
+      lx+=(GLYPHS[ch][0].length*DOT)+DOT;
+    });
+    const wStars=targets.map(t=>({
+      x:cx+(Math.random()-.5)*40, y:cy+(Math.random()-.5)*40,
+      tx:t.x, ty:t.y, size:3+Math.random()*1.2,
+      twinkle:Math.random()*Math.PI*2, tspd:.03+Math.random()*.02,
+      alpha:0,
+    }));
+    const cr=Math.round(winC.r*255), cg=Math.round(winC.g*255), cb=Math.round(winC.b*255);
+    let ft=0;
+    function drawWord(){
+      requestAnimationFrame(drawWord); ft++;
+      ctx.clearRect(0,0,W,H);
+      const prog=Math.min(1,ft/80);
+      wStars.forEach(s=>{
+        s.twinkle+=s.tspd;
+        const tw=0.8+0.2*Math.sin(s.twinkle);
+        s.x+=(s.tx-s.x)*0.07; s.y+=(s.ty-s.y)*0.07;
+        s.alpha=Math.min(1,s.alpha+0.025);
+        ctx.save();
+        ctx.globalAlpha=s.alpha*tw;
+        ctx.shadowColor=`rgb(${cr},${cg},${cb})`;
+        ctx.shadowBlur=s.size*2;
+        ctx.fillStyle=`rgb(${cr},${cg},${cb})`;
+        ctx.beginPath(); ctx.arc(s.x,s.y,s.size,0,Math.PI*2); ctx.fill();
+        ctx.shadowBlur=0; ctx.fillStyle='rgba(255,255,255,.85)';
+        ctx.beginPath(); ctx.arc(s.x,s.y,s.size*.28,0,Math.PI*2); ctx.fill();
+        ctx.restore();
+      });
+      /* Constellation lines */
+      if(prog>0.4){
+        const la=Math.min(1,(prog-0.4)/0.6)*0.2;
+        ctx.strokeStyle=`rgba(${cr},${cg},${cb},${la})`; ctx.lineWidth=0.9;
+        groups.forEach(pts=>{
+          for(let i=0;i<pts.length-1;i++){
+            const a=pts[i],b=pts[i+1];
+            if(Math.abs(a.x-b.x)<=DOT*1.1&&Math.abs(a.y-b.y)<=DOT*1.1){
+              ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+            }
+          }
+        });
+      }
+      /* Congratulations — flies from behind */
+      if(prog>0.5){
+        const cp=Math.min(1,(prog-0.5)/0.5);
+        const scale=0.05+cp*0.95;
+        const fSize=Math.round(Math.min(W,H)*0.035*scale);
+        const txt='Congratulations  '+(gP1?gP1.toUpperCase():'')+(gP2?' & '+gP2.toUpperCase():'');
+        ctx.save();
+        ctx.globalAlpha=cp*cp;
+        ctx.font='500 '+fSize+'px Courier New,monospace';
+        ctx.textAlign='center';
+        ctx.shadowColor=`rgb(${cr},${cg},${cb})`;
+        ctx.shadowBlur=fSize*0.7*cp;
+        ctx.fillStyle=`rgb(${cr},${cg},${cb})`;
+        ctx.fillText(txt, cx, cy+DOT*3.6);
+        ctx.shadowBlur=0;
+        ctx.fillStyle=`rgba(255,255,255,${0.65*cp})`;
+        ctx.fillText(txt, cx, cy+DOT*3.6);
+        ctx.restore();
+      }
+      /* Share buttons after word settles */
+      if(ft===90){
+        document.getElementById('msg-card').classList.add('visible');
+        /* Show only share row */
+        document.getElementById('msg-sym').style.display='none';
+        document.getElementById('msg-text').style.display='none';
+        document.getElementById('msg-from').style.display='none';
+        document.getElementById('msg-divider').style.display='none';
+        document.getElementById('msg-source').style.display='none';
+        document.getElementById('msg-link-btn').style.display='none';
+        document.getElementById('kozmo-link').style.display='none';
+        /* Style share row for reveal */
+        document.getElementById('share-row').style.marginTop='0';
+      }
+    }
+    drawWord();
+  }
+
+  window.__grShowWord = showStarWord;
+  window.__grWinColor = winC;
+  window.__grLoseColor = loseC;
+})();
 
 /* ── Real Bob — same shader as main page ── */
 (function(){
@@ -258,21 +458,72 @@ function copyLink(){
   const label = document.getElementById('phase-label');
   const card  = document.getElementById('msg-card');
 
+  /* Set initial Bob color based on mode */
+  const WC = window.__grWinColor  || {r:1,g:.62,b:.08};
+  const LC = window.__grLoseColor || {r:1,g:.62,b:.08};
+
   const clk = new THREE.Clock();
+  let warPhase=0, wordShown=false;
   (function tick(){
     requestAnimationFrame(tick);
     const t = clk.getElapsedTime();
     mat.uniforms.uTime.value = t;
     auraMat.uniforms.uTime.value = t;
-
     ball.rotation.y = t * .08;
     ball.rotation.x = Math.sin(t*.12)*.06;
 
+    /* ── Gender reveal color war ── */
+    if(IS_REVEAL && window.__grState){
+      const gs = window.__grState;
+      if(gs.mode==='war'){
+        gs.warT++;
+        /* Oscillate between pink and blue, speed increases */
+        const spd = 0.04 + Math.min(0.25, gs.warT*0.0012);
+        const mix = 0.5+0.5*Math.sin(gs.warT*spd);
+        gs.glowR = LC.r + (WC.r-LC.r)*mix;
+        gs.glowG = LC.g + (WC.g-LC.g)*mix;
+        gs.glowB = LC.b + (WC.b-LC.b)*mix;
+        mat.uniforms.uGlowColor.value.set(gs.glowR,gs.glowG,gs.glowB);
+        auraMat.uniforms.uGlowColor.value.set(gs.glowR,gs.glowG,gs.glowB);
+        ball.scale.setScalar(1+0.06*Math.sin(t*8));
+        mat.uniforms.uRippleStrength.value = 1.5+Math.sin(gs.warT*.08)*1.2;
+        mat.uniforms.uRippleTime.value = t*4;
+        if(gs.warT>=160){ gs.mode='winning'; gs.warT=0; }
+      } else if(gs.mode==='winning'){
+        gs.warT++;
+        const prog=Math.min(1,gs.warT/50);
+        /* Transition to winner color */
+        gs.glowR += (WC.r-gs.glowR)*0.08;
+        gs.glowG += (WC.g-gs.glowG)*0.08;
+        gs.glowB += (WC.b-gs.glowB)*0.08;
+        mat.uniforms.uGlowColor.value.set(gs.glowR,gs.glowG,gs.glowB);
+        auraMat.uniforms.uGlowColor.value.set(gs.glowR,gs.glowG,gs.glowB);
+        mat.uniforms.uLightningFlash.value = Math.sin(prog*Math.PI)*1.4;
+        mat.uniforms.uPortalOpen.value = prog*0.6;
+        auraMat.uniforms.uPortalOpen.value = prog*0.6;
+        ball.scale.setScalar(1+prog*0.35);
+        if(gs.warT>=60){ gs.mode='done'; mat.uniforms.uLightningFlash.value=0; }
+      } else if(gs.mode==='done'){
+        /* Bob settles — winning color, keeps pulsing, never static */
+        gs.glowR += (WC.r-gs.glowR)*0.03;
+        gs.glowG += (WC.g-gs.glowG)*0.03;
+        gs.glowB += (WC.b-gs.glowB)*0.03;
+        mat.uniforms.uGlowColor.value.set(gs.glowR,gs.glowG,gs.glowB);
+        auraMat.uniforms.uGlowColor.value.set(gs.glowR,gs.glowG,gs.glowB);
+        mat.uniforms.uPortalOpen.value = 0;
+        mat.uniforms.uRippleStrength.value = Math.sin(t*.35)*.15;
+        ball.scale.setScalar(1);
+        if(!wordShown){ wordShown=true; if(window.__grShowWord) window.__grShowWord(); }
+      }
+      renderer.render(scene,cam);
+      return;
+    }
+
+    /* ── Normal message portal sequence ── */
     if(phase==='idle' && t > 1.2){
       phase='distort'; phaseStart=t;
       label.textContent = 'SOMETHING IS COMING THROUGH…';
     }
-
     if(phase==='distort'){
       const p = Math.min(1,(t-phaseStart)/2.5);
       mat.uniforms.uRippleStrength.value = p*2.8;
@@ -282,7 +533,6 @@ function copyLink(){
       ball.scale.setScalar(1+p*.12*Math.sin(t*6));
       if(t-phaseStart > 2.5){ phase='flash'; phaseStart=t; label.textContent='THE PORTAL OPENS…'; }
     }
-
     if(phase==='flash'){
       const p = Math.min(1,(t-phaseStart)/1.3);
       mat.uniforms.uLightningFlash.value = Math.sin(p*Math.PI)*1.2;
@@ -291,7 +541,6 @@ function copyLink(){
       ball.scale.setScalar(1+p*.4);
       if(t-phaseStart > 1.3){ phase='reveal'; phaseStart=t; label.textContent=''; card.classList.add('visible'); }
     }
-
     if(phase==='reveal'){
       const p = Math.min(1,(t-phaseStart)/1.5);
       mat.uniforms.uLightningFlash.value = (1-p)*.3;
@@ -300,14 +549,12 @@ function copyLink(){
       ball.scale.setScalar(1+(.4*(1-p)));
       if(t-phaseStart > 1.5){ phase='done'; }
     }
-
     if(phase==='done'){
       ball.scale.setScalar(1);
       mat.uniforms.uPortalOpen.value = 0;
       mat.uniforms.uLightningFlash.value = 0;
       mat.uniforms.uRippleStrength.value = Math.sin(t*.3)*.1;
     }
-
     renderer.render(scene,cam);
   })();
 })();
