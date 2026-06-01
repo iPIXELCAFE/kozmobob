@@ -10,7 +10,20 @@
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;background:#000;overflow:hidden;}
 #canvas-container{position:fixed;inset:0;z-index:0;}
+#starfield{position:fixed;inset:0;z-index:1;pointer-events:none;}
 
+/* ── Close / back button ── */
+#close-btn{
+  position:fixed;top:16px;left:16px;z-index:50;
+  background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.15);
+  border-radius:50%;width:40px;height:40px;
+  color:rgba(255,255,255,.45);font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:color .2s,border-color .2s;
+}
+#close-btn:hover{color:rgba(255,200,40,.9);border-color:rgba(255,200,40,.4);}
+
+/* ── Normal message card ── */
 #msg-card{
   position:fixed;inset:0;z-index:10;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -18,124 +31,163 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;}
   opacity:0;transition:opacity 1.4s ease;
 }
 #msg-card.visible{opacity:1;pointer-events:all;}
-
-#msg-inner{
-  text-align:center;
-  max-width:380px;width:100%;
-}
-
-#msg-sym{
-  font-size:5rem;line-height:1;
-  margin-bottom:20px;display:block;
+#msg-inner{text-align:center;max-width:380px;width:100%;}
+#msg-sym{font-size:5rem;line-height:1;margin-bottom:20px;display:block;
   filter:drop-shadow(0 0 24px rgba(255,200,60,.8));
-  animation:symFloat 3s ease-in-out infinite;
-}
-@keyframes symFloat{
-  0%,100%{transform:translateY(0);}
-  50%{transform:translateY(-10px);}
-}
-
-#msg-text{
-  font-family:'Georgia',serif;
-  font-size:clamp(1.5rem,5vw,2.1rem);
-  line-height:1.4;
-  color:rgba(255,222,105,.97);
-  text-shadow:0 0 28px rgba(255,150,20,.6),0 0 60px rgba(255,100,10,.3);
-  margin-bottom:14px;
-}
-
-#msg-from{
-  font-family:'Courier New',monospace;
-  font-size:.80rem;letter-spacing:.18em;
-  color:rgba(255,200,40,.45);
-  margin-bottom:36px;
-}
-
-#msg-divider{
-  width:50%;height:1px;
-  background:linear-gradient(to right,transparent,rgba(255,200,40,.35),transparent);
-  margin:0 auto 24px;
-}
-
-#msg-source{
-  font-family:'Courier New',monospace;
-  font-size:.52rem;letter-spacing:.22em;
-  color:rgba(255,200,40,.25);
-  text-transform:uppercase;margin-bottom:22px;
-}
-
-#msg-link-btn{
-  display:none;
-  font-family:'Courier New',monospace;font-size:.65rem;letter-spacing:.12em;
-  color:rgba(0,207,255,.90);border:1px solid rgba(0,207,255,.35);
-  border-radius:20px;padding:10px 24px;text-decoration:none;
-  margin-bottom:20px;transition:border-color .2s,box-shadow .2s;
-}
+  animation:symFloat 3s ease-in-out infinite;}
+@keyframes symFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+#msg-text{font-family:'Georgia',serif;font-size:clamp(1.5rem,5vw,2.1rem);line-height:1.4;
+  color:rgba(255,222,105,.97);text-shadow:0 0 28px rgba(255,150,20,.6),0 0 60px rgba(255,100,10,.3);margin-bottom:14px;}
+#msg-from{font-family:'Courier New',monospace;font-size:.80rem;letter-spacing:.18em;
+  color:rgba(255,200,40,.45);margin-bottom:36px;}
+#msg-divider{width:50%;height:1px;background:linear-gradient(to right,transparent,rgba(255,200,40,.35),transparent);
+  margin:0 auto 24px;}
+#msg-source{font-family:'Courier New',monospace;font-size:.52rem;letter-spacing:.22em;
+  color:rgba(255,200,40,.25);text-transform:uppercase;margin-bottom:22px;}
+#msg-link-btn{display:none;font-family:'Courier New',monospace;font-size:.65rem;letter-spacing:.12em;
+  color:rgba(0,207,255,.90);border:1px solid rgba(0,207,255,.35);border-radius:20px;
+  padding:10px 24px;text-decoration:none;margin-bottom:20px;transition:border-color .2s,box-shadow .2s;}
 #msg-link-btn:hover{border-color:rgba(0,207,255,.8);box-shadow:0 0 18px rgba(0,207,255,.25);}
+#kozmo-link-msg{display:block;margin-top:28px;font-family:'Courier New',monospace;font-size:.50rem;
+  letter-spacing:.22em;color:rgba(255,200,40,.20);text-decoration:none;text-transform:uppercase;transition:color .2s;}
+#kozmo-link-msg:hover{color:rgba(255,200,40,.5);}
 
+/* ── Share row (normal message) ── */
 #share-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
-.share-btn{
-  font-family:'Courier New',monospace;font-size:.58rem;letter-spacing:1.5px;
+.share-btn{font-family:'Courier New',monospace;font-size:.58rem;letter-spacing:1.5px;
   border-radius:20px;padding:8px 16px;text-decoration:none;cursor:pointer;
-  border:1px solid;background:none;transition:opacity .2s;
-}
+  border:1px solid;background:none;transition:opacity .2s;}
 .share-btn:hover{opacity:.7;}
 .share-wa{color:rgba(37,211,102,.9);border-color:rgba(37,211,102,.4);}
 .share-sms{color:rgba(0,207,255,.9);border-color:rgba(0,207,255,.4);}
 .share-copy{color:rgba(255,200,40,.9);border-color:rgba(255,200,40,.4);}
 
-#kozmo-link{
-  display:block;margin-top:28px;
-  font-family:'Courier New',monospace;font-size:.50rem;letter-spacing:.22em;
-  color:rgba(255,200,40,.20);text-decoration:none;text-transform:uppercase;
-  transition:color .2s;
-}
-#kozmo-link:hover{color:rgba(255,200,40,.5);}
-
-#not-found{
-  position:fixed;inset:0;z-index:20;
-  display:none;align-items:center;justify-content:center;
-  color:rgba(255,200,40,.6);font-family:'Courier New',monospace;
-  font-size:.75rem;letter-spacing:.15em;text-align:center;
-}
-
+/* ── Phase label ── */
 #phase-label{
-  position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
-  font-family:'Courier New',monospace;font-size:.50rem;letter-spacing:.22em;
-  color:rgba(255,200,40,.22);z-index:20;text-align:center;
-  transition:opacity .5s;
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  font-family:'Courier New',monospace;font-size:.58rem;letter-spacing:.22em;
+  color:rgba(255,200,40,.50);z-index:20;text-align:center;
+  transition:opacity .5s;white-space:nowrap;
 }
-/* ── Gender Reveal ── */
-#gr-lines{
-  position:fixed;inset:0;z-index:15;
+
+/* ── Gender Reveal — tension lines ── */
+#gr-lines{position:fixed;inset:0;z-index:15;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  pointer-events:none;gap:1.4em;padding:20px;
-}
-.gr-line{
-  font-family:'Courier New',monospace;font-size:clamp(.8rem,3vw,1.1rem);
-  letter-spacing:.1em;color:rgba(255,255,255,.9);text-align:center;
-  opacity:0;transition:opacity 1.4s ease;line-height:1.6;
-}
+  pointer-events:none;gap:1.6em;padding:20px;}
+.gr-line{font-family:'Georgia',serif;font-size:clamp(1.1rem,4.5vw,1.6rem);
+  letter-spacing:.06em;color:rgba(255,255,255,.95);text-align:center;
+  opacity:0;transition:opacity 1.6s ease;line-height:1.6;
+  text-shadow:0 0 40px rgba(255,200,40,.5),0 0 80px rgba(255,150,0,.2);}
 .gr-line.show{opacity:1;}
 #gr-reveal-btn{
   position:fixed;bottom:22%;left:50%;transform:translateX(-50%);
-  z-index:16;background:none;
-  border:1px solid rgba(255,200,40,.6);border-radius:30px;
-  padding:14px 44px;font-family:'Courier New',monospace;
-  font-size:.75rem;letter-spacing:3px;color:rgba(255,200,40,.9);
-  cursor:pointer;opacity:0;transition:opacity 1s;pointer-events:none;
+  z-index:16;background:rgba(255,200,40,.08);
+  border:1.5px solid rgba(255,200,40,.7);border-radius:30px;
+  padding:16px 52px;font-family:'Courier New',monospace;
+  font-size:.85rem;letter-spacing:4px;color:rgba(255,200,40,1);
+  cursor:pointer;opacity:0;transition:opacity 1s,box-shadow .3s;pointer-events:none;
+  box-shadow:0 0 0 rgba(255,200,40,0);
 }
-#gr-reveal-btn.show{opacity:1;pointer-events:all;}
-#gr-canvas{
-  position:fixed;inset:0;z-index:14;
-  pointer-events:none;display:none;
+#gr-reveal-btn.show{opacity:1;pointer-events:all;
+  box-shadow:0 0 30px rgba(255,200,40,.25),0 0 60px rgba(255,150,0,.1);}
+#gr-reveal-btn:hover{box-shadow:0 0 50px rgba(255,200,40,.45),0 0 100px rgba(255,150,0,.2);}
+
+/* ── Star word canvas ── */
+#gr-canvas{position:fixed;inset:0;z-index:14;pointer-events:none;display:none;}
+
+/* ── "IT'S A" overlay text ── */
+#its-a-text{
+  position:fixed;left:50%;transform:translateX(-50%);
+  z-index:16;pointer-events:none;opacity:0;
+  font-family:'Courier New',monospace;letter-spacing:.3em;
+  font-size:clamp(.9rem,3.5vw,1.3rem);color:rgba(255,255,255,.9);
+  text-align:center;white-space:nowrap;
+  text-shadow:0 0 30px currentColor;
+  transition:opacity 1.2s ease;
 }
+#its-a-text.show{opacity:1;}
+
+/* ── Post-reveal overlay ── */
+#reveal-result{
+  position:fixed;bottom:0;left:0;right:0;z-index:20;
+  padding:22px 20px 28px;
+  background:linear-gradient(to top, rgba(0,0,0,.97) 70%, transparent);
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  opacity:0;transform:translateY(30px);
+  transition:opacity 1s ease, transform 1s ease;
+  pointer-events:none;
+}
+#reveal-result.show{opacity:1;transform:translateY(0);pointer-events:all;}
+
+#reveal-names{
+  font-family:'Georgia',serif;
+  font-size:clamp(1.4rem,5vw,2rem);
+  color:#fff;
+  text-shadow:0 0 40px currentColor;
+  text-align:center;letter-spacing:.05em;
+}
+#reveal-congrats{
+  font-family:'Courier New',monospace;
+  font-size:clamp(.6rem,2.5vw,.75rem);letter-spacing:.25em;
+  color:rgba(255,200,40,.6);text-align:center;text-transform:uppercase;
+}
+
+/* ── Social share buttons ── */
+#social-share{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;width:100%;max-width:420px;}
+.soc-btn{
+  display:flex;align-items:center;gap:6px;
+  font-family:'Courier New',monospace;font-size:.55rem;letter-spacing:1.5px;
+  border-radius:20px;padding:9px 14px;text-decoration:none;cursor:pointer;
+  border:1px solid;background:none;transition:opacity .2s,box-shadow .2s;
+  white-space:nowrap;
+}
+.soc-btn:hover{opacity:.8;box-shadow:0 0 18px rgba(255,255,255,.1);}
+.soc-wa{color:rgba(37,211,102,.95);border-color:rgba(37,211,102,.45);}
+.soc-x{color:rgba(255,255,255,.85);border-color:rgba(255,255,255,.3);}
+.soc-fb{color:rgba(100,149,237,.95);border-color:rgba(100,149,237,.45);}
+.soc-ig{color:rgba(255,100,180,.9);border-color:rgba(255,100,180,.4);}
+.soc-tt{color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.25);}
+.soc-sms{color:rgba(0,207,255,.9);border-color:rgba(0,207,255,.4);}
+.soc-copy{color:rgba(255,200,40,.95);border-color:rgba(255,200,40,.45);}
+
+/* ── KozmoBob Promo ── */
+#kozmo-promo{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  border-top:1px solid rgba(255,200,40,.12);
+  padding-top:14px;width:100%;max-width:420px;
+}
+#kozmo-promo-label{
+  font-family:'Courier New',monospace;font-size:.48rem;letter-spacing:.25em;
+  color:rgba(255,200,40,.35);text-transform:uppercase;
+}
+#kozmo-promo-link{
+  font-family:'Georgia',serif;font-size:clamp(1.1rem,4vw,1.5rem);
+  color:rgba(255,200,40,.95);text-decoration:none;letter-spacing:.08em;
+  text-shadow:0 0 30px rgba(255,200,40,.4);
+  transition:text-shadow .3s;
+}
+#kozmo-promo-link:hover{text-shadow:0 0 50px rgba(255,200,40,.8);}
+#kozmo-promo-sub{
+  font-family:'Courier New',monospace;font-size:.5rem;letter-spacing:.18em;
+  color:rgba(255,200,40,.3);text-align:center;
+}
+
+/* ── Not found ── */
+#not-found{position:fixed;inset:0;z-index:20;display:none;
+  align-items:center;justify-content:center;
+  color:rgba(255,200,40,.6);font-family:'Courier New',monospace;
+  font-size:.75rem;letter-spacing:.15em;text-align:center;}
 </style>
 </head>
 <body>
 
+<canvas id="starfield"></canvas>
 <div id="canvas-container"></div>
 
+<!-- Close button -->
+<button id="close-btn" onclick="history.length>1 ? history.back() : window.location.href='https://kozmobob.com'" title="Back">✕</button>
+
+<!-- Normal message card -->
 <div id="msg-card">
   <div id="msg-inner">
     <span id="msg-sym">✨</span>
@@ -149,7 +201,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;}
       <a id="share-sms" class="share-btn share-sms">SMS</a>
       <button id="share-copy" class="share-btn share-copy" onclick="copyLink()">Copy Link</button>
     </div>
-    <a href="https://kozmobob.com" id="kozmo-link">Ask KozmoBob →</a>
+    <a href="https://kozmobob.com" id="kozmo-link-msg">Ask KozmoBob →</a>
   </div>
 </div>
 
@@ -162,26 +214,97 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;}
 <div id="gr-lines" style="display:none;"></div>
 <button id="gr-reveal-btn">✦ REVEAL</button>
 <canvas id="gr-canvas"></canvas>
+<div id="its-a-text"></div>
+
+<!-- Post-reveal panel -->
+<div id="reveal-result">
+  <div id="reveal-congrats">✦ CONGRATULATIONS ✦</div>
+  <div id="reveal-names"></div>
+  <div id="social-share">
+    <a id="rv-wa"   class="soc-btn soc-wa"  target="_blank">💬 WhatsApp</a>
+    <a id="rv-x"    class="soc-btn soc-x"   target="_blank">𝕏 Post</a>
+    <a id="rv-fb"   class="soc-btn soc-fb"  target="_blank">f Facebook</a>
+    <a id="rv-ig"   class="soc-btn soc-ig"  target="_blank">◎ Instagram</a>
+    <a id="rv-tt"   class="soc-btn soc-tt"  target="_blank">♪ TikTok</a>
+    <a id="rv-sms"  class="soc-btn soc-sms">✉ SMS</a>
+    <button id="rv-copy" class="soc-btn soc-copy" onclick="copyRevealLink()">⎘ Copy Link</button>
+  </div>
+  <div id="kozmo-promo">
+    <div id="kozmo-promo-label">✦ create your own cosmic reveal at</div>
+    <a href="https://kozmobob.com" target="_blank" id="kozmo-promo-link">KozmoBob.com</a>
+    <div id="kozmo-promo-sub">horoscopes · tarot · gender reveals · personal messages</div>
+  </div>
+</div>
 
 <script>
-/* ── Read URL params ── */
+/* ── Ambient starfield ── */
+(function(){
+  const c = document.getElementById('starfield');
+  const ctx = c.getContext('2d');
+  let stars = [];
+  function resize(){
+    c.width = innerWidth; c.height = innerHeight;
+    stars = [];
+    for(let i=0;i<220;i++){
+      stars.push({
+        x: Math.random()*c.width, y: Math.random()*c.height,
+        r: Math.random()*1.6+0.3,
+        a: Math.random(),
+        da: (Math.random()-.5)*.008,
+        speed: Math.random()*.15+.04,
+        dy: -(Math.random()*.08+.02),
+      });
+    }
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  (function tick(){
+    requestAnimationFrame(tick);
+    ctx.clearRect(0,0,c.width,c.height);
+    stars.forEach(s=>{
+      s.a += s.da;
+      if(s.a<=0){s.da=Math.abs(s.da);} else if(s.a>=1){s.da=-Math.abs(s.da);}
+      s.y += s.dy;
+      if(s.y < -2) s.y = c.height+2;
+      ctx.globalAlpha = Math.max(0,Math.min(1,s.a));
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
+    });
+    ctx.globalAlpha=1;
+  })();
+})();
+
+/* ── URL params ── */
 const params = new URLSearchParams(window.location.search);
 const emoji  = params.get('e') || '✨';
 const text   = params.get('t') || '';
 const from   = params.get('f') || '';
 const link   = params.get('l') || '';
-const gGender= params.get('gender') || '';  /* 'boy' or 'girl' */
+const gGender= params.get('gender') || '';
 const gP1    = params.get('p1') || '';
 const gP2    = params.get('p2') || '';
 const gDue   = params.get('due') || '';
 const IS_REVEAL = !!gGender;
 
+const pageUrl = window.location.href;
+const revealMsg = (gGender==='girl' ? "🎀 IT'S A GIRL! " : "💙 IT'S A BOY! ") +
+  (gP1&&gP2 ? 'Congratulations '+gP1+' & '+gP2+'!' : 'A new soul is arriving!') +
+  ' Created with KozmoBob.com';
+
 if(IS_REVEAL){
-  /* Gender reveal mode — handled by the reveal engine below */
   document.getElementById('phase-label').textContent = 'THE COSMOS IS PREPARING…';
-  const pageUrl = window.location.href;
-  document.getElementById('share-wa').href  = 'https://wa.me/?text='+encodeURIComponent(pageUrl);
-  document.getElementById('share-sms').href = 'sms:?body='+encodeURIComponent(pageUrl);
+  /* Wire up post-reveal share buttons */
+  document.getElementById('rv-wa').href  = 'https://wa.me/?text='+encodeURIComponent(revealMsg+' '+pageUrl);
+  document.getElementById('rv-x').href   = 'https://twitter.com/intent/tweet?text='+encodeURIComponent(revealMsg)+'&url='+encodeURIComponent(pageUrl);
+  document.getElementById('rv-fb').href  = 'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(pageUrl);
+  document.getElementById('rv-ig').href  = 'https://instagram.com';  /* Instagram has no direct share URL — opens Instagram */
+  document.getElementById('rv-tt').href  = 'https://www.tiktok.com/upload';
+  document.getElementById('rv-sms').href = 'sms:?body='+encodeURIComponent(revealMsg+' '+pageUrl);
+  /* Names */
+  const namesEl = document.getElementById('reveal-names');
+  namesEl.textContent = (gP1&&gP2) ? gP1+' & '+gP2 : (gP1||gP2||'');
+  namesEl.style.color = gGender==='girl' ? 'rgba(255,130,200,.97)' : 'rgba(120,190,255,.97)';
+  namesEl.style.textShadow = '0 0 40px currentColor, 0 0 80px currentColor';
 } else if(!text){
   document.getElementById('not-found').style.display = 'flex';
 } else {
@@ -193,17 +316,22 @@ if(IS_REVEAL){
     lb.href = link.startsWith('http') ? link : 'https://'+link;
     lb.style.display = 'inline-block';
   }
-  const pageUrl = window.location.href;
   document.getElementById('share-wa').href  = 'https://wa.me/?text='+encodeURIComponent(pageUrl);
   document.getElementById('share-sms').href = 'sms:?body='+encodeURIComponent(pageUrl);
 }
 
 function copyLink(){
-  navigator.clipboard.writeText(window.location.href).then(()=>{
+  navigator.clipboard.writeText(pageUrl).then(()=>{
     const btn = document.getElementById('share-copy');
     btn.textContent = '✓ Copied!';
-    btn.style.color = 'rgba(100,255,100,.9)';
-    setTimeout(()=>{ btn.textContent='Copy Link'; btn.style.color=''; },2000);
+    setTimeout(()=>{ btn.textContent='Copy Link'; },2000);
+  });
+}
+function copyRevealLink(){
+  navigator.clipboard.writeText(pageUrl).then(()=>{
+    const btn = document.getElementById('rv-copy');
+    btn.textContent = '✓ Copied!';
+    setTimeout(()=>{ btn.textContent='⎘ Copy Link'; },2000);
   });
 }
 
@@ -211,18 +339,18 @@ function copyLink(){
 (function(){
   if(!IS_REVEAL) return;
 
-  const PINK   = {r:1.0, g:0.35, b:0.75};
-  const BLUE   = {r:0.25,g:0.60, b:1.0 };
-  const GOLD   = {r:1.0, g:0.62, b:0.08};
+  const PINK = {r:1.0,g:0.35,b:0.75};
+  const BLUE = {r:0.25,g:0.60,b:1.0};
+  const GOLD = {r:1.0,g:0.62,b:0.08};
   const isGirl = gGender==='girl';
   const winC   = isGirl ? PINK : BLUE;
   const loseC  = isGirl ? BLUE : PINK;
   const word   = isGirl ? 'GIRL' : 'BOY';
 
-  /* Tension lines */
   const linesDiv = document.getElementById('gr-lines');
   const revBtn   = document.getElementById('gr-reveal-btn');
   const grCanvas = document.getElementById('gr-canvas');
+  const itsAEl   = document.getElementById('its-a-text');
   linesDiv.style.display = 'flex';
 
   const LINES = [
@@ -239,9 +367,8 @@ function copyLink(){
   setTimeout(()=>linesDiv.querySelectorAll('.gr-line')[2]?.classList.add('show'),5400);
   setTimeout(()=>revBtn.classList.add('show'), 6800);
 
-  /* Bob color state — read/write by Three.js tick */
   window.__grState = {
-    mode: 'idle', /* idle → war → winner → done */
+    mode: 'idle',
     warT: 0,
     glowR: GOLD.r, glowG: GOLD.g, glowB: GOLD.b,
   };
@@ -256,7 +383,7 @@ function copyLink(){
   }
   revBtn.addEventListener('click', triggerReveal);
 
-  /* ── Star word canvas ── */
+  /* ── "IT'S A ___" glyphs ── */
   const GLYPHS={
     G:[[0,1,1,1],[1,0,0,0],[1,0,1,1],[1,0,0,1],[0,1,1,1]],
     I:[[1,1,1],[0,1,0],[0,1,0],[0,1,0],[1,1,1]],
@@ -272,8 +399,9 @@ function copyLink(){
     const W=grCanvas.width=window.innerWidth;
     const H=grCanvas.height=window.innerHeight;
     const ctx=grCanvas.getContext('2d');
-    const cx=W/2, cy=H/2-H*0.06;
-    const DOT=Math.min(W,H)*0.068;
+    /* Position word in lower-center of Bob (Bob center = screen center) */
+    const cx=W/2, cy=H/2+H*0.04;
+    const DOT=Math.min(W,H)*0.075;
     const letters=word.split('');
     let totalW=0;
     letters.forEach(ch=>{totalW+=(GLYPHS[ch][0].length*DOT)+DOT;});
@@ -288,11 +416,22 @@ function copyLink(){
     });
     const wStars=targets.map(t=>({
       x:cx+(Math.random()-.5)*40, y:cy+(Math.random()-.5)*40,
-      tx:t.x, ty:t.y, size:3+Math.random()*1.2,
+      tx:t.x, ty:t.y, size:3.5+Math.random()*1.5,
       twinkle:Math.random()*Math.PI*2, tspd:.03+Math.random()*.02,
       alpha:0,
     }));
     const cr=Math.round(winC.r*255), cg=Math.round(winC.g*255), cb=Math.round(winC.b*255);
+
+    /* "IT'S A" text above the word */
+    const itsAColor = isGirl ? 'rgba(255,150,210,.92)' : 'rgba(140,200,255,.92)';
+    itsAEl.textContent = "IT'S A";
+    itsAEl.style.color = itsAColor;
+    /* Position above the star word */
+    const wordTopY = cy - H*0.01;
+    itsAEl.style.top = (wordTopY - DOT*5.5 - 40)+'px';
+    itsAEl.style.fontSize = clamp(1.1, 5, 1.8)+'rem';
+    setTimeout(()=>itsAEl.classList.add('show'), 600);
+
     let ft=0;
     function drawWord(){
       requestAnimationFrame(drawWord); ft++;
@@ -306,17 +445,17 @@ function copyLink(){
         ctx.save();
         ctx.globalAlpha=s.alpha*tw;
         ctx.shadowColor=`rgb(${cr},${cg},${cb})`;
-        ctx.shadowBlur=s.size*2;
+        ctx.shadowBlur=s.size*3;
         ctx.fillStyle=`rgb(${cr},${cg},${cb})`;
         ctx.beginPath(); ctx.arc(s.x,s.y,s.size,0,Math.PI*2); ctx.fill();
-        ctx.shadowBlur=0; ctx.fillStyle='rgba(255,255,255,.85)';
-        ctx.beginPath(); ctx.arc(s.x,s.y,s.size*.28,0,Math.PI*2); ctx.fill();
+        ctx.shadowBlur=0; ctx.fillStyle='rgba(255,255,255,.9)';
+        ctx.beginPath(); ctx.arc(s.x,s.y,s.size*.3,0,Math.PI*2); ctx.fill();
         ctx.restore();
       });
       /* Constellation lines */
       if(prog>0.4){
-        const la=Math.min(1,(prog-0.4)/0.6)*0.2;
-        ctx.strokeStyle=`rgba(${cr},${cg},${cb},${la})`; ctx.lineWidth=0.9;
+        const la=Math.min(1,(prog-0.4)/0.6)*0.25;
+        ctx.strokeStyle=`rgba(${cr},${cg},${cb},${la})`; ctx.lineWidth=1;
         groups.forEach(pts=>{
           for(let i=0;i<pts.length-1;i++){
             const a=pts[i],b=pts[i+1];
@@ -326,49 +465,40 @@ function copyLink(){
           }
         });
       }
-      /* Congratulations — flies from behind */
+      /* Congratulations — flies in */
       if(prog>0.5){
         const cp=Math.min(1,(prog-0.5)/0.5);
         const scale=0.05+cp*0.95;
-        const fSize=Math.round(Math.min(W,H)*0.035*scale);
-        const txt='Congratulations  '+(gP1?gP1.toUpperCase():'')+(gP2?' & '+gP2.toUpperCase():'');
+        const fSize=Math.max(14,Math.round(Math.min(W,H)*0.038*scale));
+        const txt='Congratulations'+(gP1?' '+gP1.toUpperCase():'')+(gP2?' & '+gP2.toUpperCase():'');
         ctx.save();
         ctx.globalAlpha=cp*cp;
-        ctx.font='500 '+fSize+'px Courier New,monospace';
+        ctx.font='bold '+fSize+'px Georgia,serif';
         ctx.textAlign='center';
         ctx.shadowColor=`rgb(${cr},${cg},${cb})`;
-        ctx.shadowBlur=fSize*0.7*cp;
+        ctx.shadowBlur=fSize*cp;
         ctx.fillStyle=`rgb(${cr},${cg},${cb})`;
-        ctx.fillText(txt, cx, cy+DOT*3.6);
-        ctx.shadowBlur=0;
-        ctx.fillStyle=`rgba(255,255,255,${0.65*cp})`;
-        ctx.fillText(txt, cx, cy+DOT*3.6);
+        ctx.fillText(txt, cx, cy+DOT*4);
+        ctx.shadowBlur=fSize*.5*cp;
+        ctx.fillStyle=`rgba(255,255,255,${0.9*cp})`;
+        ctx.fillText(txt, cx, cy+DOT*4);
         ctx.restore();
       }
-      /* Share buttons after word settles */
-      if(ft===90){
-        document.getElementById('msg-card').classList.add('visible');
-        /* Show only share row */
-        document.getElementById('msg-sym').style.display='none';
-        document.getElementById('msg-text').style.display='none';
-        document.getElementById('msg-from').style.display='none';
-        document.getElementById('msg-divider').style.display='none';
-        document.getElementById('msg-source').style.display='none';
-        document.getElementById('msg-link-btn').style.display='none';
-        document.getElementById('kozmo-link').style.display='none';
-        /* Style share row for reveal */
-        document.getElementById('share-row').style.marginTop='0';
+      /* Show result panel */
+      if(ft===100){
+        document.getElementById('reveal-result').classList.add('show');
       }
     }
     drawWord();
   }
+  function clamp(min,max,val){ return Math.min(max,Math.max(min,val)); }
 
-  window.__grShowWord = showStarWord;
-  window.__grWinColor = winC;
-  window.__grLoseColor = loseC;
+  window.__grShowWord   = showStarWord;
+  window.__grWinColor   = winC;
+  window.__grLoseColor  = loseC;
 })();
 
-/* ── Real Bob — same shader as main page ── */
+/* ── Bob Three.js sphere ── */
 (function(){
   const mob = window.innerWidth <= 768;
   const renderer = new THREE.WebGLRenderer({ antialias:!mob, powerPreference:'high-performance' });
@@ -381,7 +511,6 @@ function copyLink(){
   const cam   = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, .1, 100);
   cam.position.z = mob ? 5.8 : 4;
 
-  /* ── Bob material — exact same shader as main page ── */
   const mat = new THREE.ShaderMaterial({
     uniforms:{
       uTime:           {value:0},
@@ -437,7 +566,6 @@ function copyLink(){
   const ball = new THREE.Mesh(new THREE.SphereGeometry(1.2, mob?32:64, mob?32:64), mat);
   scene.add(ball);
 
-  /* Aura */
   const auraMat = new THREE.ShaderMaterial({
     transparent:true, side:THREE.BackSide, depthWrite:false, blending:THREE.AdditiveBlending,
     uniforms:{uTime:{value:0}, uGlowColor:{value:new THREE.Vector3(1.,.55,.05)}, uPortalOpen:{value:0}},
@@ -451,14 +579,12 @@ function copyLink(){
     renderer.setSize(innerWidth,innerHeight);
   });
 
-  /* ── Portal animation sequence ── */
-  let phase = 'idle'; // idle → distort → flash → reveal → done
+  let phase = 'idle';
   let phaseStart = 0;
   const PHASE = { distort:2.5, flash:3.8, reveal:5.5 };
   const label = document.getElementById('phase-label');
   const card  = document.getElementById('msg-card');
 
-  /* Set initial Bob color based on mode */
   const WC = window.__grWinColor  || {r:1,g:.62,b:.08};
   const LC = window.__grLoseColor || {r:1,g:.62,b:.08};
 
@@ -472,12 +598,10 @@ function copyLink(){
     ball.rotation.y = t * .08;
     ball.rotation.x = Math.sin(t*.12)*.06;
 
-    /* ── Gender reveal color war ── */
     if(IS_REVEAL && window.__grState){
       const gs = window.__grState;
       if(gs.mode==='war'){
         gs.warT++;
-        /* Oscillate between pink and blue, speed increases */
         const spd = 0.04 + Math.min(0.25, gs.warT*0.0012);
         const mix = 0.5+0.5*Math.sin(gs.warT*spd);
         gs.glowR = LC.r + (WC.r-LC.r)*mix;
@@ -492,7 +616,6 @@ function copyLink(){
       } else if(gs.mode==='winning'){
         gs.warT++;
         const prog=Math.min(1,gs.warT/50);
-        /* Transition to winner color */
         gs.glowR += (WC.r-gs.glowR)*0.08;
         gs.glowG += (WC.g-gs.glowG)*0.08;
         gs.glowB += (WC.b-gs.glowB)*0.08;
@@ -504,7 +627,6 @@ function copyLink(){
         ball.scale.setScalar(1+prog*0.35);
         if(gs.warT>=60){ gs.mode='done'; mat.uniforms.uLightningFlash.value=0; }
       } else if(gs.mode==='done'){
-        /* Bob settles — winning color, keeps pulsing, never static */
         gs.glowR += (WC.r-gs.glowR)*0.03;
         gs.glowG += (WC.g-gs.glowG)*0.03;
         gs.glowB += (WC.b-gs.glowB)*0.03;
@@ -519,7 +641,7 @@ function copyLink(){
       return;
     }
 
-    /* ── Normal message portal sequence ── */
+    /* Normal message portal */
     if(phase==='idle' && t > 1.2){
       phase='distort'; phaseStart=t;
       label.textContent = 'SOMETHING IS COMING THROUGH…';
