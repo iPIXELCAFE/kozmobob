@@ -7562,56 +7562,6 @@ window.__KBShareCard=function(card,lines){
   },'image/png');
 };
 
-/* ── HAMBURGER MENU ── */
-(function(){
-  const btn   = document.getElementById('kb-menu-btn');
-  const panel = document.getElementById('kb-menu-panel');
-  if(!btn||!panel) return;
-
-  function toggleMenu(e){
-    e.stopPropagation();
-    const open = panel.classList.toggle('visible');
-    btn.classList.toggle('open', open);
-  }
-  btn.addEventListener('click', toggleMenu);
-  document.addEventListener('pointerdown', e=>{
-    if(!panel.contains(e.target) && e.target!==btn) {
-      panel.classList.remove('visible');
-      btn.classList.remove('open');
-    }
-  });
-
-  /* Gender reveal menu item */
-  const revealItem = document.getElementById('kb-menu-reveal');
-  if(revealItem) revealItem.addEventListener('click', ()=>{
-    panel.classList.remove('visible');
-    btn.classList.remove('open');
-    if(window.__KBGenderReveal) window.__KBGenderReveal.open();
-  });
-
-  /* Sound toggle inside menu */
-  const soundItem = document.getElementById('kb-menu-sound');
-  const soundIcon = document.getElementById('kb-menu-sound-icon');
-  const soundSub  = document.getElementById('kb-menu-sound-sub');
-  function updateSoundMenu(){
-    const muted = localStorage.getItem('__kb_sound')!=='1';
-    if(soundIcon) soundIcon.textContent = muted ? '■' : '♪';
-    if(soundSub)  soundSub.textContent  = muted ? 'Tap to enable' : 'On — tap to mute';
-  }
-  updateSoundMenu();
-  if(soundItem) soundItem.addEventListener('click', e=>{
-    e.stopPropagation();
-    /* Trigger the existing sound button */
-    const sBtn = document.getElementById('kb-sound-btn');
-    if(sBtn) sBtn.click();
-    setTimeout(updateSoundMenu, 100);
-  });
-
-  /* Keep menu sound indicator in sync when sound btn clicked directly */
-  const sBtn = document.getElementById('kb-sound-btn');
-  if(sBtn) sBtn.addEventListener('click', ()=> setTimeout(updateSoundMenu, 100));
-})();
-
 
 </script>
 
