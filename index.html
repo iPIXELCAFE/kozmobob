@@ -7677,25 +7677,54 @@ window.__KBShareCard=function(card,lines){
       if(!selectedGender) document.querySelectorAll('.kb-reveal-gender-btn').forEach(b=>{b.style.borderColor='rgba(255,80,80,.6)';setTimeout(()=>b.style.borderColor='',1400);});
       return;
     }
-    /* Generate shareable reveal link */
+    /* Build share URL */
     const base = window.location.origin + '/message';
     const url  = base+'?gender='+selectedGender
                +'&p1='+encodeURIComponent(p1)
                +'&p2='+encodeURIComponent(p2)
                +(due?'&due='+encodeURIComponent(due):'');
-    /* Show the link in the form */
-    document.getElementById('kb-reveal-go').style.display='none';
-    const linkBox=document.createElement('div');
-    linkBox.style.cssText='width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;';
-    linkBox.innerHTML=
-      '<div style="font-family:Courier New,monospace;font-size:.52rem;letter-spacing:1.5px;color:rgba(255,200,40,.5);margin-bottom:4px;">✦ YOUR REVEAL LINK IS READY</div>'+
-      '<input readonly style="width:100%;background:rgba(255,200,40,.06);border:1px solid rgba(255,200,40,.25);border-radius:8px;padding:10px 12px;font-family:Courier New,monospace;font-size:.55rem;color:rgba(255,200,40,.8);outline:none;text-align:center;" value="'+url+'" onclick="this.select()"/>'+
+
+    /* Hide GO, show two choices */
+    goBtn.style.display='none';
+    const choiceBox=document.createElement('div');
+    choiceBox.id='kb-reveal-choices';
+    choiceBox.style.cssText='width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;';
+    choiceBox.innerHTML=
+      '<div style="font-family:Courier New,monospace;font-size:.52rem;letter-spacing:1.5px;color:rgba(255,200,40,.4);margin-bottom:2px;">✦ WHAT WOULD YOU LIKE TO DO?</div>'+
       '<div style="display:flex;gap:8px;width:100%;">'+
-        '<button onclick="navigator.clipboard.writeText(\''+url+'\').then(()=>this.textContent=\'✓ COPIED\')" style="flex:1;background:none;border:1px solid rgba(255,200,40,.35);border-radius:20px;padding:10px 0;font-family:Courier New,monospace;font-size:.58rem;letter-spacing:2px;color:rgba(255,200,40,.8);cursor:pointer;">COPY LINK</button>'+
-        '<a href="https://wa.me/?text='+encodeURIComponent(url)+'" target="_blank" style="flex:1;background:none;border:1px solid rgba(37,211,102,.35);border-radius:20px;padding:10px 0;font-family:Courier New,monospace;font-size:.58rem;letter-spacing:2px;color:rgba(37,211,102,.8);text-decoration:none;display:flex;align-items:center;justify-content:center;">WHATSAPP</a>'+
+        '<button id="kb-reveal-now-btn" style="flex:1;background:rgba(255,200,40,.08);border:1px solid rgba(255,200,40,.55);border-radius:20px;padding:12px 0;font-family:Courier New,monospace;font-size:.58rem;letter-spacing:2px;color:rgba(255,200,40,.95);cursor:pointer;">✦ REVEAL NOW</button>'+
+        '<button id="kb-reveal-link-btn" style="flex:1;background:none;border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:12px 0;font-family:Courier New,monospace;font-size:.58rem;letter-spacing:2px;color:rgba(255,255,255,.5);cursor:pointer;">⇗ SHARE LINK</button>'+
       '</div>'+
-      '<button onclick="document.getElementById(\'kb-reveal-go\').style.display=\'\';this.parentNode.remove();p1Input.value=\'\';p2Input.value=\'\';dueInput.value=\'\';selectedGender=null;document.querySelectorAll(\'.kb-reveal-gender-btn\').forEach(b=>b.classList.remove(\'selected\'));" style="background:none;border:none;font-family:Courier New,monospace;font-size:.52rem;letter-spacing:1px;color:rgba(255,255,255,.2);cursor:pointer;margin-top:4px;">make another →</button>';
-    document.getElementById('kb-reveal-form').appendChild(linkBox);
+      '<button id="kb-reveal-back-btn" style="background:none;border:none;font-family:Courier New,monospace;font-size:.52rem;letter-spacing:1px;color:rgba(255,255,255,.2);cursor:pointer;margin-top:2px;">← back</button>';
+    document.getElementById('kb-reveal-form').appendChild(choiceBox);
+
+    /* REVEAL NOW */
+    document.getElementById('kb-reveal-now-btn').addEventListener('click',()=>{
+      choiceBox.remove();
+      startReveal(p1,p2,due,selectedGender);
+    });
+
+    /* SHARE LINK */
+    document.getElementById('kb-reveal-link-btn').addEventListener('click',()=>{
+      choiceBox.remove();
+      const linkBox=document.createElement('div');
+      linkBox.style.cssText='width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;';
+      linkBox.innerHTML=
+        '<div style="font-family:Courier New,monospace;font-size:.52rem;letter-spacing:1.5px;color:rgba(255,200,40,.5);margin-bottom:4px;">✦ YOUR REVEAL LINK IS READY</div>'+
+        '<input readonly style="width:100%;background:rgba(255,200,40,.06);border:1px solid rgba(255,200,40,.25);border-radius:8px;padding:10px 12px;font-family:Courier New,monospace;font-size:.55rem;color:rgba(255,200,40,.8);outline:none;text-align:center;" value="'+url+'" onclick="this.select()"/>'+
+        '<div style="display:flex;gap:8px;width:100%;">'+
+          '<button onclick="navigator.clipboard.writeText(\''+url+'\').then(()=>this.textContent=\'✓ COPIED\')" style="flex:1;background:none;border:1px solid rgba(255,200,40,.35);border-radius:20px;padding:10px 0;font-family:Courier New,monospace;font-size:.58rem;letter-spacing:2px;color:rgba(255,200,40,.8);cursor:pointer;">COPY LINK</button>'+
+          '<a href="https://wa.me/?text='+encodeURIComponent(url)+'" target="_blank" style="flex:1;background:none;border:1px solid rgba(37,211,102,.35);border-radius:20px;padding:10px 0;font-family:Courier New,monospace;font-size:.58rem;letter-spacing:2px;color:rgba(37,211,102,.8);text-decoration:none;display:flex;align-items:center;justify-content:center;">WHATSAPP</a>'+
+        '</div>'+
+        '<button onclick="this.closest(\'#kb-reveal-form,form\').querySelector(\'#kb-reveal-go\') && (document.getElementById(\'kb-reveal-go\').style.display=\'\');this.parentNode.remove();p1Input.value=\'\';p2Input.value=\'\';dueInput.value=\'\';selectedGender=null;document.querySelectorAll(\'.kb-reveal-gender-btn\').forEach(b=>b.classList.remove(\'selected\'));" style="background:none;border:none;font-family:Courier New,monospace;font-size:.52rem;letter-spacing:1px;color:rgba(255,255,255,.2);cursor:pointer;margin-top:4px;">make another →</button>';
+      document.getElementById('kb-reveal-form').appendChild(linkBox);
+    });
+
+    /* BACK */
+    document.getElementById('kb-reveal-back-btn').addEventListener('click',()=>{
+      choiceBox.remove();
+      goBtn.style.display='';
+    });
   });
 
   function startReveal(p1,p2,due,gender){
