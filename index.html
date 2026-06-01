@@ -953,6 +953,152 @@ html,body{
   display:flex;align-items:center;justify-content:center;
 }
 #kb-compat-btn:hover{color:rgba(255,160,200,.95);border-color:rgba(255,120,180,.7);}
+/* ── GENDER REVEAL OVERLAY ── */
+#kb-reveal-overlay{
+  position:fixed;inset:0;z-index:99998;
+  background:#000;
+  display:none;
+  flex-direction:column;align-items:center;justify-content:center;
+}
+#kb-reveal-overlay.visible{display:flex;}
+#kb-reveal-form{
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  width:min(360px,90vw);
+  position:relative;z-index:2;
+}
+#kb-reveal-close{
+  position:fixed;top:16px;right:20px;
+  background:none;border:none;
+  color:rgba(255,255,255,.25);font-family:'Courier New',monospace;
+  font-size:.8rem;letter-spacing:2px;cursor:pointer;z-index:3;
+}
+#kb-reveal-close:hover{color:rgba(255,255,255,.6);}
+#kb-reveal-title{
+  font-family:'Courier New',monospace;font-size:.85rem;letter-spacing:5px;
+  color:rgba(255,200,40,.9);text-align:center;margin-bottom:4px;
+}
+#kb-reveal-subtitle{
+  font-family:'Courier New',monospace;font-size:.55rem;letter-spacing:1.5px;
+  color:rgba(255,255,255,.3);text-align:center;line-height:1.7;margin-bottom:8px;
+}
+#kb-reveal-p1,#kb-reveal-p2,#kb-reveal-due{
+  width:100%;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,200,40,.2);border-radius:10px;
+  padding:12px 16px;font-family:'Courier New',monospace;
+  font-size:.7rem;letter-spacing:2px;color:rgba(255,255,255,.85);
+  outline:none;text-align:center;transition:border-color .2s;
+}
+#kb-reveal-p1:focus,#kb-reveal-p2:focus,#kb-reveal-due:focus{border-color:rgba(255,200,40,.55);}
+#kb-reveal-gender-row{
+  display:flex;gap:12px;width:100%;
+}
+.kb-reveal-gender-btn{
+  flex:1;padding:12px 0;text-align:center;
+  font-family:'Courier New',monospace;font-size:.65rem;letter-spacing:2px;
+  border-radius:10px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.4);
+  transition:all .2s;
+}
+.kb-reveal-gender-btn[data-g="boy"].selected{
+  border-color:rgba(100,180,255,.8);color:rgba(100,180,255,1);
+  background:rgba(100,180,255,.12);
+}
+.kb-reveal-gender-btn[data-g="girl"].selected{
+  border-color:rgba(255,120,200,.8);color:rgba(255,120,200,1);
+  background:rgba(255,120,200,.12);
+}
+#kb-reveal-go{
+  width:100%;margin-top:8px;
+  background:rgba(255,200,40,.1);
+  border:1px solid rgba(255,200,40,.4);border-radius:24px;
+  padding:14px 0;font-family:'Courier New',monospace;
+  font-size:.62rem;letter-spacing:2.5px;color:rgba(255,200,40,.9);
+  cursor:pointer;transition:all .2s;
+}
+#kb-reveal-go:hover{background:rgba(255,200,40,.2);border-color:rgba(255,200,40,.7);}
+#kb-reveal-canvas{
+  position:absolute;inset:0;width:100%;height:100%;
+  display:none;z-index:1;
+}
+#kb-reveal-text{
+  position:absolute;inset:0;z-index:2;
+  display:none;
+  flex-direction:column;align-items:center;justify-content:center;
+  font-family:'Courier New',monospace;
+  text-align:center;padding:40px;pointer-events:none;
+}
+.kb-reveal-line{
+  font-size:clamp(.8rem,3vw,1.1rem);letter-spacing:.12em;
+  color:rgba(255,255,255,.9);margin-bottom:1.2em;
+  opacity:0;transition:opacity 1.4s ease;line-height:1.6;
+}
+.kb-reveal-line.show{opacity:1;}
+.kb-reveal-announce{
+  font-size:clamp(1.6rem,6vw,3rem);letter-spacing:.15em;font-weight:700;
+  opacity:0;transition:opacity 1s ease;margin-top:.5em;
+  text-shadow:0 0 60px currentColor;
+}
+.kb-reveal-announce.show{opacity:1;}
+
+/* ── HAMBURGER MENU BUTTON ── */
+#kb-menu-btn{
+  position:fixed;top:14px;right:152px;
+  z-index:25;width:40px;height:40px;border-radius:50%;
+  background:rgba(0,0,0,.88);
+  border:1px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.5);
+  font-size:1.2rem;cursor:pointer;
+  transition:color .2s,border-color .2s;
+  pointer-events:all;
+  display:flex;align-items:center;justify-content:center;
+  line-height:1;
+}
+#kb-menu-btn:hover{color:rgba(255,200,40,.9);border-color:rgba(255,200,40,.5);}
+#kb-menu-btn.open{color:rgba(255,200,40,.9);border-color:rgba(255,200,40,.5);}
+/* ── MENU PANEL ── */
+#kb-menu-panel{
+  position:fixed;top:64px;right:14px;
+  z-index:24;width:260px;
+  background:rgba(4,2,12,.97);
+  border:1px solid rgba(255,200,40,.2);
+  border-radius:16px;padding:8px 0 12px;
+  opacity:0;pointer-events:none;
+  transform:translateY(-8px);
+  transition:opacity .25s,transform .25s;
+}
+#kb-menu-panel.visible{opacity:1;pointer-events:all;transform:translateY(0);}
+#kb-menu-header{
+  font-family:'Courier New',monospace;font-size:.55rem;letter-spacing:4px;
+  color:rgba(255,200,40,.3);text-align:center;padding:10px 0 14px;
+  border-bottom:1px solid rgba(255,200,40,.08);margin-bottom:6px;
+}
+.kb-menu-item{
+  display:flex;align-items:center;gap:14px;
+  padding:12px 18px;cursor:pointer;
+  transition:background .15s;
+}
+.kb-menu-item:hover{background:rgba(255,200,40,.05);}
+.kb-menu-item.kb-menu-soon{opacity:.4;cursor:default;}
+.kb-menu-item.kb-menu-soon:hover{background:none;}
+.kb-menu-icon{
+  font-size:1.1rem;width:24px;text-align:center;
+  color:rgba(255,200,40,.7);flex-shrink:0;
+}
+.kb-menu-label{
+  font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:2px;
+  color:rgba(255,200,40,.85);margin-bottom:3px;
+}
+.kb-menu-sub{
+  font-family:'Courier New',monospace;font-size:.5rem;letter-spacing:1px;
+  color:rgba(255,255,255,.25);
+}
+.kb-menu-divider{height:1px;background:rgba(255,200,40,.08);margin:6px 0;}
+@media(max-width:900px){
+  #kb-menu-btn{top:50px;right:142px;}
+  #kb-menu-panel{top:100px;right:4px;width:240px;}
+}
+
 /* Compat overlay */
 #kb-compat-overlay{
   position:fixed;inset:0;z-index:99970;
@@ -1524,6 +1670,34 @@ select.adv-input option{background:#111;}
 <button id="kb-compat-btn" title="Compatibility reading">♡</button>
 <!-- ── SOUND TOGGLE ── -->
 <button id="kb-sound-btn" title="Toggle sound">♪</button>
+<!-- ── HAMBURGER MENU ── -->
+<button id="kb-menu-btn" title="More">≡</button>
+<!-- ── MENU PANEL ── -->
+<div id="kb-menu-panel">
+  <div id="kb-menu-header">✦ KOZMOBOB</div>
+  <div class="kb-menu-item" id="kb-menu-reveal">
+    <span class="kb-menu-icon">✦</span>
+    <div class="kb-menu-text">
+      <div class="kb-menu-label">GENDER REVEAL</div>
+      <div class="kb-menu-sub">Dramatic cosmic reveal — free</div>
+    </div>
+  </div>
+  <div class="kb-menu-item kb-menu-soon">
+    <span class="kb-menu-icon">👶</span>
+    <div class="kb-menu-text">
+      <div class="kb-menu-label">BABY NAMES</div>
+      <div class="kb-menu-sub">Star-aligned names — coming soon</div>
+    </div>
+  </div>
+  <div class="kb-menu-divider"></div>
+  <div class="kb-menu-item" id="kb-menu-sound">
+    <span class="kb-menu-icon" id="kb-menu-sound-icon">♪</span>
+    <div class="kb-menu-text">
+      <div class="kb-menu-label">AMBIENT SOUND</div>
+      <div class="kb-menu-sub" id="kb-menu-sound-sub">Tap to enable</div>
+    </div>
+  </div>
+</div>
 
 <!-- ── COMPATIBILITY READING OVERLAY ── -->
 <div id="kb-compat-overlay">
@@ -7387,6 +7561,265 @@ window.__KBShareCard=function(card,lines){
     }
   },'image/png');
 };
+
+/* ── HAMBURGER MENU ── */
+(function(){
+  const btn   = document.getElementById('kb-menu-btn');
+  const panel = document.getElementById('kb-menu-panel');
+  if(!btn||!panel) return;
+
+  function toggleMenu(e){
+    e.stopPropagation();
+    const open = panel.classList.toggle('visible');
+    btn.classList.toggle('open', open);
+  }
+  btn.addEventListener('click', toggleMenu);
+  document.addEventListener('pointerdown', e=>{
+    if(!panel.contains(e.target) && e.target!==btn) {
+      panel.classList.remove('visible');
+      btn.classList.remove('open');
+    }
+  });
+
+  /* Gender reveal menu item */
+  const revealItem = document.getElementById('kb-menu-reveal');
+  if(revealItem) revealItem.addEventListener('click', ()=>{
+    panel.classList.remove('visible');
+    btn.classList.remove('open');
+    if(window.__KBGenderReveal) window.__KBGenderReveal.open();
+  });
+
+  /* Sound toggle inside menu */
+  const soundItem = document.getElementById('kb-menu-sound');
+  const soundIcon = document.getElementById('kb-menu-sound-icon');
+  const soundSub  = document.getElementById('kb-menu-sound-sub');
+  function updateSoundMenu(){
+    const muted = localStorage.getItem('__kb_sound')!=='1';
+    if(soundIcon) soundIcon.textContent = muted ? '■' : '♪';
+    if(soundSub)  soundSub.textContent  = muted ? 'Tap to enable' : 'On — tap to mute';
+  }
+  updateSoundMenu();
+  if(soundItem) soundItem.addEventListener('click', e=>{
+    e.stopPropagation();
+    /* Trigger the existing sound button */
+    const sBtn = document.getElementById('kb-sound-btn');
+    if(sBtn) sBtn.click();
+    setTimeout(updateSoundMenu, 100);
+  });
+
+  /* Keep menu sound indicator in sync when sound btn clicked directly */
+  const sBtn = document.getElementById('kb-sound-btn');
+  if(sBtn) sBtn.addEventListener('click', ()=> setTimeout(updateSoundMenu, 100));
+})();
+
+
+</script>
+
+<!-- ── GENDER REVEAL OVERLAY ── -->
+<div id="kb-reveal-overlay">
+  <!-- Form screen -->
+  <div id="kb-reveal-form">
+    <button id="kb-reveal-close">✕</button>
+    <div id="kb-reveal-title">✦ COSMIC REVEAL</div>
+    <div id="kb-reveal-subtitle">The universe has known since the beginning.<br>Let Bob announce it.</div>
+    <input id="kb-reveal-p1" type="text" placeholder="Parent 1 name" maxlength="30" autocomplete="off"/>
+    <input id="kb-reveal-p2" type="text" placeholder="Parent 2 name" maxlength="30" autocomplete="off"/>
+    <input id="kb-reveal-due" type="text" placeholder="Due date (e.g. March 2026)" maxlength="30" autocomplete="off"/>
+    <div id="kb-reveal-gender-row">
+      <div class="kb-reveal-gender-btn" data-g="boy">♂ BOY</div>
+      <div class="kb-reveal-gender-btn" data-g="girl">♀ GIRL</div>
+    </div>
+    <button id="kb-reveal-go">✦ REVEAL TO THE UNIVERSE</button>
+  </div>
+  <!-- Reveal canvas screen -->
+  <canvas id="kb-reveal-canvas"></canvas>
+  <!-- Text overlay on canvas -->
+  <div id="kb-reveal-text"></div>
+</div>
+
+<script>
+
+/* ── HAMBURGER MENU ── */
+(function(){
+  const btn   = document.getElementById('kb-menu-btn');
+  const panel = document.getElementById('kb-menu-panel');
+  if(!btn||!panel) return;
+  function toggleMenu(e){
+    e.stopPropagation();
+    const open = panel.classList.toggle('visible');
+    btn.classList.toggle('open', open);
+  }
+  btn.addEventListener('click', toggleMenu);
+  document.addEventListener('pointerdown', e=>{
+    if(!panel.contains(e.target) && e.target!==btn){
+      panel.classList.remove('visible');
+      btn.classList.remove('open');
+    }
+  });
+  const revealItem = document.getElementById('kb-menu-reveal');
+  if(revealItem) revealItem.addEventListener('click', ()=>{
+    panel.classList.remove('visible'); btn.classList.remove('open');
+    if(window.__KBGenderReveal) window.__KBGenderReveal.open();
+  });
+  const soundItem = document.getElementById('kb-menu-sound');
+  const soundIcon = document.getElementById('kb-menu-sound-icon');
+  const soundSub  = document.getElementById('kb-menu-sound-sub');
+  function updateSoundMenu(){
+    const muted = localStorage.getItem('__kb_sound')!=='1';
+    if(soundIcon) soundIcon.textContent = muted ? '■' : '♪';
+    if(soundSub)  soundSub.textContent  = muted ? 'Tap to enable' : 'On — tap to mute';
+  }
+  updateSoundMenu();
+  if(soundItem) soundItem.addEventListener('click', e=>{
+    e.stopPropagation();
+    const sBtn = document.getElementById('kb-sound-btn');
+    if(sBtn) sBtn.click();
+    setTimeout(updateSoundMenu, 100);
+  });
+  const sBtn = document.getElementById('kb-sound-btn');
+  if(sBtn) sBtn.addEventListener('click', ()=> setTimeout(updateSoundMenu, 100));
+})();
+
+/* ── GENDER REVEAL ── */
+(function(){
+  const overlay  = document.getElementById('kb-reveal-overlay');
+  const form     = document.getElementById('kb-reveal-form');
+  const closeBtn = document.getElementById('kb-reveal-close');
+  const goBtn    = document.getElementById('kb-reveal-go');
+  const canvas   = document.getElementById('kb-reveal-canvas');
+  const textDiv  = document.getElementById('kb-reveal-text');
+  const p1Input  = document.getElementById('kb-reveal-p1');
+  const p2Input  = document.getElementById('kb-reveal-p2');
+  const dueInput = document.getElementById('kb-reveal-due');
+  if(!overlay) return;
+  let selectedGender=null, animFrame=null;
+
+  document.querySelectorAll('.kb-reveal-gender-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.kb-reveal-gender-btn').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedGender=btn.dataset.g;
+    });
+  });
+
+  function open(){
+    overlay.classList.add('visible');
+    form.style.display='flex';
+    canvas.style.display='none';
+    textDiv.style.display='none';
+    textDiv.innerHTML='';
+    if(animFrame){cancelAnimationFrame(animFrame);animFrame=null;}
+  }
+  function close(){
+    overlay.classList.remove('visible');
+    if(animFrame){cancelAnimationFrame(animFrame);animFrame=null;}
+  }
+  closeBtn.addEventListener('click',close);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
+
+  goBtn.addEventListener('click',()=>{
+    const p1=(p1Input.value||'').trim();
+    const p2=(p2Input.value||'').trim();
+    const due=(dueInput.value||'').trim();
+    if(!p1||!p2||!selectedGender){
+      [p1Input,p2Input,dueInput].forEach(el=>{if(!el.value.trim()){el.style.borderColor='rgba(255,80,80,.6)';setTimeout(()=>el.style.borderColor='',1400);}});
+      if(!selectedGender) document.querySelectorAll('.kb-reveal-gender-btn').forEach(b=>{b.style.borderColor='rgba(255,80,80,.6)';setTimeout(()=>b.style.borderColor='',1400);});
+      return;
+    }
+    startReveal(p1,p2,due,selectedGender);
+  });
+
+  function startReveal(p1,p2,due,gender){
+    const isGirl=gender==='girl';
+    const color=isGirl?{r:255,g:100,b:180}:{r:80,g:160,b:255};
+    const hex=isGirl?'#ff64b4':'#50a0ff';
+    const word=isGirl?'GIRL':'BOY';
+    form.style.display='none';
+    canvas.style.display='block';
+    textDiv.style.display='flex';
+    const W=canvas.width=window.innerWidth;
+    const H=canvas.height=window.innerHeight;
+    const ctx=canvas.getContext('2d');
+    const lines=[
+      p1+' and '+p2+'…',
+      due?'A soul arriving '+due+'.':'A soul is arriving.',
+      'The stars have always known.',
+    ];
+    textDiv.innerHTML='';
+    lines.forEach(txt=>{
+      const d=document.createElement('div');
+      d.className='kb-reveal-line'; d.textContent=txt;
+      textDiv.appendChild(d);
+    });
+    const announceEl=document.createElement('div');
+    announceEl.className='kb-reveal-announce';
+    announceEl.style.color=hex;
+    announceEl.textContent='A '+word+' IS COMING';
+    textDiv.appendChild(announceEl);
+    let phase=1,t=0;
+    const particles=[];
+    for(let i=0;i<120;i++){
+      const angle=Math.random()*Math.PI*2;
+      const radius=80+Math.random()*180;
+      particles.push({x:W/2+Math.cos(angle)*radius,y:H/2+Math.sin(angle)*radius,angle,radius,
+        speed:0.002+Math.random()*0.004,size:1+Math.random()*2,alpha:0.1+Math.random()*0.3,
+        col:{r:200,g:160,b:255}});
+    }
+    setTimeout(()=>{const els=textDiv.querySelectorAll('.kb-reveal-line');if(els[0])els[0].classList.add('show');},600);
+    setTimeout(()=>{const els=textDiv.querySelectorAll('.kb-reveal-line');if(els[1])els[1].classList.add('show');},2400);
+    setTimeout(()=>{const els=textDiv.querySelectorAll('.kb-reveal-line');if(els[2])els[2].classList.add('show');},4200);
+    setTimeout(()=>{
+      phase=2;
+      for(let i=0;i<300;i++){
+        const a=Math.random()*Math.PI*2,sp=3+Math.random()*12;
+        particles.push({x:W/2,y:H/2,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,
+          size:2+Math.random()*5,alpha:1,decay:0.012+Math.random()*0.018,col:color,explode:true});
+      }
+      ctx.fillStyle='rgba('+color.r+','+color.g+','+color.b+',1)';
+      ctx.fillRect(0,0,W,H);
+      setTimeout(()=>{
+        textDiv.querySelectorAll('.kb-reveal-line').forEach(el=>el.style.opacity='0');
+        announceEl.classList.add('show');
+        phase=3;
+      },400);
+    },6000);
+    function tick(){
+      animFrame=requestAnimationFrame(tick); t++;
+      if(phase===1){
+        ctx.fillStyle='rgba(0,0,0,0.18)'; ctx.fillRect(0,0,W,H);
+        particles.forEach(p=>{
+          p.angle+=p.speed; p.radius=Math.max(20,p.radius-0.15);
+          p.x=W/2+Math.cos(p.angle)*p.radius; p.y=H/2+Math.sin(p.angle)*p.radius;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+          ctx.fillStyle='rgba('+p.col.r+','+p.col.g+','+p.col.b+','+p.alpha+')'; ctx.fill();
+        });
+        const pulse=0.5+0.5*Math.sin(t*0.06);
+        const grd=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,60+pulse*30);
+        grd.addColorStop(0,'rgba(255,200,40,'+(0.15*pulse)+')');
+        grd.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
+      } else {
+        const ta=phase===2?0.25:0.08;
+        ctx.fillStyle='rgba('+color.r+','+color.g+','+color.b+','+ta+')'; ctx.fillRect(0,0,W,H);
+        particles.filter(p=>p.explode).forEach(p=>{
+          if(p.alpha<=0) return;
+          p.x+=p.vx; p.y+=p.vy; p.vx*=0.97; p.vy*=0.97; p.alpha-=p.decay;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+          ctx.fillStyle='rgba('+p.col.r+','+p.col.g+','+p.col.b+','+Math.max(0,p.alpha)+')'; ctx.fill();
+        });
+        if(phase===3&&Math.random()<0.25){
+          const sx=Math.random()*W,sy=Math.random()*H;
+          const sg=ctx.createRadialGradient(sx,sy,0,sx,sy,40+Math.random()*80);
+          sg.addColorStop(0,'rgba('+color.r+','+color.g+','+color.b+',0.18)');
+          sg.addColorStop(1,'rgba(0,0,0,0)');
+          ctx.fillStyle=sg; ctx.fillRect(0,0,W,H);
+        }
+      }
+    }
+    tick();
+  }
+  window.__KBGenderReveal={open};
+})();
 
 </script>
 </body>
