@@ -7682,22 +7682,21 @@ window.__KBShareCard=function(card,lines){
   function startReveal(p1,p2,due,gender){
     const isGirl = gender==='girl';
     const PINK = {r:255,g:100,b:200};
-    const BLUE = {r:80,g:160,b:255};
-    const winCol = isGirl ? PINK : BLUE;
-    const loseCol= isGirl ? BLUE : PINK;
-    const word   = isGirl ? 'GIRL' : 'BOY';
+    const BLUE = {r:80,g:170,b:255};
+    const winCol  = isGirl ? PINK : BLUE;
+    const loseCol = isGirl ? BLUE : PINK;
+    const word    = isGirl ? 'GIRL' : 'BOY';
 
     form.style.display='none';
     canvas.style.display='block';
     textDiv.style.display='flex';
-
     const W=canvas.width=window.innerWidth;
     const H=canvas.height=window.innerHeight;
     const ctx=canvas.getContext('2d');
 
-    /* ── Letter dot-matrix ── */
-    const GLYPHS = {
-      G:[[0,1,1,1,0],[1,0,0,0,0],[1,0,1,1,1],[1,0,0,0,1],[0,1,1,1,1]],
+    /* ── Letter glyphs ── */
+    const GLYPHS={
+      G:[[0,1,1,1],[1,0,0,0],[1,0,1,1],[1,0,0,1],[0,1,1,1]],
       I:[[1,1,1],[0,1,0],[0,1,0],[0,1,0],[1,1,1]],
       R:[[1,1,0],[1,0,1],[1,1,0],[1,0,1],[1,0,1]],
       L:[[1,0,0],[1,0,0],[1,0,0],[1,0,0],[1,1,1]],
@@ -7706,66 +7705,62 @@ window.__KBShareCard=function(card,lines){
       Y:[[1,0,1],[1,0,1],[0,1,0],[0,1,0],[0,1,0]],
     };
 
-    /* Build target star positions for the word */
-    const DOT = Math.min(W,H) * 0.055; /* dot spacing */
+    /* Build letter target positions */
+    const DOT = Math.min(W,H)*0.072;
     const letters = word.split('');
-    const targets = [];
-    /* Calculate total word width */
-    let totalW = 0;
+    let totalW=0;
+    letters.forEach(ch=>{ totalW+=(GLYPHS[ch][0].length*DOT)+DOT; });
+    totalW-=DOT;
+    let cx=W/2-totalW/2;
+    const cy=H/2-DOT*2;
+    const targets=[];
+    const letterGroups=[]; /* for constellation lines */
     letters.forEach(ch=>{
-      const g = GLYPHS[ch];
-      totalW += (g[0].length * DOT) + DOT*0.8;
-    });
-    totalW -= DOT*0.8;
-    let cx = W/2 - totalW/2;
-    const cy = H/2 - DOT*2.5;
-    letters.forEach(ch=>{
-      const g = GLYPHS[ch];
+      const g=GLYPHS[ch], pts=[];
       for(let row=0;row<g.length;row++){
         for(let col=0;col<g[row].length;col++){
-          if(g[row][col]){
-            targets.push({x: cx+col*DOT, y: cy+row*DOT});
+          if(g[row][col]) {
+            const pt={x:cx+col*DOT, y:cy+row*DOT};
+            targets.push(pt); pts.push(pt);
           }
         }
       }
-      cx += (g[0].length * DOT) + DOT*0.8;
+      letterGroups.push(pts);
+      cx+=(g[0].length*DOT)+DOT;
     });
 
-    /* ── Create stars ── */
-    const NUM_BG   = 280;
-    const NUM_WORD = targets.length;
-    const stars = [];
+    /* ── Stars ── */
+    const NUM_BG=320;
+    const stars=[];
 
-    /* Background stars — mixed colors */
+    /* Background stars — mix of both colors */
     for(let i=0;i<NUM_BG;i++){
-      const isWin = Math.random()<0.5;
+      const isWin=Math.random()<0.5;
+      const col=isWin?winCol:loseCol;
       stars.push({
-        x: Math.random()*W, y: Math.random()*H,
-        tx: 0, ty: 0,  /* target (used in phase 3) */
-        size: 0.8+Math.random()*2.2,
-        twinkle: Math.random()*Math.PI*2,
-        twinkleSpeed: 0.02+Math.random()*0.03,
-        alpha: 0.4+Math.random()*0.5,
-        col: isWin ? winCol : loseCol,
-        isWin, isWord: false,
-        sepAngle: (Math.random()*0.6+0.2)*(Math.random()<0.5?1:-1),
-        sepDist: 60+Math.random()*200,
-        sepX: 0, sepY: 0,
+        x:Math.random()*W, y:Math.random()*H,
+        vx:(Math.random()-.5)*0.15, vy:(Math.random()-.5)*0.15,
+        size:0.8+Math.random()*2.5,
+        twinkle:Math.random()*Math.PI*2,
+        tspd:0.025+Math.random()*0.025,
+        alpha:0.5+Math.random()*0.4,
+        col, isWin, isWord:false,
+        vortexAngle:Math.atan2(H/2-Math.random()*H,W/2-Math.random()*W),
+        vortexSpeed:0.01+Math.random()*0.02,
       });
     }
 
-    /* Word stars — these fly to letter positions */
-    targets.forEach((t,i)=>{
+    /* Word stars — start scattered, fly to letter positions */
+    targets.forEach(t=>{
       stars.push({
-        x: Math.random()*W, y: Math.random()*H,
-        tx: t.x, ty: t.y,
-        size: 2.5+Math.random()*1.5,
-        twinkle: Math.random()*Math.PI*2,
-        twinkleSpeed: 0.03+Math.random()*0.02,
-        alpha: 0.5+Math.random()*0.4,
-        col: winCol,
-        isWin: true, isWord: true,
-        arrived: false,
+        x:Math.random()*W, y:Math.random()*H,
+        tx:t.x, ty:t.y,
+        size:3.2+Math.random()*1.2,
+        twinkle:Math.random()*Math.PI*2,
+        tspd:0.035+Math.random()*0.02,
+        alpha:0.6+Math.random()*0.3,
+        col:winCol, isWin:true, isWord:true,
+        arrived:false,
       });
     });
 
@@ -7778,109 +7773,154 @@ window.__KBShareCard=function(card,lines){
     ];
     lines.forEach(txt=>{
       const d=document.createElement('div');
-      d.className='kb-reveal-line'; d.textContent=txt;
-      textDiv.appendChild(d);
+      d.className='kb-reveal-line'; d.textContent=txt; textDiv.appendChild(d);
     });
-    setTimeout(()=>{const e=textDiv.querySelectorAll('.kb-reveal-line');if(e[0])e[0].classList.add('show');},800);
-    setTimeout(()=>{const e=textDiv.querySelectorAll('.kb-reveal-line');if(e[1])e[1].classList.add('show');},2800);
-    setTimeout(()=>{const e=textDiv.querySelectorAll('.kb-reveal-line');if(e[2])e[2].classList.add('show');},5000);
+    const subEl=document.createElement('div');
+    subEl.className='kb-reveal-line';
+    subEl.style.marginTop='1.5em';
+    subEl.style.color='rgba(255,255,255,0.35)';
+    subEl.style.fontSize='clamp(.5rem,2vw,.7rem)';
+    subEl.style.letterSpacing='.3em';
+    subEl.textContent='TAP TO REVEAL';
+    textDiv.appendChild(subEl);
 
-    let phase=1, t=0;
-    /* Phase 2 at 7.5s — stars separate */
-    setTimeout(()=>{
-      phase=2;
-      /* Give bg stars a separation target */
-      stars.filter(s=>!s.isWord).forEach(s=>{
-        const dir = s.isWin ? 1 : -1;
-        s.sepX = s.x + Math.cos(s.sepAngle)*s.sepDist*dir;
-        s.sepY = s.y + Math.sin(s.sepAngle)*s.sepDist*dir;
-      });
-    },7500);
-    /* Phase 3 at 10s — word stars fly to targets, fade text */
-    setTimeout(()=>{
-      phase=3;
-      textDiv.querySelectorAll('.kb-reveal-line').forEach(el=>{el.style.transition='opacity 1s';el.style.opacity='0';});
-    },10000);
+    setTimeout(()=>{textDiv.querySelectorAll('.kb-reveal-line')[0]?.classList.add('show');},600);
+    setTimeout(()=>{textDiv.querySelectorAll('.kb-reveal-line')[1]?.classList.add('show');},2600);
+    setTimeout(()=>{textDiv.querySelectorAll('.kb-reveal-line')[2]?.classList.add('show');},4600);
+    setTimeout(()=>{subEl.classList.add('show');},6200);
 
-    function easeOut(t){ return 1-(1-t)*(1-t); }
+    /* ── Phase control ── */
+    /* Phase 1: stars drift (0-?s, ends on tap or 8s auto)
+       Phase 2: vortex swirl (1.5s)
+       Phase 3: white flash (0.4s)
+       Phase 4: stars form word */
+    let phase=1, phaseT=0;
+    let flashAlpha=0;
+    let tapped=false;
 
-    let p2Start=0, p3Start=0;
-
-    function tick(){
-      animFrame=requestAnimationFrame(tick); t++;
-      ctx.fillStyle='rgba(0,0,0,0.18)'; ctx.fillRect(0,0,W,H);
-
-      stars.forEach(s=>{
-        s.twinkle+=s.twinkleSpeed;
-        const tw=0.6+0.4*Math.sin(s.twinkle);
-
-        if(phase===1){
-          /* Just twinkle in place */
-          drawStar(ctx, s.x, s.y, s.size, s.col, s.alpha*tw);
-
-        } else if(phase===2){
-          if(!p2Start) p2Start=t;
-          const prog = Math.min(1,(t-p2Start)/120);
-          const e = easeOut(prog);
-          if(!s.isWord){
-            /* Move toward separation target */
-            const nx = s.x + (s.sepX-s.x)*e*0.04;
-            const ny = s.y + (s.sepY-s.y)*e*0.04;
-            s.x+=(nx-s.x)*0.06; s.y+=(ny-s.y)*0.06;
-            const fadeAlpha = s.isWin ? s.alpha*tw : s.alpha*tw*(1-prog*0.9);
-            drawStar(ctx, s.x, s.y, s.isWin?s.size*(1+prog*0.5):s.size, s.col, fadeAlpha);
-          } else {
-            drawStar(ctx, s.x, s.y, s.size, s.col, s.alpha*tw);
-          }
-
-        } else if(phase===3){
-          if(!p3Start) p3Start=t;
-          const prog = Math.min(1,(t-p3Start)/100);
-          const e = easeOut(prog);
-          if(s.isWord){
-            /* Fly to letter target */
-            s.x += (s.tx-s.x)*0.06;
-            s.y += (s.ty-s.y)*0.06;
-            const glow = 1+e*0.5;
-            drawStar(ctx, s.x, s.y, s.size*glow, s.col, Math.min(1,s.alpha*tw*1.4));
-          } else if(s.isWin){
-            /* Win bg stars drift and twinkle */
-            s.x += (s.sepX-s.x)*0.02; s.y += (s.sepY-s.y)*0.02;
-            drawStar(ctx, s.x, s.y, s.size, s.col, s.alpha*tw*0.6);
-          }
-          /* Lose stars already gone */
-        }
-      });
-
-      /* Center radial glow in winning color during phase 2+ */
-      if(phase>=2){
-        const gIntensity = phase===2 ? Math.min(1,(t-(p2Start||t))/80)*0.07 : 0.05;
-        const grd=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.min(W,H)*0.45);
-        grd.addColorStop(0,`rgba(${winCol.r},${winCol.g},${winCol.b},${gIntensity})`);
-        grd.addColorStop(1,'rgba(0,0,0,0)');
-        ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
-      }
+    function triggerReveal(){
+      if(tapped||phase!==1) return;
+      tapped=true;
+      textDiv.querySelectorAll('.kb-reveal-line').forEach(el=>{el.style.transition='opacity .8s';el.style.opacity='0';});
+      phase=2; phaseT=0;
     }
+    /* Auto-trigger at 8s */
+    setTimeout(triggerReveal, 8000);
+    canvas.addEventListener('click', triggerReveal);
+    overlay.addEventListener('click', e=>{if(e.target===canvas)triggerReveal();});
 
-    function drawStar(ctx, x, y, size, col, alpha){
-      if(alpha<=0) return;
+    function easeOut(t){return 1-(1-Math.min(1,t))*(1-Math.min(1,t));}
+    function easeInOut(t){t=Math.min(1,t);return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+
+    function drawStar(x,y,size,col,alpha,glow){
+      if(alpha<=0.01) return;
       ctx.save();
-      ctx.globalAlpha = Math.min(1,alpha);
-      ctx.shadowColor = `rgb(${col.r},${col.g},${col.b})`;
-      ctx.shadowBlur  = size*1.8;
-      ctx.fillStyle   = `rgb(${col.r},${col.g},${col.b})`;
-      ctx.beginPath();
-      ctx.arc(x,y,size,0,Math.PI*2);
-      ctx.fill();
-      /* Inner white core */
+      ctx.globalAlpha=Math.min(1,alpha);
+      if(glow){ctx.shadowColor=`rgb(${col.r},${col.g},${col.b})`;ctx.shadowBlur=size*2.5;}
+      ctx.fillStyle=`rgb(${col.r},${col.g},${col.b})`;
+      ctx.beginPath(); ctx.arc(x,y,size,0,Math.PI*2); ctx.fill();
       ctx.shadowBlur=0;
-      ctx.fillStyle='rgba(255,255,255,0.8)';
-      ctx.beginPath();
-      ctx.arc(x,y,size*0.35,0,Math.PI*2);
-      ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,0.9)';
+      ctx.beginPath(); ctx.arc(x,y,size*0.3,0,Math.PI*2); ctx.fill();
       ctx.restore();
     }
 
+    function tick(){
+      animFrame=requestAnimationFrame(tick); phaseT++;
+      ctx.fillStyle='rgba(0,0,0,0.20)'; ctx.fillRect(0,0,W,H);
+
+      if(phase===1){
+        /* Beautiful drifting mixed star field */
+        stars.forEach(s=>{
+          s.twinkle+=s.tspd;
+          const tw=0.65+0.35*Math.sin(s.twinkle);
+          s.x=(s.x+s.vx+W)%W; s.y=(s.y+s.vy+H)%H;
+          drawStar(s.x,s.y,s.size,s.col,s.alpha*tw,false);
+        });
+
+      } else if(phase===2){
+        /* Vortex — all stars spiral toward center */
+        const prog=Math.min(1,phaseT/90);
+        let allNear=true;
+        stars.forEach(s=>{
+          s.twinkle+=s.tspd;
+          const tw=0.6+0.4*Math.sin(s.twinkle);
+          const dx=W/2-s.x, dy=H/2-s.y;
+          const dist=Math.sqrt(dx*dx+dy*dy);
+          if(dist>8) allNear=false;
+          /* Spiral inward */
+          s.vortexAngle+=s.vortexSpeed*(1+prog*4);
+          const pull=0.04+prog*0.12;
+          s.x+=(W/2-s.x)*pull+Math.cos(s.vortexAngle)*2;
+          s.y+=(H/2-s.y)*pull+Math.sin(s.vortexAngle)*2;
+          const fadeA=s.isWord?s.alpha*tw:s.alpha*tw*(1-prog*0.5);
+          drawStar(s.x,s.y,s.size*(1+prog),s.col,fadeA,false);
+        });
+        if(prog>=1||allNear){ phase=3; phaseT=0; }
+
+      } else if(phase===3){
+        /* White flash */
+        flashAlpha=Math.min(1,phaseT/12);
+        ctx.fillStyle=`rgba(255,255,255,${flashAlpha})`;
+        ctx.fillRect(0,0,W,H);
+        /* Reset word stars to center */
+        if(phaseT===1){
+          stars.forEach(s=>{ s.x=W/2+(Math.random()-.5)*20; s.y=H/2+(Math.random()-.5)*20; });
+        }
+        if(phaseT>=18){ phase=4; phaseT=0; flashAlpha=0; }
+
+      } else if(phase===4){
+        /* Stars fly to word positions — lose color stars scatter off screen */
+        const prog=Math.min(1,phaseT/80);
+        const e=easeOut(prog);
+
+        /* Fade flash */
+        if(flashAlpha>0){
+          flashAlpha=Math.max(0,flashAlpha-0.06);
+          ctx.fillStyle=`rgba(255,255,255,${flashAlpha})`;
+          ctx.fillRect(0,0,W,H);
+        }
+
+        stars.forEach(s=>{
+          s.twinkle+=s.tspd;
+          const tw=0.7+0.3*Math.sin(s.twinkle);
+          if(s.isWord){
+            s.x+=(s.tx-s.x)*0.08; s.y+=(s.ty-s.y)*0.08;
+            drawStar(s.x,s.y,s.size*(1+e*0.4),s.col,Math.min(1,s.alpha*(0.5+e*0.8)),true);
+          } else if(s.isWin){
+            /* Win bg stars drift outward gently */
+            s.x+=s.vx*2; s.y+=s.vy*2;
+            drawStar(s.x,s.y,s.size*0.8,s.col,s.alpha*tw*(1-prog*0.6),false);
+          }
+          /* Lose stars don't render */
+        });
+
+        /* Subtle color halo behind word */
+        if(prog>0.3){
+          const hi=easeOut((prog-0.3)/0.7)*0.08;
+          const grd=ctx.createRadialGradient(W/2,H/2-DOT,0,W/2,H/2-DOT,DOT*3.5);
+          grd.addColorStop(0,`rgba(${winCol.r},${winCol.g},${winCol.b},${hi})`);
+          grd.addColorStop(1,'rgba(0,0,0,0)');
+          ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
+        }
+
+        /* Draw faint constellation lines within each letter */
+        if(prog>0.6){
+          const lineA=easeOut((prog-0.6)/0.4)*0.12;
+          ctx.strokeStyle=`rgba(${winCol.r},${winCol.g},${winCol.b},${lineA})`;
+          ctx.lineWidth=0.8;
+          letterGroups.forEach(pts=>{
+            for(let i=0;i<pts.length-1;i++){
+              const a=pts[i],b=pts[i+1];
+              const dx=Math.abs(a.x-b.x),dy=Math.abs(a.y-b.y);
+              if(dx<=DOT*1.1&&dy<=DOT*1.1){
+                ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+              }
+            }
+          });
+        }
+      }
+    }
     tick();
   }
 
