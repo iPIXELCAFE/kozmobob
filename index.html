@@ -7698,10 +7698,9 @@ window.__KBShareCard=function(card,lines){
       '<button id="kb-reveal-back-btn" style="background:none;border:none;font-family:Courier New,monospace;font-size:.52rem;letter-spacing:1px;color:rgba(255,255,255,.2);cursor:pointer;margin-top:2px;">← back</button>';
     document.getElementById('kb-reveal-form').appendChild(choiceBox);
 
-    /* REVEAL NOW */
+    /* REVEAL NOW — open the full message.html experience */
     document.getElementById('kb-reveal-now-btn').addEventListener('click',()=>{
-      choiceBox.remove();
-      startReveal(p1,p2,due,selectedGender);
+      window.location.href = url;
     });
 
     /* SHARE LINK */
