@@ -7568,8 +7568,8 @@ window.__KBShareCard=function(card,lines){
 <!-- ── GENDER REVEAL OVERLAY ── -->
 <div id="kb-reveal-overlay">
   <!-- Form screen -->
+  <button id="kb-reveal-close">✕</button>
   <div id="kb-reveal-form">
-    <button id="kb-reveal-close">✕</button>
     <div id="kb-reveal-title">✦ COSMIC REVEAL</div>
     <div id="kb-reveal-subtitle">The universe has known since the beginning.<br>Let Bob announce it.</div>
     <input id="kb-reveal-p1" type="text" placeholder="Parent 1 name" maxlength="30" autocomplete="off"/>
@@ -7680,94 +7680,210 @@ window.__KBShareCard=function(card,lines){
   });
 
   function startReveal(p1,p2,due,gender){
-    const isGirl=gender==='girl';
-    const color=isGirl?{r:255,g:100,b:180}:{r:80,g:160,b:255};
-    const hex=isGirl?'#ff64b4':'#50a0ff';
-    const word=isGirl?'GIRL':'BOY';
+    const isGirl = gender==='girl';
+    const PINK = {r:255,g:100,b:200};
+    const BLUE = {r:80,g:160,b:255};
+    const winCol = isGirl ? PINK : BLUE;
+    const loseCol= isGirl ? BLUE : PINK;
+    const word   = isGirl ? 'GIRL' : 'BOY';
+
     form.style.display='none';
     canvas.style.display='block';
     textDiv.style.display='flex';
+
     const W=canvas.width=window.innerWidth;
     const H=canvas.height=window.innerHeight;
     const ctx=canvas.getContext('2d');
+
+    /* ── Letter dot-matrix ── */
+    const GLYPHS = {
+      G:[[0,1,1,1,0],[1,0,0,0,0],[1,0,1,1,1],[1,0,0,0,1],[0,1,1,1,1]],
+      I:[[1,1,1],[0,1,0],[0,1,0],[0,1,0],[1,1,1]],
+      R:[[1,1,0],[1,0,1],[1,1,0],[1,0,1],[1,0,1]],
+      L:[[1,0,0],[1,0,0],[1,0,0],[1,0,0],[1,1,1]],
+      B:[[1,1,0],[1,0,1],[1,1,0],[1,0,1],[1,1,0]],
+      O:[[0,1,1,0],[1,0,0,1],[1,0,0,1],[1,0,0,1],[0,1,1,0]],
+      Y:[[1,0,1],[1,0,1],[0,1,0],[0,1,0],[0,1,0]],
+    };
+
+    /* Build target star positions for the word */
+    const DOT = Math.min(W,H) * 0.055; /* dot spacing */
+    const letters = word.split('');
+    const targets = [];
+    /* Calculate total word width */
+    let totalW = 0;
+    letters.forEach(ch=>{
+      const g = GLYPHS[ch];
+      totalW += (g[0].length * DOT) + DOT*0.8;
+    });
+    totalW -= DOT*0.8;
+    let cx = W/2 - totalW/2;
+    const cy = H/2 - DOT*2.5;
+    letters.forEach(ch=>{
+      const g = GLYPHS[ch];
+      for(let row=0;row<g.length;row++){
+        for(let col=0;col<g[row].length;col++){
+          if(g[row][col]){
+            targets.push({x: cx+col*DOT, y: cy+row*DOT});
+          }
+        }
+      }
+      cx += (g[0].length * DOT) + DOT*0.8;
+    });
+
+    /* ── Create stars ── */
+    const NUM_BG   = 280;
+    const NUM_WORD = targets.length;
+    const stars = [];
+
+    /* Background stars — mixed colors */
+    for(let i=0;i<NUM_BG;i++){
+      const isWin = Math.random()<0.5;
+      stars.push({
+        x: Math.random()*W, y: Math.random()*H,
+        tx: 0, ty: 0,  /* target (used in phase 3) */
+        size: 0.8+Math.random()*2.2,
+        twinkle: Math.random()*Math.PI*2,
+        twinkleSpeed: 0.02+Math.random()*0.03,
+        alpha: 0.4+Math.random()*0.5,
+        col: isWin ? winCol : loseCol,
+        isWin, isWord: false,
+        sepAngle: (Math.random()*0.6+0.2)*(Math.random()<0.5?1:-1),
+        sepDist: 60+Math.random()*200,
+        sepX: 0, sepY: 0,
+      });
+    }
+
+    /* Word stars — these fly to letter positions */
+    targets.forEach((t,i)=>{
+      stars.push({
+        x: Math.random()*W, y: Math.random()*H,
+        tx: t.x, ty: t.y,
+        size: 2.5+Math.random()*1.5,
+        twinkle: Math.random()*Math.PI*2,
+        twinkleSpeed: 0.03+Math.random()*0.02,
+        alpha: 0.5+Math.random()*0.4,
+        col: winCol,
+        isWin: true, isWord: true,
+        arrived: false,
+      });
+    });
+
+    /* ── Tension text ── */
+    textDiv.innerHTML='';
     const lines=[
       p1+' and '+p2+'…',
       due?'A soul arriving '+due+'.':'A soul is arriving.',
       'The stars have always known.',
     ];
-    textDiv.innerHTML='';
     lines.forEach(txt=>{
       const d=document.createElement('div');
       d.className='kb-reveal-line'; d.textContent=txt;
       textDiv.appendChild(d);
     });
-    const announceEl=document.createElement('div');
-    announceEl.className='kb-reveal-announce';
-    announceEl.style.color=hex;
-    announceEl.textContent='A '+word+' IS COMING';
-    textDiv.appendChild(announceEl);
-    let phase=1,t=0;
-    const particles=[];
-    for(let i=0;i<120;i++){
-      const angle=Math.random()*Math.PI*2;
-      const radius=80+Math.random()*180;
-      particles.push({x:W/2+Math.cos(angle)*radius,y:H/2+Math.sin(angle)*radius,angle,radius,
-        speed:0.002+Math.random()*0.004,size:1+Math.random()*2,alpha:0.1+Math.random()*0.3,
-        col:{r:200,g:160,b:255}});
-    }
-    setTimeout(()=>{const els=textDiv.querySelectorAll('.kb-reveal-line');if(els[0])els[0].classList.add('show');},600);
-    setTimeout(()=>{const els=textDiv.querySelectorAll('.kb-reveal-line');if(els[1])els[1].classList.add('show');},2400);
-    setTimeout(()=>{const els=textDiv.querySelectorAll('.kb-reveal-line');if(els[2])els[2].classList.add('show');},4200);
+    setTimeout(()=>{const e=textDiv.querySelectorAll('.kb-reveal-line');if(e[0])e[0].classList.add('show');},800);
+    setTimeout(()=>{const e=textDiv.querySelectorAll('.kb-reveal-line');if(e[1])e[1].classList.add('show');},2800);
+    setTimeout(()=>{const e=textDiv.querySelectorAll('.kb-reveal-line');if(e[2])e[2].classList.add('show');},5000);
+
+    let phase=1, t=0;
+    /* Phase 2 at 7.5s — stars separate */
     setTimeout(()=>{
       phase=2;
-      for(let i=0;i<300;i++){
-        const a=Math.random()*Math.PI*2,sp=3+Math.random()*12;
-        particles.push({x:W/2,y:H/2,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,
-          size:2+Math.random()*5,alpha:1,decay:0.012+Math.random()*0.018,col:color,explode:true});
-      }
-      ctx.fillStyle='rgba('+color.r+','+color.g+','+color.b+',1)';
-      ctx.fillRect(0,0,W,H);
-      setTimeout(()=>{
-        textDiv.querySelectorAll('.kb-reveal-line').forEach(el=>el.style.opacity='0');
-        announceEl.classList.add('show');
-        phase=3;
-      },400);
-    },6000);
+      /* Give bg stars a separation target */
+      stars.filter(s=>!s.isWord).forEach(s=>{
+        const dir = s.isWin ? 1 : -1;
+        s.sepX = s.x + Math.cos(s.sepAngle)*s.sepDist*dir;
+        s.sepY = s.y + Math.sin(s.sepAngle)*s.sepDist*dir;
+      });
+    },7500);
+    /* Phase 3 at 10s — word stars fly to targets, fade text */
+    setTimeout(()=>{
+      phase=3;
+      textDiv.querySelectorAll('.kb-reveal-line').forEach(el=>{el.style.transition='opacity 1s';el.style.opacity='0';});
+    },10000);
+
+    function easeOut(t){ return 1-(1-t)*(1-t); }
+
+    let p2Start=0, p3Start=0;
+
     function tick(){
       animFrame=requestAnimationFrame(tick); t++;
-      if(phase===1){
-        ctx.fillStyle='rgba(0,0,0,0.18)'; ctx.fillRect(0,0,W,H);
-        particles.forEach(p=>{
-          p.angle+=p.speed; p.radius=Math.max(20,p.radius-0.15);
-          p.x=W/2+Math.cos(p.angle)*p.radius; p.y=H/2+Math.sin(p.angle)*p.radius;
-          ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-          ctx.fillStyle='rgba('+p.col.r+','+p.col.g+','+p.col.b+','+p.alpha+')'; ctx.fill();
-        });
-        const pulse=0.5+0.5*Math.sin(t*0.06);
-        const grd=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,60+pulse*30);
-        grd.addColorStop(0,'rgba(255,200,40,'+(0.15*pulse)+')');
+      ctx.fillStyle='rgba(0,0,0,0.18)'; ctx.fillRect(0,0,W,H);
+
+      stars.forEach(s=>{
+        s.twinkle+=s.twinkleSpeed;
+        const tw=0.6+0.4*Math.sin(s.twinkle);
+
+        if(phase===1){
+          /* Just twinkle in place */
+          drawStar(ctx, s.x, s.y, s.size, s.col, s.alpha*tw);
+
+        } else if(phase===2){
+          if(!p2Start) p2Start=t;
+          const prog = Math.min(1,(t-p2Start)/120);
+          const e = easeOut(prog);
+          if(!s.isWord){
+            /* Move toward separation target */
+            const nx = s.x + (s.sepX-s.x)*e*0.04;
+            const ny = s.y + (s.sepY-s.y)*e*0.04;
+            s.x+=(nx-s.x)*0.06; s.y+=(ny-s.y)*0.06;
+            const fadeAlpha = s.isWin ? s.alpha*tw : s.alpha*tw*(1-prog*0.9);
+            drawStar(ctx, s.x, s.y, s.isWin?s.size*(1+prog*0.5):s.size, s.col, fadeAlpha);
+          } else {
+            drawStar(ctx, s.x, s.y, s.size, s.col, s.alpha*tw);
+          }
+
+        } else if(phase===3){
+          if(!p3Start) p3Start=t;
+          const prog = Math.min(1,(t-p3Start)/100);
+          const e = easeOut(prog);
+          if(s.isWord){
+            /* Fly to letter target */
+            s.x += (s.tx-s.x)*0.06;
+            s.y += (s.ty-s.y)*0.06;
+            const glow = 1+e*2;
+            drawStar(ctx, s.x, s.y, s.size*glow, s.col, Math.min(1,s.alpha*tw*1.4));
+          } else if(s.isWin){
+            /* Win bg stars drift and twinkle */
+            s.x += (s.sepX-s.x)*0.02; s.y += (s.sepY-s.y)*0.02;
+            drawStar(ctx, s.x, s.y, s.size, s.col, s.alpha*tw*0.6);
+          }
+          /* Lose stars already gone */
+        }
+      });
+
+      /* Center radial glow in winning color during phase 2+ */
+      if(phase>=2){
+        const gIntensity = phase===2 ? Math.min(1,(t-(p2Start||t))/80)*0.15 : 0.12;
+        const grd=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.min(W,H)*0.45);
+        grd.addColorStop(0,`rgba(${winCol.r},${winCol.g},${winCol.b},${gIntensity})`);
         grd.addColorStop(1,'rgba(0,0,0,0)');
         ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
-      } else {
-        const ta=phase===2?0.25:0.08;
-        ctx.fillStyle='rgba('+color.r+','+color.g+','+color.b+','+ta+')'; ctx.fillRect(0,0,W,H);
-        particles.filter(p=>p.explode).forEach(p=>{
-          if(p.alpha<=0) return;
-          p.x+=p.vx; p.y+=p.vy; p.vx*=0.97; p.vy*=0.97; p.alpha-=p.decay;
-          ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-          ctx.fillStyle='rgba('+p.col.r+','+p.col.g+','+p.col.b+','+Math.max(0,p.alpha)+')'; ctx.fill();
-        });
-        if(phase===3&&Math.random()<0.25){
-          const sx=Math.random()*W,sy=Math.random()*H;
-          const sg=ctx.createRadialGradient(sx,sy,0,sx,sy,40+Math.random()*80);
-          sg.addColorStop(0,'rgba('+color.r+','+color.g+','+color.b+',0.18)');
-          sg.addColorStop(1,'rgba(0,0,0,0)');
-          ctx.fillStyle=sg; ctx.fillRect(0,0,W,H);
-        }
       }
     }
+
+    function drawStar(ctx, x, y, size, col, alpha){
+      if(alpha<=0) return;
+      ctx.save();
+      ctx.globalAlpha = Math.min(1,alpha);
+      ctx.shadowColor = `rgb(${col.r},${col.g},${col.b})`;
+      ctx.shadowBlur  = size*4;
+      ctx.fillStyle   = `rgb(${col.r},${col.g},${col.b})`;
+      ctx.beginPath();
+      ctx.arc(x,y,size,0,Math.PI*2);
+      ctx.fill();
+      /* Inner white core */
+      ctx.shadowBlur=0;
+      ctx.fillStyle='rgba(255,255,255,0.8)';
+      ctx.beginPath();
+      ctx.arc(x,y,size*0.35,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
     tick();
   }
+
   window.__KBGenderReveal={open};
 })();
 
