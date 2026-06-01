@@ -7594,18 +7594,19 @@ window.__KBShareCard=function(card,lines){
   const btn   = document.getElementById('kb-menu-btn');
   const panel = document.getElementById('kb-menu-panel');
   if(!btn||!panel) return;
-  function toggleMenu(e){
-    e.stopPropagation();
-    const open = panel.classList.toggle('visible');
-    btn.classList.toggle('open', open);
-  }
-  btn.addEventListener('pointerdown', e=>{ e.stopPropagation(); const open=panel.classList.toggle('visible'); btn.classList.toggle('open',open); });
-  document.addEventListener('pointerdown', e=>{
-    if(!panel.contains(e.target) && e.target!==btn){
+  /* Use document capture so it fires reliably regardless of other handlers */
+  document.addEventListener('pointerdown', function(e){
+    const isBtn   = e.target===btn || btn.contains(e.target);
+    const isPanel = panel.contains(e.target);
+    if(isBtn){
+      e.stopPropagation();
+      const open = panel.classList.toggle('visible');
+      btn.classList.toggle('open', open);
+    } else if(!isPanel){
       panel.classList.remove('visible');
       btn.classList.remove('open');
     }
-  });
+  }, true); /* capture phase */
   const revealItem = document.getElementById('kb-menu-reveal');
   if(revealItem) revealItem.addEventListener('click', ()=>{
     panel.classList.remove('visible'); btn.classList.remove('open');
