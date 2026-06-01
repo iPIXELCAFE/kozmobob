@@ -7565,6 +7565,41 @@ window.__KBShareCard=function(card,lines){
 
 </script>
 
+<!-- ── COOKIE CONSENT BANNER ── -->
+<style>
+#cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:99999;
+  background:rgba(5,2,16,.97);border-top:1px solid rgba(255,200,40,.2);
+  padding:12px 20px;display:flex;align-items:center;justify-content:space-between;
+  gap:14px;flex-wrap:wrap;font-family:'Courier New',monospace;font-size:.58rem;
+  letter-spacing:.08em;color:rgba(255,255,255,.6);
+  transform:translateY(0);transition:transform .4s ease;}
+#cookie-banner.hidden{transform:translateY(110%);}
+#cookie-banner a{color:rgba(255,200,40,.7);text-decoration:none;}
+#cookie-banner a:hover{color:rgba(255,200,40,1);}
+#cookie-accept{background:rgba(255,200,40,.12);border:1px solid rgba(255,200,40,.5);
+  border-radius:20px;padding:8px 20px;color:rgba(255,200,40,.95);
+  font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:2px;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;}
+#cookie-accept:hover{background:rgba(255,200,40,.22);}
+</style>
+<div id="cookie-banner" style="display:none;">
+  <span>We use cookies for ads &amp; analytics. <a href="/privacy" target="_blank">Privacy Policy</a></span>
+  <button id="cookie-accept">I AGREE</button>
+</div>
+<script>
+(function(){
+  if(localStorage.getItem('__kb_cookies')==='1') return;
+  var b=document.getElementById('cookie-banner');
+  if(!b) return;
+  b.style.display='flex';
+  document.getElementById('cookie-accept').addEventListener('click',function(){
+    localStorage.setItem('__kb_cookies','1');
+    b.classList.add('hidden');
+    setTimeout(function(){b.remove();},500);
+  });
+})();
+</script>
+
 <!-- ── GENDER REVEAL OVERLAY ── -->
 <div id="kb-reveal-overlay">
   <!-- Form screen -->
