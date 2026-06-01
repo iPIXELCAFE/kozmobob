@@ -387,7 +387,7 @@ function copyRevealLink(){
     });
     const wStars=targets.map(t=>({
       x:cx+(Math.random()-.5)*40, y:cy+(Math.random()-.5)*40,
-      tx:t.x, ty:t.y, size:6+Math.random()*3,
+      tx:t.x, ty:t.y, size:4+Math.random()*1.5,
       twinkle:Math.random()*Math.PI*2, tspd:.04+Math.random()*.03,
       dancePhase:Math.random()*Math.PI*2, danceSpd:.02+Math.random()*.015,
       danceAmp:DOT*0.18+Math.random()*DOT*0.10,
@@ -420,24 +420,19 @@ function copyRevealLink(){
         const pulse=1+0.35*Math.sin(s.twinkle*1.4);
         ctx.save();
         ctx.globalAlpha=s.alpha*tw;
-        ctx.shadowColor=`rgb(${cr},${cg},${cb})`; ctx.shadowBlur=s.size*8*tw;
+        ctx.shadowColor=`rgb(${cr},${cg},${cb})`; ctx.shadowBlur=s.size*6*tw;
         ctx.fillStyle=`rgb(${cr},${cg},${cb})`;
         ctx.beginPath(); ctx.arc(px,py,s.size*pulse,0,Math.PI*2); ctx.fill();
-        /* Second pass — extra glow ring */
-        ctx.globalAlpha=s.alpha*tw*0.4;
-        ctx.shadowBlur=s.size*16;
-        ctx.beginPath(); ctx.arc(px,py,s.size*pulse*1.8,0,Math.PI*2); ctx.fill();
-        ctx.globalAlpha=s.alpha*tw;
-        ctx.shadowBlur=s.size*3; ctx.shadowColor='#fff';
+        ctx.shadowBlur=s.size*2; ctx.shadowColor='#fff';
         ctx.fillStyle='rgba(255,255,255,.98)';
-        ctx.beginPath(); ctx.arc(px,py,s.size*pulse*.4,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(px,py,s.size*pulse*.38,0,Math.PI*2); ctx.fill();
         ctx.restore();
       });
       /* Constellation lines */
       if(prog>0.4){
         const la=Math.min(1,(prog-0.4)/0.6)*0.3;
-        ctx.strokeStyle=`rgba(${cr},${cg},${cb},${la})`; ctx.lineWidth=2;
-        ctx.shadowColor=`rgb(${cr},${cg},${cb})`; ctx.shadowBlur=6;
+        ctx.strokeStyle=`rgba(${cr},${cg},${cb},${la})`; ctx.lineWidth=1.5;
+        ctx.shadowColor=`rgb(${cr},${cg},${cb})`; ctx.shadowBlur=4;
         groups.forEach(pts=>{
           for(let i=0;i<pts.length-1;i++){
             const a=pts[i],b=pts[i+1];
