@@ -404,10 +404,14 @@ function copyRevealLink(){
     const W=grCanvas.width=window.innerWidth;
     const H=grCanvas.height=window.innerHeight;
     const ctx=grCanvas.getContext('2d');
-    const DOT=Math.min(W,H)*0.068;
-    /* Center the 5-row word vertically on Bob (screen center) */
-    const cx=W/2, cy=H/2 - 2*DOT;
+    /* Dynamic DOT — word always fits inside Bob (max 60% of short side) */
     const letters=word.split('');
+    let unitW=0;
+    letters.forEach(ch=>{unitW+=(GLYPHS[ch][0].length+1);});
+    unitW--;
+    const DOT=Math.min(Math.min(W,H)*0.068, Math.min(W,H)*0.60/unitW);
+    /* Center word on Bob */
+    const cx=W/2, cy=H/2 - 2*DOT;
     let totalW=0;
     letters.forEach(ch=>{totalW+=(GLYPHS[ch][0].length*DOT)+DOT;});
     totalW-=DOT;
@@ -421,18 +425,18 @@ function copyRevealLink(){
     });
     const wStars=targets.map(t=>({
       x:cx+(Math.random()-.5)*40, y:cy+(Math.random()-.5)*40,
-      tx:t.x, ty:t.y, size:3.5+Math.random()*1.5,
+      tx:t.x, ty:t.y, size:3+Math.random()*1.5,
       twinkle:Math.random()*Math.PI*2, tspd:.03+Math.random()*.02,
       alpha:0,
     }));
     const cr=Math.round(winC.r*255), cg=Math.round(winC.g*255), cb=Math.round(winC.b*255);
 
-    /* "IT'S A" text — sits just above the star word */
+    /* "IT'S A" sits just above the star word */
     const itsAColor = isGirl ? 'rgba(255,140,210,1)' : 'rgba(120,190,255,1)';
     itsAEl.textContent = "IT'S A";
     itsAEl.style.color = itsAColor;
-    itsAEl.style.top = Math.max(8, cy - 58)+'px';
-    itsAEl.style.fontSize = 'clamp(1rem,3.5vw,1.4rem)';
+    itsAEl.style.top = Math.max(10, cy - 50)+'px';
+    itsAEl.style.fontSize = 'clamp(.9rem,3vw,1.3rem)';
     setTimeout(()=>itsAEl.classList.add('show'), 600);
 
     let ft=0;
@@ -467,25 +471,6 @@ function copyRevealLink(){
             }
           }
         });
-      }
-      /* Congratulations — flies in */
-      if(prog>0.5){
-        const cp=Math.min(1,(prog-0.5)/0.5);
-        const scale=0.05+cp*0.95;
-        const fSize=Math.max(14,Math.round(Math.min(W,H)*0.038*scale));
-        const txt='Congratulations'+(gP1?' '+gP1.toUpperCase():'')+(gP2?' & '+gP2.toUpperCase():'');
-        ctx.save();
-        ctx.globalAlpha=cp*cp;
-        ctx.font='bold '+fSize+'px Georgia,serif';
-        ctx.textAlign='center';
-        ctx.shadowColor=`rgb(${cr},${cg},${cb})`;
-        ctx.shadowBlur=fSize*cp;
-        ctx.fillStyle=`rgb(${cr},${cg},${cb})`;
-        ctx.fillText(txt, cx, cy+DOT*4);
-        ctx.shadowBlur=fSize*.5*cp;
-        ctx.fillStyle=`rgba(255,255,255,${0.9*cp})`;
-        ctx.fillText(txt, cx, cy+DOT*4);
-        ctx.restore();
       }
       /* Show result panel */
       if(ft===100){
