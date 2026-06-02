@@ -6031,7 +6031,7 @@ function showPaywall(mode, sign, col) {
             const full = r.lines.map(l=>`<div style="margin-bottom:8px;line-height:1.5;color:rgba(255,222,105,.85);">${l}</div>`).join('');
             const d = new Date(r.timestamp);
             const detail = document.createElement('div');
-            detail.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;';
+            detail.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:32px;overflow-y:auto;';
             detail.innerHTML=`<div style="max-width:420px;width:100%;font-family:Courier New,monospace;">
               <div style="color:rgba(255,200,40,.4);font-size:.55rem;letter-spacing:3px;margin-bottom:18px;text-align:center;">${d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})} · ${(r.sign||r.mode).toUpperCase()}</div>
               <div style="font-family:Georgia,serif;">${full}</div>
