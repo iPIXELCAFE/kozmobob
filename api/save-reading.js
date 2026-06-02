@@ -45,7 +45,7 @@ module.exports = async function handler(req, res) {
     timestamp: timestamp || Date.now(),
     sign:      String(sign || 'unknown').slice(0, 30),
     mode:      String(mode || 'oracle').slice(0, 20),
-    lines:     (lines || []).map(l => String(l).slice(0, 300)).slice(0, 10),
+    lines:     (lines || []).map(l => String(l).slice(0, 600)).slice(0, 60),
   };
   readings.unshift(entry);
   if (readings.length > MAX_READINGS) readings = readings.slice(0, MAX_READINGS);
