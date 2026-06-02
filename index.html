@@ -63,65 +63,6 @@ html,body{
   pointer-events:all;
 }
 
-/* ── Demo payment overlay ── */
-#demo-overlay{
-  position:fixed;inset:0;z-index:100;
-  display:flex;align-items:center;justify-content:center;
-  background:rgba(0,0,0,.72);
-  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  opacity:0;pointer-events:none;
-  transition:opacity .35s ease;
-}
-#demo-overlay.visible{opacity:1;pointer-events:all}
-#demo-card{
-  width:min(360px,88vw);
-  border:1px solid rgba(255,175,40,.30);
-  border-radius:18px;
-  background:rgba(12,8,20,.88);
-  padding:32px 28px 28px;
-  text-align:center;
-  transform:scale(.94);
-  transition:transform .35s cubic-bezier(.22,1,.36,1);
-}
-#demo-overlay.visible #demo-card{transform:scale(1)}
-#demo-label{
-  font-size:.6rem;letter-spacing:.32em;text-transform:uppercase;
-  color:rgba(255,175,40,.45);margin-bottom:8px;
-}
-#demo-tier-name{
-  font-family:'Georgia',serif;font-size:1.55rem;letter-spacing:.12em;
-  color:rgba(255,210,90,.97);
-  text-shadow:0 0 22px rgba(255,160,30,.55);
-  margin-bottom:4px;
-}
-#demo-tier-price{
-  font-family:'Georgia',serif;font-size:2.6rem;
-  color:rgba(255,200,70,1);letter-spacing:.04em;line-height:1;
-  text-shadow:0 0 30px rgba(255,150,20,.45);
-  margin-bottom:6px;
-}
-#demo-tier-desc{
-  font-size:.72rem;letter-spacing:.14em;
-  color:rgba(180,155,210,.50);margin-bottom:28px;
-}
-#demo-pay-btn{
-  display:block;width:100%;padding:14px;
-  background:linear-gradient(135deg,rgba(255,165,30,.88),rgba(200,110,10,.88));
-  border:none;border-radius:10px;
-  font-family:'Georgia',serif;font-size:.88rem;letter-spacing:.18em;
-  color:#000;font-weight:700;text-transform:uppercase;
-  cursor:pointer;
-  transition:opacity .2s,transform .15s;
-}
-#demo-pay-btn:hover{opacity:.88;transform:scale(1.02)}
-#demo-pay-btn:active{transform:scale(.98)}
-#demo-dismiss{
-  display:block;margin:14px auto 0;
-  background:none;border:none;
-  color:rgba(180,155,200,.28);font-size:.6rem;letter-spacing:.18em;
-  text-transform:uppercase;cursor:pointer;transition:color .25s;
-}
-#demo-dismiss:hover{color:rgba(255,175,40,.55)}
 
 
 /* ── Typewriter text ── */
@@ -139,84 +80,6 @@ html,body{
   padding:0 8px;
 }
 
-/* ── Vault section ── */
-#oracle-vault-section{
-  width:100%;
-  max-height:0;
-  overflow:hidden;
-  margin-top:0;
-  opacity:0;pointer-events:none;
-  transition:opacity .9s ease, max-height .5s ease, margin-top .5s ease;
-}
-#oracle-vault-section.visible{
-  opacity:1;
-  pointer-events:all;
-  max-height:700px;
-  margin-top:22px;
-}
-
-.vault-divider{
-  height:1px;width:66%;margin:0 auto 22px;
-  background:linear-gradient(to right,transparent,rgba(255,175,40,.40) 30%,rgba(255,175,40,.40) 70%,transparent);
-}
-.vault-heading{text-align:center;margin-bottom:18px}
-.vault-heading h2{
-  font-family:'Georgia',serif;
-  font-size:clamp(.82rem,2.2vw,1rem);
-  font-weight:normal;letter-spacing:.28em;
-  color:rgba(255,200,80,.95);
-  text-shadow:0 0 18px rgba(255,160,30,.42);
-  text-transform:uppercase;
-}
-.vault-heading p{
-  margin-top:5px;font-size:.68rem;letter-spacing:.12em;
-  color:rgba(180,160,200,.44);text-transform:uppercase;
-}
-
-/* Tier grid */
-.vault-tiers{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
-.vault-tier{
-  position:relative;padding:13px 11px;
-  border:1px solid rgba(255,175,40,.18);border-radius:11px;
-  background:rgba(0,0,0,.38);
-  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  cursor:pointer;text-align:center;
-  transition:border-color .25s,background .25s,transform .2s;
-}
-.vault-tier:hover{
-  border-color:rgba(255,175,40,.58);
-  background:rgba(0,0,0,.55);
-  transform:translateY(-2px);
-}
-.vault-tier.cosmic{
-  grid-column:1/-1;border-color:rgba(255,175,40,.28);
-  background:linear-gradient(135deg,rgba(0,0,0,.42),rgba(60,20,100,.38));
-  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-}
-.vault-tier.cosmic:hover{border-color:rgba(255,175,40,.65)}
-.tier-price{
-  font-family:'Georgia',serif;font-size:1.3rem;
-  color:rgba(255,200,80,.95);letter-spacing:.04em;line-height:1;
-}
-.tier-label{
-  margin-top:3px;font-size:.60rem;letter-spacing:.18em;
-  color:rgba(180,155,210,.50);text-transform:uppercase;
-}
-.tier-tag{margin-top:4px;font-size:.65rem;color:rgba(255,190,80,.46);letter-spacing:.07em}
-.tier-badge{
-  position:absolute;top:-7px;right:10px;
-  padding:2px 7px;background:rgba(255,155,20,.85);
-  border-radius:20px;font-size:.53rem;letter-spacing:.12em;
-  color:#000;text-transform:uppercase;font-weight:700;
-}
-#vault-dismiss{
-  display:block;margin:14px auto 0;
-  background:none;border:none;
-  color:rgba(180,155,200,.26);
-  font-size:.64rem;letter-spacing:.17em;text-transform:uppercase;
-  cursor:pointer;transition:color .25s;
-}
-#vault-dismiss:hover{color:rgba(255,175,40,.58)}
 
 
 /* ── Zodiac Ring ── */
@@ -1559,21 +1422,6 @@ select.adv-input option{background:#111;}
   <div id="oracle-micro-text"></div>
   <button id="oracle-close-btn" onclick="if(window.OracleQuery)window.OracleQuery.setState('IDLE')" title="Close">✕</button>
 
-  <div id="oracle-vault-section">
-    <button id="vault-dismiss">Close &amp; Reset</button>
-  </div>
-</div>
-
-<!-- Demo payment overlay -->
-<div id="demo-overlay">
-  <div id="demo-card">
-    <div id="demo-label">Demo Mode &mdash; Phase 6 Payment</div>
-    <div id="demo-tier-name">Weekly</div>
-    <div id="demo-tier-price">$4</div>
-    <div id="demo-tier-desc">One deep reading</div>
-    <button id="demo-pay-btn">Unlock Access</button>
-    <button id="demo-dismiss">Cancel</button>
-  </div>
 </div>
 
 
@@ -1944,9 +1792,32 @@ select.adv-input option{background:#111;}
   if (closeBtn) closeBtn.addEventListener('click', () => overlay.classList.remove('visible'));
   if (overlay)  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.classList.remove('visible'); });
 
-  /* ── Pay button — placeholder until Stripe is wired ── */
-  if (payBtn) payBtn.addEventListener('click', () => {
-    alert('Payment coming soon! KozmoBob is setting up Stripe.');
+  /* ── Pay button — Stripe checkout ── */
+  if (payBtn) payBtn.addEventListener('click', async () => {
+    const emoji   = (document.getElementById('advert-emoji-input')?.value || '').trim();
+    const message = (document.getElementById('advert-msg')?.value || '').trim();
+    const fromVal = (document.getElementById('advert-from')?.value || '').trim();
+    const bizVal  = (document.getElementById('advert-biz')?.value || '').trim();
+    const url     = bizVal || '';
+    const deviceId = localStorage.getItem('__kb_device') || '';
+
+    let product, metadata;
+    if (currentBill === 'message') {
+      if (!message) { alert('Please enter your message.'); return; }
+      product  = 'personal-message';
+      metadata = { message, emoji, fromVal, url, deviceId };
+    } else if (currentBill === 'right') {
+      product  = 'billboard-premium';
+      metadata = { message: bizVal, emoji, url, deviceId };
+    } else {
+      product  = 'billboard-community';
+      metadata = { message: bizVal, emoji, url, deviceId };
+    }
+
+    payBtn.textContent = '✦ Redirecting...';
+    payBtn.disabled = true;
+    await goToCheckout(product, metadata);
+    payBtn.disabled = false;
   });
 
   updateEmojiDisplay();
@@ -2407,7 +2278,7 @@ const OracleInteraction = (() => {
 })();
 
 
-/* ── 4. QUERY ENGINE  (state machine + typewriter + vault reveal) ── */
+/* ── 4. QUERY ENGINE  (state machine + typewriter) ── */
 const OracleQuery = (() => {
   const { mat, auraMat } = OracleScene;
   const { inp, ph }      = OracleInteraction;
@@ -2415,7 +2286,7 @@ const OracleQuery = (() => {
   /* DOM refs */
   const ctr   = document.getElementById('oracle-container');
   const txt   = document.getElementById('oracle-micro-text');
-  const vsect = document.getElementById('oracle-vault-section');
+
   const wrap  = document.getElementById('oracle-input-wrap');
 
   /* Stop raycaster from eating clicks inside the panel */
@@ -2517,7 +2388,7 @@ const OracleQuery = (() => {
       (function f(){const p=Math.min((performance.now()-rs)/1100,1);const e=-1+(4-2*p)*p;ball.scale.setScalar(from+(1.0-from)*Math.min(p,1));if(p<1)requestAnimationFrame(f);})();
       /* Hide glass panel, restore input bar */
       ctr.classList.remove('visible');
-      vsect.classList.remove('visible');
+
       /* Clear teaser too */
       const _ti = document.getElementById('card-teaser');
       if (_ti) { _ti.classList.remove('visible'); _ti.textContent = ''; }
@@ -3285,8 +3156,6 @@ const OracleQuery = (() => {
             const hook = document.createElement('span');
             hook.className = 'oracle-line';
             hook.style.cssText = 'display:block;margin-top:18px;font-size:.78rem;letter-spacing:.18em;color:rgba(255,200,40,.45);text-align:center;font-style:italic;cursor:pointer;';
-            hook.textContent = '✦  There is more I see.  Unlock your full reading.  ✦';
-            hook.addEventListener('click', () => vsect.classList.add('visible'));
             txt.appendChild(hook);
             ctr.scrollTop = ctr.scrollHeight;
           }, 900);
@@ -3386,69 +3255,6 @@ const OracleQuery = (() => {
   }
 
   /* Demo overlay logic */
-  const demoOverlay  = document.getElementById('demo-overlay');
-  const demoName     = document.getElementById('demo-tier-name');
-  const demoPrice    = document.getElementById('demo-tier-price');
-  const demoDesc     = document.getElementById('demo-tier-desc');
-  const demoPayBtn   = document.getElementById('demo-pay-btn');
-  const demoDismiss  = document.getElementById('demo-dismiss');
-
-  const TIER_DATA = {
-    weekly:  { name:'Weekly',           price:'$4',   desc:'One deep reading' },
-    monthly: { name:'Monthly',          price:'$25',  desc:'30 days of Oracle' },
-    yearly:  { name:'Yearly',           price:'$99',  desc:'Full year · priority readings' },
-    cosmic:  { name:'Cosmic Blueprint', price:'$250', desc:'Lifetime access · personal blueprint' },
-  };
-
-  function openDemo(tier) {
-    const d = TIER_DATA[tier] || {};
-    demoName.textContent  = d.name;
-    demoPrice.textContent = d.price;
-    demoDesc.textContent  = d.desc;
-    demoOverlay.classList.add('visible');
-  }
-  function closeDemo() { demoOverlay.classList.remove('visible'); }
-
-  demoPayBtn.addEventListener('click', () => {
-    demoPayBtn.textContent = '✦ The Vault Opens ✦';
-    demoPayBtn.style.background = 'linear-gradient(135deg,rgba(255,195,45,.95),rgba(210,125,10,.95))';
-    demoPayBtn.style.color = '#000';
-    setTimeout(() => {
-      closeDemo();
-      demoPayBtn.textContent = 'Unlock Access';
-      demoPayBtn.style.background = '';
-      demoPayBtn.style.color = '';
-      /* Flash Bob gold — vault opens visually */
-      const flash = OracleScene.mat.uniforms.uLightningFlash;
-      flash.value = 0.88;
-      setTimeout(() => { flash.value *= 0.28; setTimeout(() => { flash.value = 0; }, 380); }, 160);
-      OracleScene.setGlowColor(1.0, 0.75, 0.12, 800);
-      /* Bob speaks the access-granted line */
-      if (window.speechSynthesis) {
-        speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(
-          'The vault recognizes you. Your connection is now sealed. Bob awaits your question.'
-        );
-        const vaultV = window.__pickVoice ? window.__pickVoice() : null;
-        if (vaultV) u.voice = vaultV;
-        u.rate = 0.66; u.pitch = 0.76; u.volume = 0.97;
-        speechSynthesis.speak(u);
-      }
-    }, 900);
-  });
-  demoDismiss.addEventListener('click', closeDemo);
-  demoOverlay.addEventListener('pointerdown', e => {
-    if (e.target === demoOverlay) closeDemo();
-  });
-
-  /* Vault tier clicks */
-  document.querySelectorAll('.vault-tier').forEach(t => {
-    t.addEventListener('click', () => openDemo(t.dataset.tier));
-  });
-
-  /* Close & Reset */
-  document.getElementById('vault-dismiss').addEventListener('click', () => setState(ST.I));
-
   /* Input enter */
   inp.addEventListener('keydown', e => {
     if (e.key !== 'Enter') return;
@@ -3460,6 +3266,46 @@ const OracleQuery = (() => {
 
   window.OracleQuery = { submit, setState };
   return { submit, setState };
+})();
+
+/* ── STRIPE PAYMENT SUCCESS HANDLER ── */
+(function(){
+  const sp = new URLSearchParams(window.location.search);
+  if(sp.get('payment') !== 'success') return;
+  const product = sp.get('product') || '';
+  history.replaceState({}, '', window.location.pathname);
+
+  const READING_MODES = {
+    'reading-weekly':  'weekly',
+    'reading-monthly': 'monthly',
+    'reading-yearly':  'yearly',
+    'tarot-deep':      'tarot-deep',
+  };
+
+  const mode = READING_MODES[product];
+  if(!mode) return; /* starmap handled separately */
+
+  /* Wait for OracleQuery to be ready */
+  function tryUnlock(attempts){
+    if(!window.OracleQuery || !window.__KB){ if(attempts>0) setTimeout(()=>tryUnlock(attempts-1),300); return; }
+    window.__KB.unlock();
+
+    if(mode === 'tarot-deep'){
+      /* Just unlock — user will tap a card to get the deep read */
+      return;
+    }
+
+    /* For horoscope readings — restore saved sign and submit */
+    const saved = sessionStorage.getItem('__kb_payment_sign');
+    sessionStorage.removeItem('__kb_payment_sign');
+    const sign = saved || '';
+    if(sign){
+      window.__KBReadingMode = mode;
+      window.__KBLastMode    = mode;
+      setTimeout(()=>{ if(window.OracleQuery) window.OracleQuery.submit(sign); }, 500);
+    }
+  }
+  tryUnlock(10);
 })();
 
 /* ── IDLE PORTAL — fires every 45s during idle, shows current brand message ── */
@@ -5540,7 +5386,7 @@ function showReadingPicker(sign, r, g, b) {
       const isPaid = btn.dataset.paid === 'true';
 
       if (isPaid && !isDevUnlocked()) {
-        /* Stripe not yet wired — show coming soon */
+        sessionStorage.setItem('__kb_payment_sign', sign);
         showPaywall(mode, sign, col);
         close();
         return;
@@ -5555,25 +5401,53 @@ function showReadingPicker(sign, r, g, b) {
   });
 }
 
+async function goToCheckout(product, metadata = {}) {
+  try {
+    const res = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product, metadata }),
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+    else alert('Could not start checkout. Please try again.');
+  } catch (err) {
+    console.error('Checkout error:', err);
+    alert('Could not start checkout. Please try again.');
+  }
+}
+
 function showPaywall(mode, sign, col) {
   const existing = document.getElementById('__kb_paywall');
   if (existing) existing.remove();
-  const labels = { weekly: 'WEEKLY — $1.99', monthly: 'MONTHLY — $4.99', yearly: 'YEARLY — $9.99' };
+
+  const PRODUCTS = {
+    weekly:     { label: 'WEEKLY READING',  price: '$1.99', product: 'reading-weekly' },
+    monthly:    { label: 'MONTHLY READING', price: '$4.99', product: 'reading-monthly' },
+    yearly:     { label: 'YEARLY READING',  price: '$9.99', product: 'reading-yearly' },
+    'tarot-deep':   { label: 'TAROT DEEP READ', price: '$0.99', product: 'tarot-deep' },
+    'tarot-spread': { label: 'TAROT DEEP READ', price: '$0.99', product: 'tarot-deep' },
+  };
+  const p = PRODUCTS[mode] || { label: mode.toUpperCase(), price: '', product: mode };
+
   const ov = document.createElement('div');
   ov.id = '__kb_paywall';
-  ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.92);';
+  ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.92);backdrop-filter:blur(6px);';
   ov.innerHTML = `
-    <div style="text-align:center;font-family:'Courier New',monospace;max-width:340px;">
+    <div style="text-align:center;font-family:'Courier New',monospace;max-width:340px;width:100%;">
       <div style="font-size:2.5rem;margin-bottom:16px;">✦</div>
-      <div style="font-size:.8rem;letter-spacing:.2em;color:rgba(255,200,40,.9);margin-bottom:10px;">${labels[mode]}</div>
-      <div style="font-size:.65rem;letter-spacing:.1em;color:rgba(255,255,255,.45);margin-bottom:28px;">PAYMENTS COMING SOON</div>
-      <div style="font-size:.55rem;color:rgba(255,255,255,.2);letter-spacing:.1em;margin-bottom:24px;">Bob is getting his payment terminal ready.<br>Check back soon.</div>
-      <div id="__kb_pw_close" style="font-size:.55rem;letter-spacing:.25em;color:rgba(255,200,40,.4);cursor:pointer;">✕ &nbsp; CLOSE</div>
+      <div style="font-size:.8rem;letter-spacing:.2em;color:rgba(255,200,40,.9);margin-bottom:6px;">${p.label}</div>
+      <div style="font-family:'Georgia',serif;font-size:2.2rem;color:rgba(255,200,70,1);letter-spacing:.04em;margin-bottom:20px;text-shadow:0 0 24px rgba(255,150,20,.4);">${p.price}</div>
+      <button id="__kb_pw_pay" style="display:block;width:100%;padding:14px;background:linear-gradient(135deg,rgba(255,165,30,.9),rgba(200,110,10,.9));border:none;border-radius:10px;font-family:'Courier New',monospace;font-size:.8rem;letter-spacing:.18em;color:#000;font-weight:700;text-transform:uppercase;cursor:pointer;margin-bottom:14px;">✦ PAY NOW</button>
+      <div id="__kb_pw_close" style="font-size:.55rem;letter-spacing:.25em;color:rgba(255,255,255,.2);cursor:pointer;">✕ &nbsp; CANCEL</div>
     </div>`;
   document.body.appendChild(ov);
+
+  ov.querySelector('#__kb_pw_pay').addEventListener('click', () => {
+    goToCheckout(p.product, { sign });
+  });
   ov.querySelector('#__kb_pw_close').addEventListener('click', () => ov.remove());
   ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
-  setTimeout(() => ov.remove(), 6000);
 }
 
 /* ── 13. READING LIMIT — 1 horoscope + 1 question free per day ── */
@@ -6824,8 +6698,8 @@ function showPaywall(mode, sign, col) {
     });
   }
 
-  /* ── Generate button ── */
-  document.getElementById('starmap-generate').addEventListener('click', ()=>{
+  /* ── Generate button — gate behind $9.99 Stripe payment ── */
+  function doRenderMap(){
     const lat  = parseFloat(document.getElementById('sm-lat').value);
     const lng  = parseFloat(document.getElementById('sm-lng').value);
     const date = document.getElementById('sm-date').value;
@@ -6833,13 +6707,66 @@ function showPaywall(mode, sign, col) {
     const city = document.getElementById('sm-city').value.trim();
     const l1   = document.getElementById('sm-line1').value.trim();
     const l2   = document.getElementById('sm-line2').value.trim();
-    if(!city || isNaN(lat) || isNaN(lng)){ alert('Please select a city from the dropdown first.'); return; }
-    if(!date){ alert('Please enter a date.'); return; }
+    if(!city || isNaN(lat) || isNaN(lng)){ alert('Please select a city from the dropdown first.'); return false; }
+    if(!date){ alert('Please enter a date.'); return false; }
     const [yr,mo,dy]=date.split('-').map(Number);
     const [hr,mn]=(time).split(':').map(Number);
     const jd=julianDate(yr,mo,dy,hr,mn);
     const planets=getPlanets(jd);
     renderMap(lat, lng, date, time, city, l1, l2, planets);
+    return true;
+  }
+
+  /* Check if returning from successful starmap payment */
+  (function(){
+    const sp = new URLSearchParams(window.location.search);
+    if(sp.get('payment') === 'success' && sp.get('product') === 'starmap'){
+      /* Restore saved starmap state and render */
+      const saved = sessionStorage.getItem('__kb_starmap_state');
+      if(saved){
+        try {
+          const s = JSON.parse(saved);
+          if(s.lat) document.getElementById('sm-lat').value = s.lat;
+          if(s.lng) document.getElementById('sm-lng').value = s.lng;
+          if(s.date) document.getElementById('sm-date').value = s.date;
+          if(s.time) document.getElementById('sm-time').value = s.time;
+          if(s.city){ document.getElementById('sm-city').value = s.city; document.getElementById('sm-city-search').value = s.city; }
+          if(s.l1) document.getElementById('sm-line1').value = s.l1;
+          if(s.l2) document.getElementById('sm-line2').value = s.l2;
+          sessionStorage.removeItem('__kb_starmap_state');
+          setTimeout(()=>{ document.getElementById('starmap-overlay').classList.add('visible'); doRenderMap(); }, 600);
+        } catch(e){}
+      }
+      /* Clean URL */
+      history.replaceState({}, '', window.location.pathname);
+    }
+  })();
+
+  document.getElementById('starmap-generate').addEventListener('click', ()=>{
+    const lat  = parseFloat(document.getElementById('sm-lat').value);
+    const lng  = parseFloat(document.getElementById('sm-lng').value);
+    const date = document.getElementById('sm-date').value;
+    const city = document.getElementById('sm-city').value.trim();
+    if(!city || isNaN(lat) || isNaN(lng)){ alert('Please select a city from the dropdown first.'); return; }
+    if(!date){ alert('Please enter a date.'); return; }
+
+    /* Check dev unlock */
+    if(localStorage.getItem('__kb_dev') === '1'){ doRenderMap(); return; }
+
+    /* Save state then go to Stripe */
+    sessionStorage.setItem('__kb_starmap_state', JSON.stringify({
+      lat: document.getElementById('sm-lat').value,
+      lng: document.getElementById('sm-lng').value,
+      date,
+      time: document.getElementById('sm-time').value || '21:00',
+      city,
+      l1: document.getElementById('sm-line1').value.trim(),
+      l2: document.getElementById('sm-line2').value.trim(),
+    }));
+    const btn = document.getElementById('starmap-generate');
+    btn.textContent = '✦ Redirecting to payment...';
+    btn.disabled = true;
+    goToCheckout('starmap').catch(()=>{ btn.textContent='✦ Generate My Sky'; btn.disabled=false; });
   });
 
   /* ── Download ── */
