@@ -1,5 +1,10 @@
 {
   "rewrites": [
     { "source": "/message", "destination": "/message.html" }
-  ]
+  ],
+  "functions": {
+    "api/stripe-webhook.js": {
+      "bodyParser": false
+    }
+  }
 }
