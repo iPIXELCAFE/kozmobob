@@ -623,8 +623,16 @@ html,body{
     font-size:10px;letter-spacing:3px;text-transform:uppercase;
     color:rgba(0,207,255,.95);
     transition:color .6s ease,opacity .4s ease;
-    max-width:180px;overflow:hidden;white-space:nowrap;
-    text-overflow:ellipsis;
+    max-width:200px;overflow:hidden;white-space:nowrap;
+  }
+  #mob-bot-name.scrolling{
+    animation:mobNameScroll 8s linear infinite;
+  }
+  @keyframes mobNameScroll{
+    0%{transform:translateX(0)}
+    30%{transform:translateX(0)}
+    80%{transform:translateX(calc(-100% - 20px))}
+    100%{transform:translateX(calc(-100% - 20px))}
   }
   #mob-bot-url{
     font-family:'Courier New',monospace;
@@ -682,8 +690,8 @@ html,body{
 #mob-msg-takeover.visible{display:flex;}
 @keyframes takeoverIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 #mob-msg-sym{font-size:3.2rem;line-height:1;margin-bottom:8px;}
-#mob-msg-text{font-family:'Georgia',serif;font-size:1.25rem;line-height:1.35;letter-spacing:.02em;margin-bottom:6px;}
-#mob-msg-from{font-family:'Courier New',monospace;font-size:.65rem;letter-spacing:.18em;opacity:.55;}
+#mob-msg-text{font-family:'Georgia',serif;font-size:1.25rem;line-height:1.35;letter-spacing:.02em;margin-bottom:8px;}
+#mob-msg-from{font-family:'Courier New',monospace;font-size:.75rem;letter-spacing:.15em;opacity:.9;color:rgba(255,255,255,.85);}
 
 @media(max-width:768px){
   /* Zodiac ring: smaller signs on mobile */
@@ -749,7 +757,7 @@ html,body{
 @media(max-width:900px){
   #readings-btn{
     position:fixed;
-    top:50px!important;bottom:auto!important;
+    top:80px!important;bottom:auto!important;
     left:4px!important;right:auto;transform:none;
     width:calc(50vw - 8px)!important;padding:9px 0;
     font-size:.58rem;border-radius:18px;
@@ -966,8 +974,8 @@ html,body{
 }
 .kb-menu-divider{height:1px;background:rgba(255,200,40,.08);margin:6px 0;}
 @media(max-width:900px){
-  #kb-menu-btn{top:50px;right:142px;}
-  #kb-menu-panel{top:100px;right:4px;width:240px;}
+  #kb-menu-btn{top:80px;right:142px;}
+  #kb-menu-panel{top:130px;right:4px;width:240px;}
 }
 
 /* Compat overlay */
@@ -1028,9 +1036,9 @@ html,body{
 }
 #kb-compat-go:hover{background:rgba(255,120,180,.2);border-color:rgba(255,120,180,.65);color:rgba(255,160,200,.98);}
 @media(max-width:900px){
-  #kb-sound-btn{top:50px;right:4px;}
-  #kb-compat-btn{top:50px;right:50px;}
-  #kb-weekly-btn{top:50px;right:96px;}
+  #kb-sound-btn{top:80px;right:4px;}
+  #kb-compat-btn{top:80px;right:50px;}
+  #kb-weekly-btn{top:80px;right:96px;}
 }
 @media(max-width:900px){
   #album-btn{
@@ -4942,8 +4950,15 @@ const OracleQuery = (() => {
   window.__getAllBrands    = function() { return BRANDS; };
 
   function showTakeover(msg) {
-    /* disabled until real paid messages are live */
-    return;
+    if (!msg || !msg.text) return;
+    if (takeoverTimer) clearTimeout(takeoverTimer);
+    takeover.classList.remove('visible');
+    msgSym.textContent  = msg.sym || '✦';
+    msgText.textContent = msg.text;
+    msgText.style.color = msg.color || '#FFD700';
+    msgFrom.textContent = msg.from || '';
+    setTimeout(()=>{ takeover.classList.add('visible'); }, 100);
+    takeoverTimer = setTimeout(()=>{ takeover.classList.remove('visible'); }, 6000);
   }
 
   function show(b){
@@ -4951,6 +4966,9 @@ const OracleQuery = (() => {
     setTimeout(()=>{
       nameEl.textContent  = b.name;
       nameEl.style.color  = b.color;
+      /* Scroll if text is long */
+      nameEl.classList.remove('scrolling');
+      if(b.name.length > 14) setTimeout(()=>nameEl.classList.add('scrolling'), 400);
       if(urlEl){ urlEl.textContent = b.url; urlEl.style.color = b.color.replace('.95','.40'); }
       banner.style.borderTopColor = b.border;
       const tag = document.getElementById('mob-bot-tag');
