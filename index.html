@@ -1839,7 +1839,7 @@ window.__KB = (() => {
   };
   const prevDay = d => { const x=new Date(d); x.setDate(x.getDate()-1); return x.toISOString().slice(0,10); };
   const isWeekend = () => { const d = new Date().getDay(); return d === 0 || d === 6; }; /* 0=Sun, 6=Sat */
-  const pullLimit = () => 9999; /* DEV MODE — restore to 2 */
+  const pullLimit = () => 2;
 
   /* Load / migrate localStorage */
   let s = {};
@@ -1885,9 +1885,9 @@ window.__KB = (() => {
     usePull:     ()  => { s.pulls++;       save(); },
     bonusPulls:  ()  => s.bonusPulls||0,
     claimStreakBonus: () => { const n=s.streakBonus||0; s.streakBonus=0; save(); return n; },
-    canHoro:     ()  => { checkReset(); return (s.horoscopes||0) < 9999; }, /* DEV MODE — restore to 1 */
+    canHoro:     ()  => { checkReset(); return (s.horoscopes||0) < 1; },
     useHoro:     ()  => { s.horoscopes = (s.horoscopes||0)+1; save(); },
-    canQuestion: ()  => { checkReset(); return (s.questions||0) < 9999; }, /* DEV MODE — restore to 1 */
+    canQuestion: ()  => { checkReset(); return (s.questions||0) < 1; },
     useQuestion: ()  => { s.questions = (s.questions||0)+1; save(); },
     addCard:     (c) => {
       const wasNew = !(s.cards[c]);
