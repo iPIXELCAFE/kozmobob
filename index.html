@@ -3330,6 +3330,12 @@ const OracleQuery = (() => {
   function showIdlePortal() {
     if (window.__OS !== 'IDLE') return;
     if (window.__portalActive) return;
+    /* Don't fire if any overlay/form is open */
+    if (document.getElementById('advert-overlay')?.classList.contains('visible')) return;
+    if (document.getElementById('__kb_picker')) return;
+    if (document.getElementById('__kb_tarot_picker')) return;
+    if (document.getElementById('__kb_paywall')) return;
+    if (document.getElementById('starmap-overlay')?.classList.contains('visible')) return;
     const item = getIdleMsg();
     if (!item) return;
 
