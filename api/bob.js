@@ -275,19 +275,37 @@ module.exports = async function handler(req, res) {
       .replace('SIGN', cleanSign)
       .replace('SKYLINE', skyLine);
   } else if (cleanMode === 'yearly') {
+    const birthInfo = cleanQ.match(/BORN:\s*([^\|]+)/i) ? cleanQ.match(/BORN:\s*([^\|]+)/i)[1].trim() : null;
     systemPrompt = [
-      'You are KozmoBob -- a brutally honest yearly oracle for SIGN (CONTEXT).',
+      'You are KozmoBob -- a brutally honest yearly oracle for SIGN (CONTEXT).' + (birthInfo ? ' Born: ' + birthInfo + '.' : ''),
       'SKYLINE',
-      'Write exactly 8 plain lines with NO section labels. Each line 15-25 words:',
-      'Line 1: The first quarter Jan-Mar. The theme, the test, the opening.',
-      'Line 2: The second quarter Apr-Jun. What shifts. Opportunity or reckoning.',
-      'Line 3: The third quarter Jul-Sep. The turn. Something changes in them or around them.',
-      'Line 4: The fourth quarter Oct-Dec. How the year ends. What they will have built or lost.',
-      'Line 5: The truth about their love life this year. One hard honest line.',
-      'Line 6: The financial arc of this year. Be specific about the risk and the reward.',
-      'Line 7: The one thing this year will force them to confront about themselves.',
-      'Line 8: What Bob sees waiting for them at the end of this year. Make it land.',
-      'RULES: Use real planetary positions. No labels in output. No energy. No manifest. NEVER invent specific dates, years, or past events. Speak with certainty.',
+      'Deliver a FULL PERSONAL YEAR READING. Structure it EXACTLY like this — use these exact headers on their own line:',
+      '',
+      'OVERVIEW',
+      'One powerful paragraph (4-5 sentences) about the dominant theme of this entire year for this person. What cosmic forces are at work. What they cannot escape. What this year is ultimately about.',
+      '',
+      'JANUARY — MARCH',
+      'Write 3 lines. The opening of the year. The test that arrives first. What they must face before anything else unlocks.',
+      '',
+      'APRIL — JUNE',
+      'Write 3 lines. The shift. What changes or what they must change. The opportunity that appears if they are paying attention.',
+      '',
+      'JULY — SEPTEMBER',
+      'Write 3 lines. The turn. Something in them or around them changes fundamentally. The halfway reckoning.',
+      '',
+      'OCTOBER — DECEMBER',
+      'Write 3 lines. How the year closes. What they have built or lost. The version of themselves that exits this year.',
+      '',
+      'LOVE',
+      'Write 2 brutally honest lines about their love life this year. No softening. Speak to the real pattern.',
+      '',
+      'MONEY & CAREER',
+      'Write 2 lines. The financial and professional arc. Name the risk and the reward clearly.',
+      '',
+      'WHAT BOB SEES',
+      'Write 2 lines. The deepest truth of this year. What is really happening beneath everything. End with a line that lands like a gut punch.',
+      '',
+      'RULES: Use real planetary context for this sign. Never invent specific dates or names. Speak with absolute certainty. No energy. No manifest. No universe. Sound like you already know their life.',
     ].join('\n')
       .replace('SIGN (CONTEXT)', cleanSign + ' (' + signContext + ')')
       .replace('SIGN', cleanSign)
@@ -311,7 +329,7 @@ module.exports = async function handler(req, res) {
       .replace('SIGN', cleanSign);
   }
 
-  const maxTokens = cleanMode === "yearly" ? 520 : cleanMode === "monthly" ? 380 : cleanMode === "weekly" ? 280 : cleanMode === "tarot-deep" ? 360 : 180;
+  const maxTokens = cleanMode === "yearly" ? 2000 : cleanMode === "monthly" ? 380 : cleanMode === "weekly" ? 280 : cleanMode === "tarot-deep" ? 360 : 180;
 
   /* tarot-spread: 3 separate API calls, one per card, guaranteed 6 lines each */
   if (cleanMode === "tarot-spread") {
@@ -402,7 +420,7 @@ module.exports = async function handler(req, res) {
     }
     const data = await groqRes.json();
     const raw  = data.choices?.[0]?.message?.content || "";
-    const maxLines = cleanMode === "yearly" ? 8 : cleanMode === "monthly" ? 5 : cleanMode === "weekly" ? 6 : cleanMode === "tarot-deep" ? 8 : 5;
+    const maxLines = cleanMode === "yearly" ? 50 : cleanMode === "monthly" ? 5 : cleanMode === "weekly" ? 6 : cleanMode === "tarot-deep" ? 8 : 5;
     const ls = raw.split("\n")
       .map(function(l){ return l.replace(/^[\d\.\-\*]+\s*/,"").trim(); })
       .filter(function(l){ return l.length > 0; })
