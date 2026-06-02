@@ -671,27 +671,40 @@ html,body{
 .epick:hover{background:rgba(255,200,40,.10);transform:scale(1.15);}
 .epick.selected{border-color:rgba(255,200,40,.80);background:rgba(255,200,40,.12);}
 
-/* ── Personal message mobile takeover ── */
+/* ── Personal message mobile takeover — FULL SCREEN PORTAL ── */
 #mob-msg-takeover{
   display:none;
-  position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(20px);
-  z-index:35;
+  position:fixed;inset:0;
+  z-index:9995;
   flex-direction:column;align-items:center;justify-content:center;
-  padding:14px 24px 16px;
-  background:rgba(0,0,0,.96);
-  border:1px solid rgba(255,215,0,.35);
-  border-radius:14px;
+  padding:40px 32px;
+  background:rgba(0,0,0,.94);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
   text-align:center;
-  width:min(340px,60vw);
-  box-shadow:0 0 28px rgba(0,0,0,.7);
-  animation:takeoverIn .45s cubic-bezier(.22,1,.36,1) forwards;
   opacity:0;
+  transition:opacity .6s ease;
 }
-#mob-msg-takeover.visible{display:flex;}
-@keyframes takeoverIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-#mob-msg-sym{font-size:3.2rem;line-height:1;margin-bottom:8px;}
-#mob-msg-text{font-family:'Georgia',serif;font-size:1.25rem;line-height:1.35;letter-spacing:.02em;margin-bottom:8px;}
-#mob-msg-from{font-family:'Courier New',monospace;font-size:.75rem;letter-spacing:.15em;opacity:.9;color:rgba(255,255,255,.85);}
+#mob-msg-takeover.visible{display:flex;opacity:1;}
+#mob-msg-sym{font-size:5rem;line-height:1;margin-bottom:24px;filter:drop-shadow(0 0 20px currentColor);}
+#mob-msg-text{
+  font-family:'Georgia',serif;
+  font-size:clamp(1.4rem,5vw,2rem);
+  line-height:1.45;letter-spacing:.02em;
+  margin-bottom:16px;
+  color:#fff;
+  text-shadow:0 0 30px rgba(255,255,255,.3);
+}
+#mob-msg-from{
+  font-family:'Courier New',monospace;
+  font-size:.9rem;letter-spacing:.2em;
+  color:rgba(255,255,255,.7);
+}
+#mob-msg-close{
+  margin-top:40px;
+  font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:3px;
+  color:rgba(255,255,255,.3);cursor:pointer;
+  border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:8px 20px;
+}
 
 @media(max-width:768px){
   /* Zodiac ring: smaller signs on mobile */
@@ -1461,8 +1474,9 @@ select.adv-input option{background:#111;}
 </div>
 <div id="mob-msg-takeover">
   <div id="mob-msg-sym">🎂</div>
-  <div id="mob-msg-text" style="color:#FFD700"></div>
+  <div id="mob-msg-text"></div>
   <div id="mob-msg-from"></div>
+  <div id="mob-msg-close">✕ &nbsp; CLOSE</div>
 </div>
 
 <!-- AD BILLBOARD — left side, 2126 LED mega-screen -->
@@ -4955,10 +4969,12 @@ const OracleQuery = (() => {
     takeover.classList.remove('visible');
     msgSym.textContent  = msg.sym || '✦';
     msgText.textContent = msg.text;
-    msgText.style.color = msg.color || '#FFD700';
+    msgText.style.color = '#fff';
     msgFrom.textContent = msg.from || '';
+    const closeBtn = document.getElementById('mob-msg-close');
+    if (closeBtn) closeBtn.onclick = () => { takeover.classList.remove('visible'); clearTimeout(takeoverTimer); };
     setTimeout(()=>{ takeover.classList.add('visible'); }, 100);
-    takeoverTimer = setTimeout(()=>{ takeover.classList.remove('visible'); }, 6000);
+    takeoverTimer = setTimeout(()=>{ takeover.classList.remove('visible'); }, 9000);
   }
 
   function show(b){
