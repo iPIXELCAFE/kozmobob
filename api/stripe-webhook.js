@@ -10,7 +10,7 @@ const redis = new Redis({
 });
 
 /* Disable Vercel's default body parsing — Stripe needs raw body for sig verification */
-export const config = { api: { bodyParser: false } };
+module.exports.config = { api: { bodyParser: false } };
 
 async function getRawBody(req) {
   return new Promise((resolve, reject) => {
@@ -58,9 +58,8 @@ async function handlePurchase(product, meta, session) {
     case 'reading-weekly':
     case 'reading-monthly':
     case 'reading-yearly': {
-      /* Grant access token for this reading mode, keyed by Stripe session ID */
       const mode = product.replace('reading-', '');
-      await redis.set(`paid:${sessionId}`, JSON.stringify({ mode, grantedAt: now }), { ex: 86400 }); /* 24hr window */
+      await redis.set(`paid:${sessionId}`, JSON.stringify({ mode, grantedAt: now }), { ex: 86400 });
       break;
     }
 
@@ -70,14 +69,9 @@ async function handlePurchase(product, meta, session) {
     }
 
     case 'personal-message': {
-      /* Store message in KV — live for 1 hour, permanent star entry */
       const { message, emoji, deviceId, url } = meta;
       const msgData = { message, emoji, deviceId, url, paidAt: now, sessionId };
-
-      /* Live billboard slot — expires in 1 hour */
       await redis.set('billboard:live', JSON.stringify(msgData), { ex: 3600 });
-
-      /* Permanent stars page entry */
       await redis.lpush('stars:messages', JSON.stringify({ ...msgData, type: 'personal' }));
       break;
     }
@@ -87,16 +81,12 @@ async function handlePurchase(product, meta, session) {
       const { message, emoji, deviceId, url, hours = 1 } = meta;
       const type = product === 'billboard-premium' ? 'premium' : 'community';
       const msgData = { message, emoji, deviceId, url, type, paidAt: now, sessionId };
-
       await redis.set(`billboard:${type}:live`, JSON.stringify(msgData), { ex: parseInt(hours) * 3600 });
-
-      /* Also log to stars */
       await redis.lpush('stars:messages', JSON.stringify({ ...msgData }));
       break;
     }
 
     case 'starmap': {
-      /* Grant starmap access token */
       await redis.set(`paid:${sessionId}`, JSON.stringify({ mode: 'starmap', grantedAt: now }), { ex: 86400 });
       break;
     }
