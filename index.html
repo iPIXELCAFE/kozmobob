@@ -1885,9 +1885,9 @@ window.__KB = (() => {
     usePull:     ()  => { s.pulls++;       save(); },
     bonusPulls:  ()  => s.bonusPulls||0,
     claimStreakBonus: () => { const n=s.streakBonus||0; s.streakBonus=0; save(); return n; },
-    canHoro:     ()  => { checkReset(); return (s.horoscopes||0) < 1; },
+    canHoro:     ()  => { if(localStorage.getItem('__kb_dev')==='1') return true; checkReset(); return (s.horoscopes||0) < 1; },
     useHoro:     ()  => { s.horoscopes = (s.horoscopes||0)+1; save(); },
-    canQuestion: ()  => { checkReset(); return (s.questions||0) < 1; },
+    canQuestion: ()  => { if(localStorage.getItem('__kb_dev')==='1') return true; checkReset(); return (s.questions||0) < 1; },
     useQuestion: ()  => { s.questions = (s.questions||0)+1; save(); },
     addCard:     (c) => {
       const wasNew = !(s.cards[c]);
@@ -5022,7 +5022,7 @@ const OracleQuery = (() => {
     const btn = document.getElementById('mini-bob-wrap');
     if(!btn) return;
     btn.addEventListener('pointerdown', e => {
-      if(window.__KB.isPaid()) return; /* paid = unlimited */
+      if(window.__KB.isPaid() || localStorage.getItem('__kb_dev')==='1') return; /* paid/dev = unlimited */
       if(!window.__KB.canPull()){
         e.stopImmediatePropagation();
         /* Show limit message */
