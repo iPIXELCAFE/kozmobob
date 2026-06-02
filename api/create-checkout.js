@@ -6,7 +6,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const PRICES = {
   'reading-weekly':   { amount: 199,   name: 'Weekly Reading' },
   'reading-monthly':  { amount: 499,   name: 'Monthly Reading' },
-  'reading-yearly':   { amount: 999,   name: 'Yearly Reading' },
+  'reading-yearly':   { amount: 2499,  name: 'Yearly Reading' },
   'tarot-deep':       { amount: 99,    name: 'Tarot Deep Read' },
   'personal-message': { amount: 1999,  name: 'Personal Billboard Message' },
   'billboard-community': { amount: 5500,  name: 'Community Billboard (1hr)' },
