@@ -379,10 +379,24 @@ function copyRevealLink(){
     letters.forEach(ch=>{totalW+=(GLYPHS[ch][0].length*DOT)+DOT;}); totalW-=DOT;
     let lx=cx-totalW/2, targets=[], groups=[];
     letters.forEach(ch=>{
-      const g=GLYPHS[ch],pts=[];
-      for(let r=0;r<g.length;r++) for(let c=0;c<g[r].length;c++)
-        if(g[r][c]){const pt={x:lx+c*DOT,y:cy+r*DOT};targets.push(pt);pts.push(pt);}
-      groups.push(pts);
+      const g=GLYPHS[ch];
+      /* Build grid of points */
+      const grid=[];
+      for(let r=0;r<g.length;r++){
+        grid[r]=[];
+        for(let c=0;c<g[r].length;c++){
+          if(g[r][c]){const pt={x:lx+c*DOT,y:cy+r*DOT};targets.push(pt);grid[r][c]=pt;}
+          else grid[r][c]=null;
+        }
+      }
+      /* Edges: only connect true horizontal/vertical neighbors */
+      const edges=[];
+      for(let r=0;r<g.length;r++) for(let c=0;c<g[r].length;c++){
+        if(!grid[r][c]) continue;
+        if(c+1<g[r].length && grid[r][c+1]) edges.push([grid[r][c],grid[r][c+1]]);
+        if(r+1<g.length && c<(g[r+1]||[]).length && grid[r+1] && grid[r+1][c]) edges.push([grid[r][c],grid[r+1][c]]);
+      }
+      groups.push(edges);
       lx+=(GLYPHS[ch][0].length*DOT)+DOT;
     });
     const wStars=targets.map(t=>({
@@ -433,13 +447,10 @@ function copyRevealLink(){
         const la=Math.min(1,(prog-0.4)/0.6)*0.3;
         ctx.strokeStyle=`rgba(${cr},${cg},${cb},${la})`; ctx.lineWidth=1.5;
         ctx.shadowColor=`rgb(${cr},${cg},${cb})`; ctx.shadowBlur=4;
-        groups.forEach(pts=>{
-          for(let i=0;i<pts.length-1;i++){
-            const a=pts[i],b=pts[i+1];
-            if(Math.abs(a.x-b.x)<=DOT*1.1&&Math.abs(a.y-b.y)<=DOT*1.1){
-              ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
-            }
-          }
+        groups.forEach(edges=>{
+          edges.forEach(([a,b])=>{
+            ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+          });
         });
       }
       if(ft===100) document.getElementById('reveal-result').classList.add('show');
