@@ -5307,7 +5307,7 @@ function showReadingPicker(sign, r, g, b) {
     { id: 'daily',   label: 'DAILY',   price: 'FREE',   mode: 'horoscope', lines: '4 lines',  paid: false },
     { id: 'weekly',  label: 'WEEKLY',  price: '$1.99',  mode: 'weekly',    lines: '6 lines',  paid: true  },
     { id: 'monthly', label: 'MONTHLY', price: '$4.99',  mode: 'monthly',   lines: '5 sections', paid: true },
-    { id: 'yearly',  label: 'YEARLY',  price: '$9.99',  mode: 'yearly',    lines: '8 sections', paid: true },
+    { id: 'yearly',  label: 'YEARLY',  price: '$24.99', mode: 'yearly',    lines: 'full 12-month', paid: true },
   ];
 
   const ov = document.createElement('div');
@@ -5430,7 +5430,7 @@ function showPaywall(mode, sign, col) {
   const PRODUCTS = {
     weekly:     { label: 'WEEKLY READING',  price: '$1.99', product: 'reading-weekly' },
     monthly:    { label: 'MONTHLY READING', price: '$4.99', product: 'reading-monthly' },
-    yearly:     { label: 'YEARLY READING',  price: '$9.99', product: 'reading-yearly' },
+    yearly:     { label: 'YEARLY READING',  price: '$24.99', product: 'reading-yearly' },
     'tarot-deep':   { label: 'TAROT DEEP READ', price: '$0.99', product: 'tarot-deep' },
     'tarot-spread': { label: 'TAROT DEEP READ', price: '$0.99', product: 'tarot-deep' },
   };
