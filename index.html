@@ -3104,7 +3104,7 @@ const OracleQuery = (() => {
     window.__KBLastMode = null; /* consume it */
     const _isPaidSession = window.__KB.isPaid()
       || localStorage.getItem('__kb_dev') === '1'
-      || ['weekly','monthly','yearly'].includes(_lastMode);
+      || ['weekly','monthly','yearly','tarot-deep'].includes(_lastMode);
     if (!_isTarotRead && !_isPaidSession) {
       const SPONSORS = [
         { msg:'Seal your story forever at iPIXEL CAFE — digital time capsules for every moment.', url:'https://www.ipixelcafe.com', tts:'Seal your story forever at iPixel Cafe — digital time capsules for every moment.' },
