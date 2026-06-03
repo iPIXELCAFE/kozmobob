@@ -6,49 +6,62 @@
 <title>KozmoBob — Sky of Stars</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;user-select:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#00010e;user-select:none}
 #c{display:block;width:100%;height:100%;cursor:grab}
 #c:active{cursor:grabbing}
-#ui{position:fixed;inset:0;pointer-events:none;z-index:20}
-#back{
-  position:fixed;top:16px;left:20px;pointer-events:all;
-  background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.15);
-  color:rgba(255,255,255,.4);font-family:'Courier New',monospace;
-  font-size:.55rem;letter-spacing:2px;padding:8px 16px;
-  border-radius:20px;cursor:pointer;transition:all .25s;
-}
+#sky-ui{position:fixed;inset:0;pointer-events:none;z-index:20}
+#back{position:fixed;top:16px;left:20px;pointer-events:all;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);font-family:'Courier New',monospace;font-size:.55rem;letter-spacing:2px;padding:8px 16px;border-radius:20px;cursor:pointer;transition:all .25s}
 #back:hover{color:#fff;border-color:rgba(255,255,255,.4)}
 #hdr{position:fixed;top:18px;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none}
 #hdr-title{font-family:'Courier New',monospace;font-size:.65rem;letter-spacing:5px;color:rgba(255,255,255,.35)}
 #hdr-count{font-family:'Courier New',monospace;font-size:.46rem;letter-spacing:2px;color:rgba(255,200,40,.35);margin-top:5px;min-height:1em}
-#tip{
-  position:fixed;pointer-events:none;z-index:30;
-  background:rgba(0,0,0,.92);border:1px solid rgba(255,200,40,.5);
-  border-radius:10px;padding:10px 16px;
-  font-family:'Courier New',monospace;font-size:.58rem;
-  letter-spacing:1.5px;color:rgba(255,200,40,.95);
-  line-height:1.9;text-align:center;display:none;
-  transform:translate(-50%,-115%);white-space:nowrap;
-}
-#hint{
-  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
-  font-family:'Courier New',monospace;font-size:.46rem;letter-spacing:2px;
-  color:rgba(255,255,255,.18);pointer-events:none;text-align:center;
-  transition:opacity 1s;
-}
-#add{
-  position:fixed;bottom:28px;left:50%;transform:translateX(-50%);pointer-events:all;
-  background:rgba(255,200,40,.08);border:1px solid rgba(255,200,40,.3);
-  color:rgba(255,200,40,.75);font-family:'Courier New',monospace;
-  font-size:.56rem;letter-spacing:2.5px;padding:13px 30px;
-  border-radius:24px;cursor:pointer;transition:all .25s;white-space:nowrap;
-}
-#add:hover{background:rgba(255,200,40,.16);color:#ffc828;border-color:rgba(255,200,40,.6)}
+#tip{position:fixed;pointer-events:none;z-index:30;background:rgba(0,0,0,.92);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px 16px;font-family:'Courier New',monospace;font-size:.58rem;letter-spacing:1.5px;line-height:1.9;text-align:center;display:none;transform:translate(-50%,-115%);white-space:nowrap}
+#tip.boy{border-color:rgba(100,160,255,.5);color:rgba(130,180,255,.95)}
+#tip.girl{border-color:rgba(255,100,180,.5);color:rgba(255,140,200,.95)}
+#tip.neutral{border-color:rgba(200,200,255,.5);color:rgba(210,210,255,.95)}
+#hint{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);font-family:'Courier New',monospace;font-size:.46rem;letter-spacing:2px;color:rgba(255,255,255,.15);pointer-events:none;text-align:center;transition:opacity 1.5s}
+#add-btn{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);pointer-events:all;background:rgba(255,200,40,.08);border:1px solid rgba(255,200,40,.3);color:rgba(255,200,40,.75);font-family:'Courier New',monospace;font-size:.56rem;letter-spacing:2.5px;padding:13px 30px;border-radius:24px;cursor:pointer;transition:all .25s;white-space:nowrap}
+#add-btn:hover{background:rgba(255,200,40,.16);color:#ffc828;border-color:rgba(255,200,40,.6)}
+/* ── PLACE STAR PANEL ── */
+#star-panel{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(0,1,14,.65);backdrop-filter:blur(8px)}
+#star-panel.open{display:flex}
+#star-box{position:relative;width:min(360px,90vw);background:rgba(0,1,14,.97);border-radius:20px;padding:36px 26px 28px;display:flex;flex-direction:column;align-items:center;gap:14px;max-height:88vh;overflow-y:auto}
+#star-box.boy{border:1px solid rgba(100,160,255,.4)}
+#star-box.girl{border:1px solid rgba(255,100,180,.4)}
+#star-box.neutral{border:1px solid rgba(200,200,255,.3)}
+#star-close{position:absolute;top:12px;right:14px;background:none;border:none;color:rgba(255,255,255,.25);font-family:'Courier New',monospace;font-size:.7rem;letter-spacing:2px;cursor:pointer;pointer-events:all}
+#star-close:hover{color:rgba(255,255,255,.6)}
+#star-title{font-family:'Courier New',monospace;font-size:.8rem;letter-spacing:5px;text-align:center}
+#star-title.boy{color:rgba(130,180,255,.9)}
+#star-title.girl{color:rgba(255,140,200,.9)}
+#star-title.neutral{color:rgba(210,210,255,.9)}
+#star-preview{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:4px auto}
+#star-preview.boy{background:rgba(100,160,255,.12);box-shadow:0 0 30px rgba(100,160,255,.3)}
+#star-preview.girl{background:rgba(255,100,180,.12);box-shadow:0 0 30px rgba(255,100,180,.3)}
+#star-preview.neutral{background:rgba(200,200,255,.1);box-shadow:0 0 30px rgba(200,200,255,.2)}
+#star-sub{font-family:'Courier New',monospace;font-size:.58rem;letter-spacing:1.5px;color:rgba(255,255,255,.35);text-align:center;line-height:1.8}
+.star-gender-row{display:flex;gap:10px;width:100%}
+.star-g-btn{flex:1;padding:10px 0;text-align:center;font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:2px;border-radius:10px;cursor:pointer;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);transition:all .2s;pointer-events:all}
+.star-g-btn[data-g="boy"].sel{border-color:rgba(100,160,255,.8);color:rgba(130,180,255,1);background:rgba(100,160,255,.12)}
+.star-g-btn[data-g="girl"].sel{border-color:rgba(255,100,180,.8);color:rgba(255,140,200,1);background:rgba(255,100,180,.12)}
+.star-g-btn[data-g="neutral"].sel{border-color:rgba(200,200,255,.6);color:rgba(210,210,255,1);background:rgba(200,200,255,.08)}
+.star-field-label{font-family:'Courier New',monospace;font-size:.5rem;letter-spacing:2px;color:rgba(255,255,255,.3);align-self:flex-start}
+#star-panel input[type=text],#star-panel textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:11px 14px;font-family:'Courier New',monospace;font-size:.68rem;letter-spacing:1.5px;color:rgba(255,255,255,.85);outline:none;resize:none;transition:border-color .2s}
+#star-panel input[type=text]:focus,#star-panel textarea:focus{border-color:rgba(255,255,255,.35)}
+#star-charcount{font-family:'Courier New',monospace;font-size:.46rem;letter-spacing:1px;color:rgba(255,255,255,.2);align-self:flex-end}
+#star-buy{width:100%;margin-top:6px;padding:14px 0;font-family:'Courier New',monospace;font-size:.65rem;letter-spacing:2.5px;border-radius:24px;cursor:pointer;transition:all .2s;pointer-events:all}
+#star-buy.boy{background:rgba(100,160,255,.1);border:1px solid rgba(100,160,255,.5);color:rgba(130,180,255,.9)}
+#star-buy.boy:hover{background:rgba(100,160,255,.2)}
+#star-buy.girl{background:rgba(255,100,180,.1);border:1px solid rgba(255,100,180,.5);color:rgba(255,140,200,.9)}
+#star-buy.girl:hover{background:rgba(255,100,180,.2)}
+#star-buy.neutral{background:rgba(200,200,255,.08);border:1px solid rgba(200,200,255,.3);color:rgba(210,210,255,.9)}
+#star-buy.neutral:hover{background:rgba(200,200,255,.15)}
+#star-msg{font-family:'Courier New',monospace;font-size:.58rem;letter-spacing:1px;color:rgba(255,255,255,.3);text-align:center;min-height:1em}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
-<div id="ui">
+<div id="sky-ui">
   <button id="back">← BACK</button>
   <div id="hdr">
     <div id="hdr-title">✦ SKY OF STARS ✦</div>
@@ -56,25 +69,46 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;user-select:non
   </div>
   <div id="tip"></div>
   <div id="hint">DRAG TO EXPLORE THE SKY</div>
-  <button id="add">✦ ADD YOUR BABY'S STAR — $0.99</button>
+  <button id="add-btn">✦ ADD YOUR BABY'S STAR — $0.99</button>
 </div>
+
+<!-- PLACE STAR PANEL -->
+<div id="star-panel">
+  <div id="star-box" class="neutral">
+    <button id="star-close">✕</button>
+    <div id="star-title" class="neutral">✦ YOUR BABY'S STAR</div>
+    <div id="star-preview" class="neutral">✦</div>
+    <div id="star-sub">This star will shine in this sky forever.<br>Share only what you're comfortable with.</div>
+    <div class="star-gender-row">
+      <div class="star-g-btn" data-g="boy">♂ BOY</div>
+      <div class="star-g-btn" data-g="girl">♀ GIRL</div>
+      <div class="star-g-btn sel" data-g="neutral">✦ NEUTRAL</div>
+    </div>
+    <div class="star-field-label">NAME ON STAR (OPTIONAL)</div>
+    <input type="text" id="star-name" placeholder="First name, nickname, or leave blank" maxlength="30" autocomplete="off" spellcheck="false"/>
+    <div class="star-field-label">TINY MESSAGE (OPTIONAL)</div>
+    <textarea id="star-message" placeholder="e.g. We love you • Born under the stars" maxlength="50" rows="2"></textarea>
+    <div id="star-charcount">0 / 50</div>
+    <button id="star-buy" class="neutral">✦ PLACE STAR IN THE SKY — $0.99</button>
+    <div id="star-msg"></div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
 'use strict';
 
-const W = window.innerWidth, H = window.innerHeight;
-const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('c'),antialias:true});
+const W=window.innerWidth, H=window.innerHeight;
+const renderer=new THREE.WebGLRenderer({canvas:document.getElementById('c'),antialias:true});
 renderer.setSize(W,H);
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-renderer.setClearColor(0x00010a,1);
+renderer.setClearColor(0x00010e,1);
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(75,W/H,0.1,1000);
 
-const scene = new THREE.Scene();
-const cam = new THREE.PerspectiveCamera(75,W/H,0.1,1000);
-
-/* ── SHADERS ─────────────────────────────────────────── */
-
-const STAR_VS = `
+/* ── SHADERS ── */
+const STAR_VS=`
 attribute float aSize;
 attribute float aPhase;
 attribute vec3 aCol;
@@ -82,131 +116,95 @@ uniform float uT;
 varying vec3 vCol;
 varying float vA;
 void main(){
-  vCol = aCol;
-  float tw = 0.55 + 0.45*sin(uT*(0.5+aPhase*2.5)+aPhase*6.2832);
-  vA = tw;
-  gl_PointSize = aSize*(0.7+0.3*tw);
-  gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0);
+  vCol=aCol;
+  float tw=0.55+0.45*sin(uT*(0.5+aPhase*2.5)+aPhase*6.2832);
+  vA=tw;
+  gl_PointSize=aSize*(0.7+0.3*tw);
+  gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
 }`;
-
-const STAR_FS = `
+const STAR_FS=`
 varying vec3 vCol;
 varying float vA;
 void main(){
   vec2 uv=gl_PointCoord-vec2(0.5);
   float d=length(uv);
   if(d>0.5)discard;
-  float core=1.0-smoothstep(0.0,0.25,d);
-  float edge=1.0-smoothstep(0.0,0.5,d);
-  float a=(core*0.9+edge*0.5)*vA;
+  float a=(1.0-smoothstep(0.0,0.5,d))*vA;
   gl_FragColor=vec4(vCol,a);
 }`;
-
-const GOLD_VS = `
+const BABY_VS=`
 attribute float aSize;
 attribute float aPhase;
+attribute vec3 aCol;
 uniform float uT;
+varying vec3 vCol;
 varying float vA;
 void main(){
-  float tw = 0.4+0.6*sin(uT*1.4+aPhase*6.2832);
-  vA = 0.7+0.3*tw;
-  gl_PointSize = aSize*(0.7+0.5*tw);
-  gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0);
+  vCol=aCol;
+  float tw=0.4+0.6*sin(uT*1.3+aPhase*6.2832);
+  vA=0.7+0.3*tw;
+  gl_PointSize=aSize*(0.65+0.55*tw);
+  gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
 }`;
-
-const GOLD_FS = `
+const BABY_FS=`
+varying vec3 vCol;
 varying float vA;
 void main(){
   vec2 uv=gl_PointCoord-vec2(0.5);
   float d=length(uv);
   if(d>0.5)discard;
-  float core=1.0-smoothstep(0.0,0.2,d);
-  float mid=1.0-smoothstep(0.0,0.38,d);
+  float core=1.0-smoothstep(0.0,0.18,d);
+  float mid=1.0-smoothstep(0.0,0.36,d);
   float glow=1.0-smoothstep(0.0,0.5,d);
-  float a=(core*1.0+mid*0.6+glow*0.3)*vA;
-  gl_FragColor=vec4(1.0,0.87,0.28,a);
+  float a=(core+mid*0.6+glow*0.3)*vA;
+  gl_FragColor=vec4(vCol,a);
 }`;
 
-/* ── HELPERS ─────────────────────────────────────────── */
-
+/* ── HELPERS ── */
 function normRand(){
   let u=0,v=0;
-  while(!u) u=Math.random();
-  while(!v) v=Math.random();
+  while(!u)u=Math.random();
+  while(!v)v=Math.random();
   return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
 }
-
 function rndSphere(r){
-  const th=Math.random()*Math.PI*2;
-  const ph=Math.acos(2*Math.random()-1);
-  return new THREE.Vector3(
-    r*Math.sin(ph)*Math.cos(th),
-    r*Math.sin(ph)*Math.sin(th),
-    r*Math.cos(ph)
-  );
+  const th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);
+  return new THREE.Vector3(r*Math.sin(ph)*Math.cos(th),r*Math.sin(ph)*Math.sin(th),r*Math.cos(ph));
 }
 
-/* ── BACKGROUND STARS ────────────────────────────────── */
-
-const N_STARS = 8000;
-const sPos  = new Float32Array(N_STARS*3);
-const sCol  = new Float32Array(N_STARS*3);
-const sSize = new Float32Array(N_STARS);
-const sPh   = new Float32Array(N_STARS);
-
-const STAR_PAL = [
-  [1.0,1.0,1.0],[1.0,1.0,1.0],[1.0,1.0,1.0],[1.0,1.0,1.0],
-  [0.75,0.87,1.0],[0.82,0.91,1.0],
-  [1.0,0.95,0.78],[1.0,0.91,0.68],
-  [1.0,0.82,0.62],
-];
-
-for(let i=0;i<N_STARS;i++){
+/* ── BACKGROUND STARS ── */
+const NS=8000;
+const sP=new Float32Array(NS*3),sC=new Float32Array(NS*3),sSz=new Float32Array(NS),sPh=new Float32Array(NS);
+const PAL=[[1,1,1],[1,1,1],[1,1,1],[1,1,1],[0.75,0.87,1],[0.82,0.92,1],[1,0.95,0.78],[1,0.82,0.62]];
+for(let i=0;i<NS;i++){
   const p=rndSphere(400);
-  sPos[i*3]=p.x; sPos[i*3+1]=p.y; sPos[i*3+2]=p.z;
-  const c=STAR_PAL[Math.floor(Math.random()*STAR_PAL.length)];
-  sCol[i*3]=c[0]; sCol[i*3+1]=c[1]; sCol[i*3+2]=c[2];
+  sP[i*3]=p.x;sP[i*3+1]=p.y;sP[i*3+2]=p.z;
+  const c=PAL[Math.floor(Math.random()*PAL.length)];
+  sC[i*3]=c[0];sC[i*3+1]=c[1];sC[i*3+2]=c[2];
   const r=Math.random();
-  sSize[i] = r<0.55 ? 0.8+Math.random()*0.8
-           : r<0.88 ? 1.8+Math.random()*1.2
-           :          3.2+Math.random()*2;
+  sSz[i]=r<0.55?0.8+Math.random()*0.8:r<0.88?1.8+Math.random()*1.2:3.2+Math.random()*2;
   sPh[i]=Math.random()*10;
 }
-
 const starGeo=new THREE.BufferGeometry();
-starGeo.setAttribute('position',new THREE.BufferAttribute(sPos,3));
-starGeo.setAttribute('aCol',new THREE.BufferAttribute(sCol,3));
-starGeo.setAttribute('aSize',new THREE.BufferAttribute(sSize,1));
+starGeo.setAttribute('position',new THREE.BufferAttribute(sP,3));
+starGeo.setAttribute('aCol',new THREE.BufferAttribute(sC,3));
+starGeo.setAttribute('aSize',new THREE.BufferAttribute(sSz,1));
 starGeo.setAttribute('aPhase',new THREE.BufferAttribute(sPh,1));
-const starMat=new THREE.ShaderMaterial({
-  vertexShader:STAR_VS,fragmentShader:STAR_FS,
-  transparent:true,depthWrite:false,
-  uniforms:{uT:{value:0}}
-});
+const starMat=new THREE.ShaderMaterial({vertexShader:STAR_VS,fragmentShader:STAR_FS,transparent:true,depthWrite:false,uniforms:{uT:{value:0}}});
 scene.add(new THREE.Points(starGeo,starMat));
 
-/* ── MILKY WAY ───────────────────────────────────────── */
-
-const MW_Q=new THREE.Quaternion().setFromAxisAngle(
-  new THREE.Vector3(0.55,0.12,0.83).normalize(), 1.08
-);
-
-function addMWLayer(count,sigma,szMin,szMax,colR,colG,colB){
-  const pos=new Float32Array(count*3);
-  const col=new Float32Array(count*3);
-  const sz=new Float32Array(count);
-  const ph=new Float32Array(count);
+/* ── MILKY WAY ── */
+/* Tilted so the band arcs visibly across the default view */
+const MW_Q=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1).normalize(),0.62);
+const mwMats=[];
+function addMW(count,sigma,szMin,szMax,r,g,b){
+  const pos=new Float32Array(count*3),col=new Float32Array(count*3),sz=new Float32Array(count),ph=new Float32Array(count);
   for(let i=0;i<count;i++){
-    const lon=Math.random()*Math.PI*2;
-    const lat=normRand()*sigma+(Math.sin(lon*1.5)*0.04);
-    const r=388+Math.random()*8;
-    const v=new THREE.Vector3(
-      Math.cos(lat)*Math.cos(lon),
-      Math.sin(lat),
-      Math.cos(lat)*Math.sin(lon)
-    ).applyQuaternion(MW_Q).multiplyScalar(r);
-    pos[i*3]=v.x; pos[i*3+1]=v.y; pos[i*3+2]=v.z;
-    col[i*3]=colR; col[i*3+1]=colG; col[i*3+2]=colB;
+    const lon=Math.random()*Math.PI*2,lat=normRand()*sigma;
+    const rv=387+Math.random()*8;
+    const v=new THREE.Vector3(Math.cos(lat)*Math.cos(lon),Math.sin(lat),Math.cos(lat)*Math.sin(lon)).applyQuaternion(MW_Q).multiplyScalar(rv);
+    pos[i*3]=v.x;pos[i*3+1]=v.y;pos[i*3+2]=v.z;
+    col[i*3]=r;col[i*3+1]=g;col[i*3+2]=b;
     sz[i]=szMin+Math.random()*(szMax-szMin);
     ph[i]=Math.random()*10;
   }
@@ -215,275 +213,255 @@ function addMWLayer(count,sigma,szMin,szMax,colR,colG,colB){
   geo.setAttribute('aCol',new THREE.BufferAttribute(col,3));
   geo.setAttribute('aSize',new THREE.BufferAttribute(sz,1));
   geo.setAttribute('aPhase',new THREE.BufferAttribute(ph,1));
-  const mat=new THREE.ShaderMaterial({
-    vertexShader:STAR_VS,fragmentShader:STAR_FS,
-    transparent:true,depthWrite:false,
-    blending:THREE.AdditiveBlending,
-    uniforms:{uT:{value:0}}
-  });
+  const mat=new THREE.ShaderMaterial({vertexShader:STAR_VS,fragmentShader:STAR_FS,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,uniforms:{uT:{value:0}}});
   scene.add(new THREE.Points(geo,mat));
-  return mat;
+  mwMats.push(mat);
 }
+addMW(4500,0.055,0.8,1.8,0.75,0.85,1.0);   /* bright blue-white core */
+addMW(3000,0.13,1.5,5.0,0.55,0.45,0.85);   /* purple mid glow */
+addMW(2000,0.24,4.0,10.0,0.35,0.28,0.6);   /* wide soft halo */
 
-const mwMats = [
-  addMWLayer(3500, 0.06, 0.7, 1.6, 0.72, 0.82, 1.0),
-  addMWLayer(2000, 0.14, 1.5, 4.5, 0.52, 0.42, 0.82),
-  addMWLayer(1200, 0.22, 3.0, 8.0, 0.38, 0.32, 0.65),
-];
+/* ── MOON (real position from today's date) ── */
+function calcMoonDir(){
+  const now=new Date();
+  const Y=now.getUTCFullYear(),M=now.getUTCMonth()+1,D=now.getUTCDate();
+  const h=now.getUTCHours()+now.getUTCMinutes()/60;
+  const JD=367*Y-Math.floor(7*(Y+Math.floor((M+9)/12))/4)+Math.floor(275*M/9)+D+1721013.5+h/24;
+  const T=(JD-2451545.0)/36525;
+  const d2r=Math.PI/180;
+  const Lm=((218.3165+481267.8813*T)%360+360)%360;
+  const Mm=((134.9634+477198.8676*T)%360+360)%360;
+  const Dm=((297.8502+445267.1115*T)%360+360)%360;
+  const lon=Lm+6.2888*Math.sin(Mm*d2r)+1.274*Math.sin((2*Dm-Mm)*d2r)+0.6583*Math.sin(2*Dm*d2r);
+  const lat=5.1282*Math.sin((93.272+483202.0175*T)*d2r);
+  const eps=23.439*d2r;
+  const lonR=lon*d2r,latR=lat*d2r;
+  const xe=Math.cos(latR)*Math.cos(lonR);
+  const ye=Math.cos(latR)*Math.sin(lonR)*Math.cos(eps)-Math.sin(latR)*Math.sin(eps);
+  const ze=Math.cos(latR)*Math.sin(lonR)*Math.sin(eps)+Math.sin(latR)*Math.cos(eps);
+  return new THREE.Vector3(xe,ze,-ye).normalize();
+}
+const moonDir=calcMoonDir();
+const moonPos=moonDir.clone().multiplyScalar(370);
 
-/* ── MOON ────────────────────────────────────────────── */
-
-const moonDir=new THREE.Vector3(0.45,0.62,-0.65).normalize();
-const moonD=375;
-
-// Moon disc
-const moonMesh=new THREE.Mesh(
-  new THREE.SphereGeometry(14,32,32),
-  new THREE.MeshBasicMaterial({color:0xfff8e8})
-);
-moonMesh.position.copy(moonDir).multiplyScalar(moonD);
+/* Moon disc */
+const moonMesh=new THREE.Mesh(new THREE.SphereGeometry(16,32,32),new THREE.MeshBasicMaterial({color:0xfff9f0}));
+moonMesh.position.copy(moonPos);
 scene.add(moonMesh);
-
-// Slight crescent shadow
-const shadowMesh=new THREE.Mesh(
-  new THREE.SphereGeometry(13.5,32,32),
-  new THREE.MeshBasicMaterial({color:0x00010a,transparent:true,opacity:0.45})
-);
-shadowMesh.position.copy(moonDir).multiplyScalar(moonD).add(new THREE.Vector3(-8,4,0));
-scene.add(shadowMesh);
-
-// Glow sprites using canvas textures
-function makeGlow(innerCol,outerCol,size){
+/* Crescent shadow */
+const moonShadow=new THREE.Mesh(new THREE.SphereGeometry(15.5,32,32),new THREE.MeshBasicMaterial({color:0x00010e,transparent:true,opacity:0.5}));
+moonShadow.position.copy(moonPos).add(new THREE.Vector3(-10,5,0));
+scene.add(moonShadow);
+/* Glow layers using canvas textures */
+function mkGlow(inner,outer,sz){
   const cv=document.createElement('canvas');
-  cv.width=cv.height=size;
-  const ctx=cv.getContext('2d');
-  const c=ctx.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
-  c.addColorStop(0,innerCol);
-  c.addColorStop(0.25,outerCol.replace(')',',0.6)').replace('rgb','rgba'));
-  c.addColorStop(0.6,outerCol.replace(')',',0.15)').replace('rgb','rgba'));
-  c.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=c;
-  ctx.fillRect(0,0,size,size);
+  cv.width=cv.height=sz;
+  const ctx=cv.getContext('2d'),r=sz/2;
+  const g=ctx.createRadialGradient(r,r,0,r,r,r);
+  g.addColorStop(0,inner);g.addColorStop(0.3,outer.replace('rgb','rgba').replace(')',',0.5)'));
+  g.addColorStop(0.7,outer.replace('rgb','rgba').replace(')',',0.1)'));g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,sz,sz);
   return new THREE.CanvasTexture(cv);
 }
-
-function addGlowSprite(tex,scale,opacity){
-  const sp=new THREE.Sprite(new THREE.SpriteMaterial({
-    map:tex,transparent:true,opacity,
-    blending:THREE.AdditiveBlending,depthWrite:false
-  }));
-  sp.position.copy(moonDir).multiplyScalar(moonD);
-  sp.scale.set(scale,scale,1);
-  scene.add(sp);
+function addGlow(tex,scale,op){
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,opacity:op,blending:THREE.AdditiveBlending,depthWrite:false}));
+  sp.position.copy(moonPos);sp.scale.set(scale,scale,1);scene.add(sp);
 }
+addGlow(mkGlow('rgba(255,255,240,0.95)','rgb(255,255,220)',128),42,0.85);
+addGlow(mkGlow('rgba(180,200,255,0.5)','rgb(140,170,255)',256),100,0.3);
+addGlow(mkGlow('rgba(100,130,255,0.2)','rgb(80,110,200)',512),200,0.12);
 
-addGlowSprite(makeGlow('rgba(255,255,240,0.9)','rgb(255,255,220)',128),38,0.8);
-addGlowSprite(makeGlow('rgba(200,210,255,0.5)','rgb(150,170,255)',256),90,0.35);
-addGlowSprite(makeGlow('rgba(120,140,255,0.2)','rgb(80,100,200)',512),180,0.15);
+/* ── BABY STARS ── */
+let babyStars=[];
+let babyPoints=null,babyMat=null;
 
-/* ── BABY STARS ──────────────────────────────────────── */
+const GENDER_COL={
+  boy:[0.32,0.62,1.0],
+  girl:[1.0,0.38,0.7],
+  neutral:[0.82,0.82,1.0]
+};
 
-let babyStars = [];
-let babyPoints = null;
-let babyMat = null;
-
-// Sample data so sky isn't empty on load
-const SAMPLES = [
-  {name:'Emma Rose',    date:'March 2025',    px:0.32, py:0.71, pz:-0.63},
-  {name:'Liam James',   date:'June 2025',     px:-0.58,py:0.52, pz:0.63},
-  {name:'Sofia Grace',  date:'January 2026',  px:0.78, py:0.38, pz:0.49},
-  {name:'Noah Alex',    date:'September 2025',px:-0.22,py:0.92, pz:-0.32},
-  {name:'Ava Claire',   date:'November 2025', px:0.52, py:-0.28,pz:0.81},
-  {name:'Lucas Ryan',   date:'February 2026', px:-0.68,py:0.62, pz:-0.39},
-  {name:'Mia Belle',    date:'July 2025',     px:0.12, py:0.82, pz:0.56},
-  {name:'Ethan Cole',   date:'April 2026',    px:-0.42,py:0.44, pz:-0.79},
-  {name:'Isla Marie',   date:'May 2025',      px:0.67, py:0.55, pz:0.49},
-  {name:'Oliver Max',   date:'December 2025', px:-0.35,py:0.78, pz:0.52},
+const SAMPLES=[
+  {name:'Emma Rose',    date:'March 2025',    gender:'girl',   px:0.32,py:0.71,pz:-0.63},
+  {name:'Liam',         date:'June 2025',     gender:'boy',    px:-0.58,py:0.52,pz:0.63},
+  {name:'Sofia',        date:'Jan 2026',      gender:'girl',   px:0.78,py:0.38,pz:0.49},
+  {name:'Noah',         date:'Sep 2025',      gender:'boy',    px:-0.22,py:0.92,pz:-0.32},
+  {name:'Our star',     date:'Nov 2025',      gender:'neutral',px:0.52,py:-0.28,pz:0.81},
+  {name:'Lucas',        date:'Feb 2026',      gender:'boy',    px:-0.68,py:0.62,pz:-0.39},
+  {name:'Mia Belle',    date:'Jul 2025',      gender:'girl',   px:0.12,py:0.82,pz:0.56},
+  {name:'Ethan',        date:'Apr 2026',      gender:'boy',    px:-0.42,py:0.44,pz:-0.79},
+  {name:'Isla',         date:'May 2025',      gender:'girl',   px:0.67,py:0.55,pz:0.49},
+  {name:'Oliver',       date:'Dec 2025',      gender:'boy',    px:-0.35,py:0.78,pz:0.52},
 ];
+babyStars=SAMPLES.map(s=>({...s,pos:new THREE.Vector3(s.px,s.py,s.pz).normalize()}));
 
-SAMPLES.forEach(s=>{
-  babyStars.push({
-    name:s.name, date:s.date,
-    pos:new THREE.Vector3(s.px,s.py,s.pz).normalize()
-  });
-});
-
-function buildBabyPoints(){
-  if(babyPoints){ scene.remove(babyPoints); babyPoints.geometry.dispose(); }
-  if(!babyStars.length) return;
-  const pos=new Float32Array(babyStars.length*3);
-  const sz=new Float32Array(babyStars.length);
-  const ph=new Float32Array(babyStars.length);
+function buildBaby(){
+  if(babyPoints){scene.remove(babyPoints);babyPoints.geometry.dispose();if(babyMat)babyMat.dispose();}
+  if(!babyStars.length)return;
+  const pos=new Float32Array(babyStars.length*3),col=new Float32Array(babyStars.length*3),sz=new Float32Array(babyStars.length),ph=new Float32Array(babyStars.length);
   babyStars.forEach((b,i)=>{
     const v=b.pos.clone().multiplyScalar(393);
-    pos[i*3]=v.x; pos[i*3+1]=v.y; pos[i*3+2]=v.z;
-    sz[i]=9+Math.random()*5;
-    ph[i]=Math.random()*Math.PI*2;
+    pos[i*3]=v.x;pos[i*3+1]=v.y;pos[i*3+2]=v.z;
+    const c=GENDER_COL[b.gender]||GENDER_COL.neutral;
+    col[i*3]=c[0];col[i*3+1]=c[1];col[i*3+2]=c[2];
+    sz[i]=8+Math.random()*5;ph[i]=Math.random()*Math.PI*2;
   });
   const geo=new THREE.BufferGeometry();
   geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('aCol',new THREE.BufferAttribute(col,3));
   geo.setAttribute('aSize',new THREE.BufferAttribute(sz,1));
   geo.setAttribute('aPhase',new THREE.BufferAttribute(ph,1));
-  babyMat=new THREE.ShaderMaterial({
-    vertexShader:GOLD_VS,fragmentShader:GOLD_FS,
-    transparent:true,depthWrite:false,
-    blending:THREE.AdditiveBlending,
-    uniforms:{uT:{value:0}}
-  });
+  babyMat=new THREE.ShaderMaterial({vertexShader:BABY_VS,fragmentShader:BABY_FS,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,uniforms:{uT:{value:0}}});
   babyPoints=new THREE.Points(geo,babyMat);
   scene.add(babyPoints);
-  document.getElementById('hdr-count').textContent=
-    babyStars.length+' SOUL'+(babyStars.length!==1?'S':'')+' SHINE HERE';
+  document.getElementById('hdr-count').textContent=babyStars.length+' SOUL'+(babyStars.length!==1?'S':'')+' SHINE HERE';
 }
-buildBabyPoints();
+buildBaby();
 
-// Load real stars from API
 fetch('/api/get-stars').then(r=>r.ok?r.json():null).then(data=>{
-  if(!data||!data.stars||!data.stars.length) return;
-  babyStars=data.stars.map(s=>({
-    name:s.name, date:s.date,
-    pos:new THREE.Vector3(s.px||Math.random()*2-1,s.py||Math.random()*2-1,s.pz||Math.random()*2-1).normalize()
-  }));
-  buildBabyPoints();
+  if(!data||!data.stars||!data.stars.length)return;
+  babyStars=data.stars.map(s=>({...s,pos:new THREE.Vector3(s.px||Math.random()*2-1,s.py||Math.random()*2-1,s.pz||Math.random()*2-1).normalize()}));
+  buildBaby();
 }).catch(()=>{});
 
-/* ── SHOOTING STARS ──────────────────────────────────── */
-
-const shooters=[];
-let nextShoot=10+Math.random()*12;
-
+/* ── SHOOTING STARS ── */
+const shooters=[];let nextShoot=12+Math.random()*15;
 function spawnShooter(){
-  const start=new THREE.Vector3(
-    (Math.random()-0.5)*1.6,
-    0.2+Math.random()*0.7,
-    (Math.random()-0.5)*1.6
-  ).normalize().multiplyScalar(398);
-  const dir=new THREE.Vector3(
-    (Math.random()-0.5)*0.6,
-    -(0.15+Math.random()*0.35),
-    (Math.random()-0.5)*0.6
-  ).normalize();
-  const len=50+Math.random()*90;
-  const end=start.clone().addScaledVector(dir,len);
+  const start=new THREE.Vector3((Math.random()-0.5)*1.6,0.2+Math.random()*0.7,(Math.random()-0.5)*1.6).normalize().multiplyScalar(398);
+  const dir=new THREE.Vector3((Math.random()-0.5)*0.6,-(0.15+Math.random()*0.35),(Math.random()-0.5)*0.6).normalize();
+  const end=start.clone().addScaledVector(dir,60+Math.random()*100);
   const geo=new THREE.BufferGeometry().setFromPoints([start,end]);
-  const mat=new THREE.LineBasicMaterial({
-    color:0xffffff,transparent:true,opacity:0,
-    depthWrite:false,blending:THREE.AdditiveBlending
-  });
-  scene.add(new THREE.Line(geo,mat));
-  shooters.push({line:new THREE.Line(geo,mat),mat,life:0,dur:0.6+Math.random()*0.7});
-  scene.remove(shooters[shooters.length-1].line);
-  scene.add(shooters[shooters.length-1].line);
+  const mat=new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending});
+  const line=new THREE.Line(geo,mat);
+  scene.add(line);
+  shooters.push({line,mat,life:0,dur:0.5+Math.random()*0.8});
 }
 
-/* ── CAMERA CONTROLS ─────────────────────────────────── */
-
-let camTheta=0, camPhi=Math.PI/2-0.18;
-let isDrag=false, px=0, py=0;
-let autoRot=true;
-
+/* ── CAMERA ── */
+let camTheta=0,camPhi=Math.PI/2-0.18,isDrag=false,px=0,py=0,autoRot=true;
 function lookUpdate(){
-  cam.lookAt(
-    Math.sin(camPhi)*Math.cos(camTheta)*100,
-    Math.cos(camPhi)*100,
-    Math.sin(camPhi)*Math.sin(camTheta)*100
-  );
+  cam.lookAt(Math.sin(camPhi)*Math.cos(camTheta)*100,Math.cos(camPhi)*100,Math.sin(camPhi)*Math.sin(camTheta)*100);
 }
-
-function onDown(x,y){
-  isDrag=true; px=x; py=y; autoRot=false;
-  document.getElementById('hint').style.opacity='0';
-}
-function onMove(x,y){
-  if(!isDrag)return;
-  camTheta-=(x-px)*0.004;
-  camPhi=Math.max(0.05,Math.min(Math.PI-0.05,camPhi-(y-py)*0.004));
-  px=x; py=y; lookUpdate();
-}
-function onUp(){ isDrag=false; setTimeout(()=>autoRot=true,5000); }
-
-document.addEventListener('mousedown',e=>{ if(e.target.tagName!=='BUTTON') onDown(e.clientX,e.clientY); });
+function onDown(x,y){isDrag=true;px=x;py=y;autoRot=false;document.getElementById('hint').style.opacity='0';}
+function onMove(x,y){if(!isDrag)return;camTheta-=(x-px)*0.004;camPhi=Math.max(0.05,Math.min(Math.PI-0.05,camPhi-(y-py)*0.004));px=x;py=y;lookUpdate();}
+function onUp(){isDrag=false;setTimeout(()=>autoRot=true,5000);}
+document.addEventListener('mousedown',e=>{if(e.target.tagName!=='BUTTON'&&e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA')onDown(e.clientX,e.clientY);});
 document.addEventListener('mousemove',e=>onMove(e.clientX,e.clientY));
 document.addEventListener('mouseup',onUp);
-document.addEventListener('touchstart',e=>{ if(e.target.tagName!=='BUTTON') onDown(e.touches[0].clientX,e.touches[0].clientY); },{passive:true});
+document.addEventListener('touchstart',e=>{if(e.target.tagName!=='BUTTON'&&e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA')onDown(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
 document.addEventListener('touchmove',e=>onMove(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
 document.addEventListener('touchend',onUp);
-
 lookUpdate();
 
-/* ── RAYCASTING ──────────────────────────────────────── */
-
-const RC=new THREE.Raycaster();
-RC.params.Points.threshold=10;
+/* ── RAYCASTING ── */
+const RC=new THREE.Raycaster();RC.params.Points.threshold=10;
 const mouse2=new THREE.Vector2();
 const tip=document.getElementById('tip');
-
 window.addEventListener('mousemove',e=>{
-  mouse2.x=(e.clientX/W)*2-1;
-  mouse2.y=-(e.clientY/H)*2+1;
-  if(!babyPoints) return;
+  mouse2.x=(e.clientX/W)*2-1;mouse2.y=-(e.clientY/H)*2+1;
+  if(!babyPoints)return;
   RC.setFromCamera(mouse2,cam);
   const hits=RC.intersectObject(babyPoints);
   if(hits.length){
     const b=babyStars[hits[0].index];
     if(b){
-      tip.style.display='block';
-      tip.style.left=e.clientX+'px';
-      tip.style.top=e.clientY+'px';
-      tip.innerHTML='✦ '+b.name+'<br>'+b.date;
+      tip.className=b.gender||'neutral';
+      tip.style.display='block';tip.style.left=e.clientX+'px';tip.style.top=e.clientY+'px';
+      tip.innerHTML='✦ '+(b.name||'Baby Star')+(b.date?'<br>'+b.date:'')+(b.message?'<br><span style="opacity:.6;font-size:.5rem">'+b.message+'</span>':'');
     }
-  } else {
-    tip.style.display='none';
-  }
+  } else tip.style.display='none';
 });
 
-/* ── RENDER LOOP ─────────────────────────────────────── */
-
-const clock=new THREE.Clock();
-let lastT=0;
-
+/* ── RENDER LOOP ── */
+const clock=new THREE.Clock();let lastT=0;
 (function animate(){
   requestAnimationFrame(animate);
-  const t=clock.getElapsedTime();
-  const dt=Math.min(t-lastT,0.05);
-  lastT=t;
-
+  const t=clock.getElapsedTime(),dt=Math.min(t-lastT,0.05);lastT=t;
   starMat.uniforms.uT.value=t;
   mwMats.forEach(m=>m.uniforms.uT.value=t);
-  if(babyMat) babyMat.uniforms.uT.value=t;
-
-  if(autoRot&&!isDrag){ camTheta+=0.0002; lookUpdate(); }
-
-  // Shooting stars
+  if(babyMat)babyMat.uniforms.uT.value=t;
+  if(autoRot&&!isDrag){camTheta+=0.00003;lookUpdate();}
   nextShoot-=dt;
-  if(nextShoot<=0){ spawnShooter(); nextShoot=8+Math.random()*16; }
+  if(nextShoot<=0){spawnShooter();nextShoot=10+Math.random()*18;}
   for(let i=shooters.length-1;i>=0;i--){
-    const s=shooters[i]; s.life+=dt;
-    const p=s.life/s.dur;
-    s.mat.opacity=p<0.15?p/0.15:(1-(p-0.15)/0.85)*0.95;
-    if(s.life>=s.dur){
-      scene.remove(s.line);
-      s.line.geometry.dispose(); s.mat.dispose();
-      shooters.splice(i,1);
-    }
+    const s=shooters[i];s.life+=dt;const p=s.life/s.dur;
+    s.mat.opacity=p<0.15?p/0.15:(1-(p-0.15)/0.85)*0.9;
+    if(s.life>=s.dur){scene.remove(s.line);s.line.geometry.dispose();s.mat.dispose();shooters.splice(i,1);}
   }
-
   renderer.render(scene,cam);
 })();
+window.addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();});
 
-/* ── RESIZE ──────────────────────────────────────────── */
+/* ── PLACE STAR PANEL ── */
+let selGender='neutral';
 
-window.addEventListener('resize',()=>{
-  renderer.setSize(innerWidth,innerHeight);
-  cam.aspect=innerWidth/innerHeight;
-  cam.updateProjectionMatrix();
+function updateStarUI(g){
+  selGender=g;
+  const box=document.getElementById('star-box');
+  const title=document.getElementById('star-title');
+  const preview=document.getElementById('star-preview');
+  const buy=document.getElementById('star-buy');
+  ['boy','girl','neutral'].forEach(x=>{box.classList.remove(x);title.classList.remove(x);preview.classList.remove(x);buy.classList.remove(x);});
+  box.classList.add(g);title.classList.add(g);preview.classList.add(g);buy.classList.add(g);
+  document.querySelectorAll('.star-g-btn').forEach(b=>{b.classList.toggle('sel',b.dataset.g===g);});
+  preview.textContent=g==='girl'?'♀':g==='boy'?'♂':'✦';
+}
+
+document.querySelectorAll('.star-g-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>updateStarUI(btn.dataset.g));
 });
 
-/* ── BUTTONS ─────────────────────────────────────────── */
+const msgArea=document.getElementById('star-message');
+msgArea.addEventListener('input',()=>{
+  document.getElementById('star-charcount').textContent=msgArea.value.length+' / 50';
+});
 
+function openStarPanel(prefillName,prefillGender){
+  if(prefillGender)updateStarUI(prefillGender);
+  if(prefillName)document.getElementById('star-name').value=prefillName;
+  document.getElementById('star-panel').classList.add('open');
+}
+function closeStarPanel(){document.getElementById('star-panel').classList.remove('open');}
+
+document.getElementById('star-close').addEventListener('click',closeStarPanel);
+document.getElementById('star-panel').addEventListener('click',e=>{if(e.target===document.getElementById('star-panel'))closeStarPanel();});
+document.getElementById('add-btn').addEventListener('click',()=>openStarPanel('','neutral'));
+
+document.getElementById('star-buy').addEventListener('click',async()=>{
+  const name=(document.getElementById('star-name').value||'').trim();
+  const message=(document.getElementById('star-message').value||'').trim();
+  const msgEl=document.getElementById('star-msg');
+  const buyBtn=document.getElementById('star-buy');
+  buyBtn.disabled=true;
+  msgEl.textContent='Opening checkout...';
+  const px=(Math.random()*2-1),py=Math.random()*0.8+0.1,pz=(Math.random()*2-1);
+  const norm=Math.sqrt(px*px+py*py+pz*pz);
+  try{
+    const r=await fetch('/api/create-checkout',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        product:'baby-star',
+        metadata:{name,message,gender:selGender,px:px/norm,py:py/norm,pz:pz/norm}
+      })
+    });
+    const data=await r.json();
+    if(data.url)location.href=data.url;
+    else{msgEl.textContent='Something went wrong. Try again.';buyBtn.disabled=false;}
+  }catch(e){msgEl.textContent='Something went wrong. Try again.';buyBtn.disabled=false;}
+});
+
+/* Read URL params — if coming back from baby names with ?place=1 */
+const params=new URLSearchParams(location.search);
+if(params.get('place')==='1'){
+  setTimeout(()=>openStarPanel(params.get('name')||'',params.get('gender')||'neutral'),800);
+}
+if(params.get('star')==='success'){
+  document.getElementById('hdr-count').textContent='YOUR STAR IS NOW IN THE SKY ✦';
+}
+
+/* Buttons */
 document.getElementById('back').addEventListener('click',()=>location.href='/');
-document.getElementById('add').addEventListener('click',()=>location.href='/#baby-names');
-
 })();
 </script>
 </body>
