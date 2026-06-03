@@ -1493,12 +1493,15 @@ select.adv-input option{background:#111;}
 <!-- MOBILE BOTTOM BANNER — rotating ads -->
 <div id="mob-bot-banner">
   <div id="mob-bot-banner-border"></div>
-  <div id="mob-bot-left">
-    <span id="mob-bot-live">◉ LIVE</span>
-    <span id="mob-bot-name">iPIXEL CAFE</span>
+  <div id="mob-bot-content" style="display:flex;flex-direction:column;justify-content:center;flex:1;z-index:3;overflow:hidden;padding-right:10px;">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+      <span id="mob-bot-live">◉ LIVE</span>
+      <span id="mob-bot-name" style="font-size:9px;letter-spacing:2px;opacity:.6;">iPIXEL CAFE</span>
+    </div>
+    <div id="mob-bot-msg" style="font-family:'Georgia',serif;font-size:13px;line-height:1.25;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+    <div id="mob-bot-from" style="font-family:'Courier New',monospace;font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,.55);margin-top:2px;"></div>
   </div>
-  <span id="mob-bot-url">ipixelcafe.com</span>
-  <span id="mob-bot-tag" onclick="event.stopPropagation();openAdvertOverlay('bottom')" style="cursor:pointer;">✦ ADVERTISE</span>
+  <span id="mob-bot-tag" onclick="event.stopPropagation();openAdvertOverlay('bottom')" style="cursor:pointer;flex-shrink:0;">✦ AD</span>
 </div>
 <div id="mob-msg-takeover">
   <div id="mob-msg-sym">🎂</div>
@@ -5031,15 +5034,22 @@ const OracleQuery = (() => {
       /* Update holographic border color */
       const botBorder = document.getElementById('mob-bot-banner-border');
       if(botBorder) botBorder.style.background = `linear-gradient(90deg,${b.color},#C77DFF,${b.color})`;
-      /* Scroll if text is long */
-      nameEl.classList.remove('scrolling');
-      if(urlEl){ urlEl.textContent = b.url; urlEl.style.color = b.color.replace('.95','.40'); }
-      banner.style.borderTopColor = b.border;
+      /* Show full message text if available, otherwise brand name */
+      const msgEl = document.getElementById('mob-bot-msg');
+      const fromEl = document.getElementById('mob-bot-from');
+      if(b.msg && b.msg.text){
+        nameEl.textContent = (b.msg.sym||'') + ' ' + b.name;
+        if(msgEl){ msgEl.textContent = b.msg.text; msgEl.style.color = b.msg.color || '#fff'; msgEl.style.textShadow = `0 0 12px ${b.msg.color||'#fff'}66`; }
+        if(fromEl){ fromEl.textContent = b.msg.from || ''; }
+      } else {
+        nameEl.textContent = b.name;
+        if(msgEl){ msgEl.textContent = b.url || ''; msgEl.style.color = 'rgba(255,255,255,.5)'; msgEl.style.textShadow = 'none'; }
+        if(fromEl){ fromEl.textContent = ''; }
+      }
       const tag = document.getElementById('mob-bot-tag');
-      if(tag){ tag.style.color = b.color.replace('.95','.40'); tag.style.borderColor = b.border; }
+      if(tag){ tag.style.color = b.color.replace('.95','.9'); tag.style.borderColor = b.border; }
       currentHref = b.href;
       nameEl.style.opacity = '1';
-      /* takeover disabled */
     }, 350);
   }
 
