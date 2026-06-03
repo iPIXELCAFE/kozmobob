@@ -12,6 +12,7 @@ const PRICES = {
   'billboard-community': { amount: 5500,  name: 'Community Billboard (1hr)' },
   'billboard-premium':   { amount: 25000, name: 'Premium Billboard (1hr)' },
   'starmap':          { amount: 999,   name: 'Star Map' },
+  'baby-star':        { amount: 99,    name: 'Baby Star in the Sky' },
 };
 
 module.exports = async (req, res) => {
@@ -40,8 +41,12 @@ module.exports = async (req, res) => {
         quantity: 1,
       }],
       metadata: { product, ...metadata },
-      success_url: `https://kozmobob.com/?payment=success&product=${product}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url:  `https://kozmobob.com/?payment=cancelled`,
+      success_url: product === 'baby-star'
+        ? `https://kozmobob.com/sky?star=success&session_id={CHECKOUT_SESSION_ID}`
+        : `https://kozmobob.com/?payment=success&product=${product}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: product === 'baby-star'
+        ? `https://kozmobob.com/sky`
+        : `https://kozmobob.com/?payment=cancelled`,
     });
 
     res.status(200).json({ url: session.url });
