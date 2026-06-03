@@ -7676,7 +7676,7 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
 
   /* ── Rate limit: 1 per 3 hours ── */
   const LS_KEY = '__kb_baby_ts';
-  const COOL_MS = 3 * 60 * 60 * 1000; /* 3 hours */
+  const COOL_MS = 0; /* DEV MODE — restore to: 3 * 60 * 60 * 1000 */
 
   function getCoolRemaining(){
     const last = parseInt(localStorage.getItem(LS_KEY)||'0',10);
