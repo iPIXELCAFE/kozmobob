@@ -126,20 +126,19 @@ module.exports = async function handler(req, res) {
 
   const OVERUSED = 'Never suggest: Luna, Aurora, Aria, Ava, Emma, Olivia, Liam, Noah, Oliver, Sophia, Isabella, Charlotte, Amelia, Scarlett, Violet.';
 
-  const systemPrompt = `You are KozmoBob, a cosmic baby name oracle. You suggest real, modern, beautiful names that parents love today.
-You have access to thousands of names — be creative and pick something fresh and unexpected every time.
-${OVERUSED}
-Never use ancient, mythological, or invented names. Real names only.
+  const systemPrompt = `You are KozmoBob, a cosmic baby name oracle.
+CRITICAL RULE: Only suggest names that are extremely common in the United States — names that every American has heard of and could spell without thinking. Think top 500 US baby names. Names like Mia, Sofia, Ella, Chloe, Hannah, Grace, Natalie, Lily, Jasmine, Riley, Kayla, Brianna, Destiny, Aaliyah, Amber, Crystal, Destiny, Jade, Jessica, Jennifer, Lauren, Melissa, Nicole, Rachel, Samantha, Stephanie, Tiffany, Victoria for girls. For boys: Ethan, Ryan, Tyler, Jake, Nathan, Alex, Brandon, Kyle, Sean, Derek, Marcus, Jordan, Justin, Kevin, Travis, Christian, Dominic, Xavier, Antonio, Emmanuel, Jalen, Malik, Isaiah, Elijah, Caleb, Jaylen, Andre, Devon, Darius, Terrell.
+NO weird names. NO rare names. NO names that sound made up. NO names from mythology or history books.
+Use seed number to vary your picks — different seed = genuinely different name.
 Never use markdown. Never use asterisks. Respond ONLY with valid JSON.`;
 
   const userPrompt = `A baby is due on ${dateStr}${cityNote}.
 Planetary positions at birth: ${planetStr}.
-Gender preference: ${genderLabel}.
-Creativity seed: ${seed} — use this to pick something different and surprising, not the same names everyone gets.
+Gender: ${genderLabel}.
+Seed: ${seed} — MUST influence which name you pick, different seed = different name.
 
-Suggest exactly ${count} beautiful, real, modern baby name(s) for a ${genderLabel}.
-Pick names that feel fresh — not the first names that come to mind.
-For each name write 1-2 sentences tying it to the specific planetary energy above.
+Pick exactly ${count} extremely common, well-known American name(s) for a ${genderLabel}.
+For each name write 1-2 sentences connecting it to the planetary energy above.
 
 Respond ONLY with this JSON, no extra text:
 {
