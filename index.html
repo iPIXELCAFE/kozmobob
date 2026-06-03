@@ -559,99 +559,157 @@ html,body{
   #lqb,#rqb{display:none!important;}
 
   /* PERMANENT TOP BANNER — iPIXEL CAFE */
+  /* ── HOLOGRAPHIC BANNER KEYFRAMES ── */
+  @keyframes holoShift{
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+  }
+  @keyframes shimmerSweep{
+    0%{transform:translateX(-100%)}
+    60%{transform:translateX(250%)}
+    100%{transform:translateX(250%)}
+  }
+  @keyframes holoPulse{
+    0%,100%{opacity:.7}
+    50%{opacity:1}
+  }
+
   #mob-top-banner{
     display:flex;
     position:fixed;top:0;left:0;right:0;
-    height:72px;z-index:30;
-    background:rgba(0,0,0,.95);
-    border-bottom:1px solid rgba(255,200,40,.40);
+    height:80px;z-index:30;
+    background:linear-gradient(135deg,rgba(4,2,12,.98),rgba(8,4,20,.98));
+    border-bottom:2px solid transparent;
+    background-clip:padding-box;
     align-items:center;justify-content:space-between;
-    padding:0 14px;
+    padding:0 16px;
     cursor:pointer;
+    overflow:hidden;
+    box-shadow:0 4px 30px rgba(255,200,40,.15);
   }
-  #mob-top-left{display:flex;align-items:center;gap:7px}
+  #mob-top-banner::before{
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.018) 3px,rgba(255,255,255,.018) 4px);
+    z-index:1;
+  }
+  #mob-top-banner::after{
+    content:'';position:absolute;top:0;left:0;width:40%;height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);
+    animation:shimmerSweep 4s ease-in-out infinite;
+    z-index:2;pointer-events:none;
+  }
+  /* Animated bottom border */
+  #mob-top-banner-border{
+    position:absolute;bottom:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,#FFD700,#FF6B6B,#C77DFF,#00D4FF,#06FFA5,#FFD700);
+    background-size:300% 100%;
+    animation:holoShift 4s linear infinite;
+  }
+  #mob-top-left{display:flex;align-items:center;gap:8px;z-index:3;}
   #mob-top-dot{
-    font-size:7px;letter-spacing:1.5px;
-    color:rgba(255,200,40,.55);
+    font-size:7px;letter-spacing:2px;
+    color:rgba(255,200,40,.7);
     font-family:'Courier New',monospace;
   }
   #mob-top-name{
     font-family:'Courier New',monospace;
-    font-size:10px;letter-spacing:3px;text-transform:uppercase;
-    color:rgba(255,215,0,.95);
-    max-width:180px;overflow:hidden;white-space:nowrap;
-    text-overflow:ellipsis;
+    font-size:13px;letter-spacing:3px;text-transform:uppercase;
+    color:#fff;
+    text-shadow:0 0 14px rgba(255,215,0,.8),0 0 30px rgba(255,215,0,.4);
+    max-width:200px;overflow:hidden;white-space:nowrap;
+    z-index:3;
   }
   #mob-top-sub{
     font-family:'Courier New',monospace;
-    font-size:7px;letter-spacing:1.5px;
-    color:rgba(255,200,40,.50);text-transform:uppercase;
+    font-size:8px;letter-spacing:2px;
+    color:rgba(255,200,40,.55);text-transform:uppercase;
+    z-index:3;
   }
   #mob-top-tag{
     font-family:'Courier New',monospace;
-    font-size:7px;letter-spacing:1.5px;
-    color:rgba(255,200,40,.75);text-transform:uppercase;
-    border:1px solid rgba(255,200,40,.40);
-    padding:3px 8px;border-radius:3px;
-    transition:color .2s,border-color .2s,box-shadow .2s;
+    font-size:8px;letter-spacing:2px;
+    color:rgba(255,200,40,.9);text-transform:uppercase;
+    border:1px solid rgba(255,200,40,.5);
+    padding:5px 10px;border-radius:4px;
+    background:rgba(255,200,40,.08);
+    transition:all .2s;z-index:3;
+    box-shadow:0 0 10px rgba(255,200,40,.2);
   }
   #mob-top-tag:hover{
-    color:rgba(255,220,60,1);border-color:rgba(255,200,40,.8);
-    box-shadow:0 0 8px rgba(255,190,30,.4);
+    color:#fff;border-color:rgba(255,200,40,1);
+    box-shadow:0 0 20px rgba(255,200,40,.6);
+    background:rgba(255,200,40,.15);
   }
 
-  /* ROTATING BOTTOM BANNER — multiple brands */
+  /* ROTATING BOTTOM BANNER — HOLOGRAPHIC */
   #mob-bot-banner{
     display:flex;
     position:fixed;bottom:0;left:0;right:0;
-    height:72px;z-index:30;
-    background:rgba(0,0,0,.95);
-    border-top:1px solid rgba(0,207,255,.30);
+    height:80px;z-index:30;
+    background:linear-gradient(135deg,rgba(4,2,12,.98),rgba(8,4,20,.98));
+    border-top:2px solid transparent;
     align-items:center;justify-content:space-between;
-    padding:0 14px;
+    padding:0 16px;
     cursor:pointer;
-    transition:border-top-color .6s ease;
+    overflow:hidden;
+    transition:box-shadow .6s ease;
+    box-shadow:0 -4px 30px rgba(0,207,255,.12);
   }
-  #mob-bot-left{display:flex;align-items:center;gap:7px}
+  #mob-bot-banner::before{
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.018) 3px,rgba(255,255,255,.018) 4px);
+    z-index:1;
+  }
+  #mob-bot-banner::after{
+    content:'';position:absolute;top:0;left:0;width:40%;height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);
+    animation:shimmerSweep 3.5s ease-in-out infinite 1s;
+    z-index:2;pointer-events:none;
+  }
+  #mob-bot-banner-border{
+    position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,#00D4FF,#C77DFF,#FF6B6B,#FFD700,#06FFA5,#00D4FF);
+    background-size:300% 100%;
+    animation:holoShift 4s linear infinite;
+  }
+  #mob-bot-left{display:flex;align-items:center;gap:8px;z-index:3;}
   #mob-bot-live{
-    font-size:6px;letter-spacing:2px;color:rgba(0,207,255,.70);
+    font-size:7px;letter-spacing:2px;color:rgba(0,255,200,.9);
     font-family:'Courier New',monospace;
     animation:tickerBlink 1.2s ease-in-out infinite;
+    text-shadow:0 0 8px rgba(0,255,200,.8);
   }
   #mob-bot-name{
     font-family:'Courier New',monospace;
-    font-size:10px;letter-spacing:3px;text-transform:uppercase;
-    color:rgba(0,207,255,.95);
-    transition:color .6s ease,opacity .4s ease;
-    max-width:200px;overflow:hidden;white-space:nowrap;
-  }
-  #mob-bot-name.scrolling{
-    animation:mobNameScroll 8s linear infinite;
-  }
-  @keyframes mobNameScroll{
-    0%{transform:translateX(0)}
-    30%{transform:translateX(0)}
-    80%{transform:translateX(calc(-100% - 20px))}
-    100%{transform:translateX(calc(-100% - 20px))}
+    font-size:14px;letter-spacing:3px;text-transform:uppercase;
+    color:#fff;
+    text-shadow:0 0 14px currentColor,0 0 28px currentColor;
+    transition:color .6s ease,opacity .4s ease,text-shadow .6s ease;
+    max-width:180px;overflow:hidden;white-space:nowrap;
+    z-index:3;
   }
   #mob-bot-url{
     font-family:'Courier New',monospace;
-    font-size:7px;letter-spacing:1.5px;
-    color:rgba(0,207,255,.40);text-transform:lowercase;
-    transition:color .6s ease;
+    font-size:8px;letter-spacing:1.5px;
+    color:rgba(255,255,255,.35);text-transform:lowercase;
+    transition:color .6s ease;z-index:3;
   }
   #mob-bot-tag{
     font-family:'Courier New',monospace;
-    font-size:7px;letter-spacing:1.5px;
-    color:rgba(0,207,255,.75);
-    border:1px solid rgba(0,207,255,.40);
-    padding:3px 8px;border-radius:3px;
+    font-size:8px;letter-spacing:2px;
+    color:rgba(0,207,255,.9);
+    border:1px solid rgba(0,207,255,.5);
+    padding:5px 10px;border-radius:4px;
     text-transform:uppercase;
-    transition:color .3s ease,border-color .3s ease,box-shadow .3s ease;
+    background:rgba(0,207,255,.08);
+    transition:all .2s;z-index:3;
+    box-shadow:0 0 10px rgba(0,207,255,.2);
   }
   #mob-bot-tag:hover{
-    color:rgba(0,230,255,1);border-color:rgba(0,207,255,.8);
-    box-shadow:0 0 8px rgba(0,207,255,.35);
+    color:#fff;border-color:rgba(0,207,255,1);
+    box-shadow:0 0 20px rgba(0,207,255,.6);
+    background:rgba(0,207,255,.15);
   }
 }
 
@@ -1423,22 +1481,24 @@ select.adv-input option{background:#111;}
 
 <!-- MOBILE TOP BANNER — permanent iPIXEL CAFE -->
 <div id="mob-top-banner" onclick="window.open('https://ipixelcafe.com','_blank')">
+  <div id="mob-top-banner-border"></div>
   <div id="mob-top-left">
     <span id="mob-top-dot">◈ PERMANENT</span>
     <span id="mob-top-name">iPIXEL CAFE</span>
   </div>
   <span id="mob-top-sub">ipixelcafe.com</span>
-  <span id="mob-top-tag" onclick="event.stopPropagation();openAdvertOverlay('top')" style="cursor:pointer;color:rgba(255,200,40,.75);border-color:rgba(255,200,40,.45);letter-spacing:1.5px;">✦ ADVERTISE</span>
+  <span id="mob-top-tag" onclick="event.stopPropagation();openAdvertOverlay('top')" style="cursor:pointer;">✦ ADVERTISE</span>
 </div>
 
 <!-- MOBILE BOTTOM BANNER — rotating ads -->
 <div id="mob-bot-banner">
+  <div id="mob-bot-banner-border"></div>
   <div id="mob-bot-left">
     <span id="mob-bot-live">◉ LIVE</span>
     <span id="mob-bot-name">iPIXEL CAFE</span>
   </div>
   <span id="mob-bot-url">ipixelcafe.com</span>
-  <span id="mob-bot-tag" onclick="event.stopPropagation();openAdvertOverlay('bottom')" style="cursor:pointer;letter-spacing:1.5px;">✦ ADVERTISE</span>
+  <span id="mob-bot-tag" onclick="event.stopPropagation();openAdvertOverlay('bottom')" style="cursor:pointer;">✦ ADVERTISE</span>
 </div>
 <div id="mob-msg-takeover">
   <div id="mob-msg-sym">🎂</div>
@@ -4967,9 +5027,12 @@ const OracleQuery = (() => {
     setTimeout(()=>{
       nameEl.textContent  = b.name;
       nameEl.style.color  = b.color;
+      nameEl.style.textShadow = `0 0 14px ${b.color},0 0 28px ${b.color}88`;
+      /* Update holographic border color */
+      const botBorder = document.getElementById('mob-bot-banner-border');
+      if(botBorder) botBorder.style.background = `linear-gradient(90deg,${b.color},#C77DFF,${b.color})`;
       /* Scroll if text is long */
       nameEl.classList.remove('scrolling');
-      if(b.name.length > 14) setTimeout(()=>nameEl.classList.add('scrolling'), 400);
       if(urlEl){ urlEl.textContent = b.url; urlEl.style.color = b.color.replace('.95','.40'); }
       banner.style.borderTopColor = b.border;
       const tag = document.getElementById('mob-bot-tag');
