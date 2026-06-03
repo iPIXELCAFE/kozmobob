@@ -145,22 +145,44 @@ module.exports = async function handler(req, res) {
     pickedNames.push(pool[(base + i * step) % pool.length]);
   }
 
-  const systemPrompt = `You are KozmoBob, a mystical cosmic oracle. You write short poetic cosmic explanations for baby names.
-Be specific — tie each name to the actual planet signs provided. Be warm, poetic, and confident.
+  /* ── Zodiac sign for this baby ── */
+  const ZODIAC_DATA = {
+    Aries:       { symbol: '♈', dates: 'Mar 21 – Apr 19', trait: 'bold, fearless, and born to lead' },
+    Taurus:      { symbol: '♉', dates: 'Apr 20 – May 20', trait: 'grounded, loyal, and deeply loving' },
+    Gemini:      { symbol: '♊', dates: 'May 21 – Jun 20', trait: 'curious, quick, and endlessly charming' },
+    Cancer:      { symbol: '♋', dates: 'Jun 21 – Jul 22', trait: 'intuitive, nurturing, and deeply feeling' },
+    Leo:         { symbol: '♌', dates: 'Jul 23 – Aug 22', trait: 'radiant, generous, and born to shine' },
+    Virgo:       { symbol: '♍', dates: 'Aug 23 – Sep 22', trait: 'intelligent, devoted, and quietly powerful' },
+    Libra:       { symbol: '♎', dates: 'Sep 23 – Oct 22', trait: 'graceful, loving, and naturally balanced' },
+    Scorpio:     { symbol: '♏', dates: 'Oct 23 – Nov 21', trait: 'intense, loyal, and fiercely protective' },
+    Sagittarius: { symbol: '♐', dates: 'Nov 22 – Dec 21', trait: 'adventurous, honest, and full of wonder' },
+    Capricorn:   { symbol: '♑', dates: 'Dec 22 – Jan 19', trait: 'determined, wise, and built to achieve' },
+    Aquarius:    { symbol: '♒', dates: 'Jan 20 – Feb 18', trait: 'visionary, unique, and ahead of their time' },
+    Pisces:      { symbol: '♓', dates: 'Feb 19 – Mar 20', trait: 'dreamy, compassionate, and deeply soulful' },
+  };
+  const babyZodiac = ZODIAC_DATA[serverPlanets.Sun] || ZODIAC_DATA['Aries'];
+
+  const systemPrompt = `You are KozmoBob, a mystical cosmic oracle writing for expectant parents.
+Your tone is warm, emotional, and deeply personal — like you are speaking directly to the parents about their specific child.
+Write as if this name was placed in the stars the moment this baby was conceived.
+Make parents feel the magic. Make them want to share it.
 Never use markdown. Never use asterisks. Respond ONLY with valid JSON.`;
 
   const userPrompt = `A baby is due on ${dateStr}${cityNote}.
-Planetary positions: ${planetStr}.
+The sky at this baby's birth: ${planetStr}.
+This baby will be a ${serverPlanets.Sun} — ${babyZodiac.trait}.
 Gender: ${genderLabel}.
 
-The stars have chosen these name(s) for this exact birth date: ${pickedNames.join(', ')}.
+The stars have held these name(s) for this exact soul: ${pickedNames.join(', ')}.
 
-For each name write 1-2 sentences explaining the cosmic connection — reference specific planets and signs from above.
+For each name write 2-3 warm, emotional sentences that feel personal and magical.
+Speak to the parents directly. Reference the baby's ${serverPlanets.Sun} Sun and specific planets.
+Make them feel like this name was always meant for their child.
 
 Respond ONLY with this JSON, no extra text:
 {
   "names": [
-    { "name": "EXACT NAME", "reason": "cosmic explanation referencing specific planets" }
+    { "name": "EXACT NAME", "reason": "warm emotional cosmic explanation for the parents" }
   ]
 }`;
 
@@ -202,6 +224,12 @@ Respond ONLY with this JSON, no extra text:
     return res.status(200).json({
       names: parsed.names.slice(0, count),
       planets: serverPlanets,
+      zodiac: {
+        sign: serverPlanets.Sun,
+        symbol: babyZodiac.symbol,
+        dates: babyZodiac.dates,
+        trait: babyZodiac.trait,
+      },
     });
 
   } catch (err) {
