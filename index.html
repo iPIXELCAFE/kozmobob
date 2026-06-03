@@ -834,7 +834,7 @@ html,body{
   font-size:1rem;cursor:pointer;
   transition:color .2s,border-color .2s;
   pointer-events:all;
-  display:flex;align-items:center;justify-content:center;
+  display:none;
 }
 #kb-sound-btn:hover{color:rgba(255,200,40,.95);border-color:rgba(255,200,40,.6);}
 #kb-sound-btn.muted{color:rgba(255,255,255,.2);border-color:rgba(255,255,255,.1);}
@@ -2152,6 +2152,7 @@ const AudioManager = (() => {
 
   return { init, setVolume };
 })();
+window.AudioManager = AudioManager;
 
 
 /* ── 2. ORACLE SCENE ── */
@@ -7524,6 +7525,7 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
     btn.classList.toggle('muted',m);
     btn.textContent=m?'\u25A0':'\u266a'; /* ■ = muted, ♪ = on */
     if(masterGain) masterGain.gain.setTargetAtTime(m?0:0.18,ctx.currentTime,0.3);
+    if(window.AudioManager) window.AudioManager.setVolume(m?0:0.15,0.3);
   }
   window.__KBSound={
     flip:function(){
