@@ -958,6 +958,126 @@ html,body{
 }
 .kb-reveal-announce.show{opacity:1;}
 
+/* ── BABY NAMES OVERLAY ── */
+#kb-baby-overlay{
+  position:fixed;inset:0;z-index:99990;
+  background:rgba(0,0,0,.82);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;
+}
+#kb-baby-overlay.visible{display:flex;}
+#kb-baby-panel{
+  position:relative;width:min(380px,92vw);max-height:88vh;overflow-y:auto;
+  background:rgba(4,2,14,.97);
+  border:1px solid rgba(120,80,255,.35);border-radius:20px;
+  padding:36px 26px 28px;
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  scrollbar-width:thin;scrollbar-color:rgba(120,80,255,.3) transparent;
+}
+#kb-baby-close{
+  position:absolute;top:12px;right:14px;
+  background:none;border:none;
+  color:rgba(255,255,255,.25);font-family:'Courier New',monospace;
+  font-size:.7rem;letter-spacing:2px;cursor:pointer;
+}
+#kb-baby-close:hover{color:rgba(255,255,255,.6);}
+#kb-baby-title{
+  font-family:'Courier New',monospace;font-size:.82rem;letter-spacing:5px;
+  color:rgba(160,100,255,.9);text-align:center;
+}
+#kb-baby-sub{
+  font-family:'Courier New',monospace;font-size:.55rem;letter-spacing:1.5px;
+  color:rgba(255,255,255,.3);text-align:center;line-height:1.7;
+}
+#kb-baby-panel input,#kb-baby-panel select{
+  width:100%;background:rgba(255,255,255,.04);
+  border:1px solid rgba(120,80,255,.25);border-radius:10px;
+  padding:11px 14px;font-family:'Courier New',monospace;
+  font-size:.68rem;letter-spacing:2px;color:rgba(255,255,255,.85);
+  outline:none;text-align:center;transition:border-color .2s;
+  -webkit-appearance:none;appearance:none;
+}
+#kb-baby-panel input:focus,#kb-baby-panel select:focus{border-color:rgba(160,100,255,.6);}
+#kb-baby-panel select option{background:#0a0618;color:rgba(255,255,255,.85);}
+.kb-baby-row{display:flex;gap:10px;width:100%;}
+.kb-baby-row input,.kb-baby-row select{flex:1;}
+#kb-baby-gender-row{display:flex;gap:10px;width:100%;}
+.kb-baby-g-btn{
+  flex:1;padding:11px 0;text-align:center;
+  font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:2px;
+  border-radius:10px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);
+  transition:all .2s;
+}
+.kb-baby-g-btn[data-g="boy"].sel{border-color:rgba(100,180,255,.8);color:rgba(100,180,255,1);background:rgba(100,180,255,.12);}
+.kb-baby-g-btn[data-g="girl"].sel{border-color:rgba(255,120,200,.8);color:rgba(255,120,200,1);background:rgba(255,120,200,.12);}
+.kb-baby-g-btn[data-g="neutral"].sel{border-color:rgba(160,100,255,.8);color:rgba(160,100,255,1);background:rgba(160,100,255,.12);}
+#kb-baby-go{
+  width:100%;margin-top:4px;
+  background:rgba(120,80,255,.1);
+  border:1px solid rgba(120,80,255,.4);border-radius:24px;
+  padding:13px 0;font-family:'Courier New',monospace;
+  font-size:.62rem;letter-spacing:2.5px;color:rgba(160,100,255,.9);
+  cursor:pointer;transition:all .2s;
+}
+#kb-baby-go:hover{background:rgba(120,80,255,.2);border-color:rgba(160,100,255,.7);}
+#kb-baby-go:disabled{opacity:.4;cursor:not-allowed;}
+#kb-baby-cooldown{
+  font-family:'Courier New',monospace;font-size:.55rem;letter-spacing:1.5px;
+  color:rgba(255,200,40,.5);text-align:center;min-height:1em;
+}
+#kb-baby-results{
+  width:100%;display:none;flex-direction:column;gap:16px;
+}
+#kb-baby-results.show{display:flex;}
+.kb-baby-name-card{
+  background:rgba(120,80,255,.07);
+  border:1px solid rgba(120,80,255,.25);border-radius:14px;
+  padding:16px 18px;
+}
+.kb-baby-name-card .bn-name{
+  font-family:'Courier New',monospace;font-size:.85rem;letter-spacing:4px;
+  color:rgba(200,160,255,.95);margin-bottom:6px;
+}
+.kb-baby-name-card .bn-reason{
+  font-family:'Courier New',monospace;font-size:.55rem;letter-spacing:1px;
+  color:rgba(255,255,255,.5);line-height:1.7;
+}
+#kb-baby-upsell{
+  width:100%;display:none;flex-direction:column;gap:10px;align-items:center;
+}
+#kb-baby-upsell.show{display:flex;}
+#kb-baby-upsell-title{
+  font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:2px;
+  color:rgba(255,200,40,.6);text-align:center;
+}
+.kb-baby-pay-btn{
+  width:100%;padding:12px 0;
+  font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:2px;
+  border-radius:20px;cursor:pointer;transition:all .2s;text-align:center;
+}
+#kb-baby-pay-5{
+  background:rgba(255,200,40,.1);border:1px solid rgba(255,200,40,.4);
+  color:rgba(255,200,40,.9);
+}
+#kb-baby-pay-5:hover{background:rgba(255,200,40,.2);}
+#kb-baby-pay-unlim{
+  background:rgba(120,80,255,.1);border:1px solid rgba(120,80,255,.4);
+  color:rgba(160,100,255,.9);
+}
+#kb-baby-pay-unlim:hover{background:rgba(120,80,255,.2);}
+#kb-baby-loading{
+  display:none;font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:3px;
+  color:rgba(160,100,255,.6);text-align:center;animation:kb-baby-pulse 1.4s ease-in-out infinite;
+}
+#kb-baby-loading.show{display:block;}
+@keyframes kb-baby-pulse{0%,100%{opacity:.3}50%{opacity:1}}
+#kb-baby-planets{
+  width:100%;display:none;
+  font-family:'Courier New',monospace;font-size:.48rem;letter-spacing:1.5px;
+  color:rgba(120,80,255,.45);text-align:center;line-height:2;
+}
+#kb-baby-planets.show{display:block;}
+
 /* ── HAMBURGER MENU BUTTON ── */
 #kb-menu-btn{
   position:fixed;top:14px;right:152px;
@@ -1604,11 +1724,11 @@ select.adv-input option{background:#111;}
       <div class="kb-menu-sub">Dramatic cosmic reveal — free</div>
     </div>
   </div>
-  <div class="kb-menu-item kb-menu-soon">
+  <div class="kb-menu-item" id="kb-menu-baby">
     <span class="kb-menu-icon">👶</span>
     <div class="kb-menu-text">
       <div class="kb-menu-label">BABY NAMES</div>
-      <div class="kb-menu-sub">Star-aligned names — coming soon</div>
+      <div class="kb-menu-sub">Star-aligned names — 1 free every 3 hrs</div>
     </div>
   </div>
   <div class="kb-menu-divider"></div>
@@ -1631,6 +1751,36 @@ select.adv-input option{background:#111;}
     <div id="kb-compat-and">and</div>
     <input id="kb-compat-b" type="text" placeholder="Second name" maxlength="30" autocomplete="off" spellcheck="false"/>
     <button id="kb-compat-go">✦ READ THE ENERGY</button>
+  </div>
+</div>
+
+<!-- ── BABY NAMES OVERLAY ── -->
+<div id="kb-baby-overlay">
+  <div id="kb-baby-panel">
+    <button id="kb-baby-close">✕</button>
+    <div id="kb-baby-title">👶 BABY NAMES</div>
+    <div id="kb-baby-sub">Enter the birth details.<br>Bob reads the stars and finds names written in the sky.</div>
+
+    <input id="kb-baby-date" type="date" placeholder="Due date"/>
+    <div class="kb-baby-row">
+      <input id="kb-baby-time" type="time" placeholder="Birth time (optional)"/>
+      <input id="kb-baby-city" type="text" placeholder="City (e.g. New York)" maxlength="40" autocomplete="off" spellcheck="false"/>
+    </div>
+    <div id="kb-baby-gender-row">
+      <div class="kb-baby-g-btn" data-g="boy">♂ BOY</div>
+      <div class="kb-baby-g-btn" data-g="girl">♀ GIRL</div>
+      <div class="kb-baby-g-btn" data-g="neutral">✦ NEUTRAL</div>
+    </div>
+    <button id="kb-baby-go">✦ READ THE STARS</button>
+    <div id="kb-baby-cooldown"></div>
+    <div id="kb-baby-loading">✦ READING THE COSMOS ✦</div>
+    <div id="kb-baby-planets"></div>
+    <div id="kb-baby-results"></div>
+    <div id="kb-baby-upsell">
+      <div id="kb-baby-upsell-title">WANT MORE NAMES?</div>
+      <button class="kb-baby-pay-btn" id="kb-baby-pay-5">✦ 5 MORE NAMES — $1.99</button>
+      <button class="kb-baby-pay-btn" id="kb-baby-pay-unlim">★ UNLIMITED 24 HRS — $7.99</button>
+    </div>
   </div>
 </div>
 
@@ -7482,6 +7632,182 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
   window.__KBMilestone=function(total){
     if(READINGS[total]) setTimeout(()=>showMilestoneReading(READINGS[total]),1200);
   };
+})();
+
+/* ── BABY NAMES ── */
+(function(){
+  const overlay   = document.getElementById('kb-baby-overlay');
+  const closeBtn  = document.getElementById('kb-baby-close');
+  const goBtn     = document.getElementById('kb-baby-go');
+  const dateIn    = document.getElementById('kb-baby-date');
+  const timeIn    = document.getElementById('kb-baby-time');
+  const cityIn    = document.getElementById('kb-baby-city');
+  const coolEl    = document.getElementById('kb-baby-cooldown');
+  const loadEl    = document.getElementById('kb-baby-loading');
+  const planetsEl = document.getElementById('kb-baby-planets');
+  const resultsEl = document.getElementById('kb-baby-results');
+  const upsellEl  = document.getElementById('kb-baby-upsell');
+  const menuItem  = document.getElementById('kb-menu-baby');
+  if(!overlay) return;
+
+  let selGender = null;
+  let coolTimer = null;
+
+  /* ── Gender buttons ── */
+  document.querySelectorAll('.kb-baby-g-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.kb-baby-g-btn').forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel');
+      selGender = btn.dataset.g;
+    });
+  });
+
+  /* ── Open / close ── */
+  if(menuItem) menuItem.addEventListener('click',e=>{
+    e.stopPropagation();
+    document.getElementById('kb-menu-panel').classList.remove('open');
+    overlay.classList.add('visible');
+    resetUI();
+    updateCooldown();
+  });
+  closeBtn.addEventListener('click',()=>close());
+  overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
+  function close(){overlay.classList.remove('visible');clearTimeout(coolTimer);}
+
+  /* ── Rate limit: 1 per 3 hours ── */
+  const LS_KEY = '__kb_baby_ts';
+  const COOL_MS = 3 * 60 * 60 * 1000; /* 3 hours */
+
+  function getCoolRemaining(){
+    const last = parseInt(localStorage.getItem(LS_KEY)||'0',10);
+    const elapsed = Date.now() - last;
+    return Math.max(0, COOL_MS - elapsed);
+  }
+
+  function updateCooldown(){
+    clearTimeout(coolTimer);
+    const rem = getCoolRemaining();
+    if(rem <= 0){
+      coolEl.textContent = '1 free reading available';
+      goBtn.disabled = false;
+      return;
+    }
+    goBtn.disabled = true;
+    const h = Math.floor(rem/3600000);
+    const m = Math.floor((rem%3600000)/60000);
+    const s = Math.floor((rem%60000)/1000);
+    coolEl.textContent = `Next free name in ${h}h ${m}m ${s}s`;
+    coolTimer = setTimeout(updateCooldown, 1000);
+  }
+
+  /* ── Planetary positions (simplified but accurate enough) ── */
+  function calcPlanets(date, time, city){
+    /* Convert date/time to Julian Day */
+    const dt = time ? new Date(`${date}T${time}`) : new Date(`${date}T12:00:00`);
+    const Y=dt.getFullYear(),M=dt.getMonth()+1,D=dt.getDate();
+    const h=dt.getHours()+dt.getMinutes()/60;
+    const JD = 367*Y - Math.floor(7*(Y+Math.floor((M+9)/12))/4)
+             + Math.floor(275*M/9) + D + 1721013.5 + h/24;
+    const T = (JD - 2451545.0) / 36525; /* Julian centuries from J2000 */
+
+    /* Mean longitudes (degrees) — simplified VSOP87 */
+    const planets = {
+      Sun:     { L: (280.46646 + 36000.76983*T) % 360 },
+      Moon:    { L: (218.3165 + 481267.8813*T) % 360 },
+      Mercury: { L: (252.2509 + 149472.6674*T) % 360 },
+      Venus:   { L: (181.9798 + 58517.8156*T) % 360 },
+      Mars:    { L: (355.4330 + 19140.2993*T) % 360 },
+      Jupiter: { L: (34.3515 + 3034.9057*T) % 360 },
+      Saturn:  { L: (49.9443 + 1222.1138*T) % 360 },
+    };
+
+    const signs = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo',
+                   'Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+
+    const result = {};
+    for(const [name, {L}] of Object.entries(planets)){
+      const lon = ((L % 360) + 360) % 360;
+      result[name] = signs[Math.floor(lon/30)];
+    }
+    return result;
+  }
+
+  /* ── Fire API call ── */
+  async function fetchNames(planets, gender, city, dateStr){
+    const planetStr = Object.entries(planets)
+      .map(([p,s])=>`${p} in ${s}`).join(', ');
+    const res = await fetch('/api/baby-names', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ planets: planetStr, gender, city, date: dateStr, count: 3 })
+    });
+    if(!res.ok) throw new Error('API error');
+    return res.json();
+  }
+
+  /* ── Render name cards ── */
+  function renderNames(names){
+    resultsEl.innerHTML = '';
+    names.forEach(({name, reason})=>{
+      const card = document.createElement('div');
+      card.className = 'kb-baby-name-card';
+      card.innerHTML = `<div class="bn-name">${name}</div><div class="bn-reason">${reason}</div>`;
+      resultsEl.appendChild(card);
+    });
+    resultsEl.classList.add('show');
+    upsellEl.classList.add('show');
+  }
+
+  /* ── Reset UI ── */
+  function resetUI(){
+    resultsEl.classList.remove('show');
+    resultsEl.innerHTML='';
+    upsellEl.classList.remove('show');
+    planetsEl.classList.remove('show');
+    planetsEl.textContent='';
+    loadEl.classList.remove('show');
+    coolEl.textContent='';
+  }
+
+  /* ── Go button ── */
+  goBtn.addEventListener('click', async ()=>{
+    const dateVal = dateIn.value;
+    const cityVal = (cityIn.value||'').trim();
+    if(!dateVal){ dateIn.style.borderColor='rgba(255,80,80,.6)'; setTimeout(()=>dateIn.style.borderColor='',1200); return; }
+    if(!selGender){ document.querySelectorAll('.kb-baby-g-btn').forEach(b=>{ b.style.borderColor='rgba(255,80,80,.4)'; setTimeout(()=>b.style.borderColor='',1200);}); return; }
+
+    resetUI();
+    goBtn.disabled = true;
+    loadEl.classList.add('show');
+
+    try {
+      const planets = calcPlanets(dateVal, timeIn.value, cityVal);
+      /* Show planet positions */
+      planetsEl.textContent = Object.entries(planets).map(([p,s])=>`${p} · ${s}`).join('  ✦  ');
+      planetsEl.classList.add('show');
+
+      const data = await fetchNames(planets, selGender, cityVal, dateVal);
+      loadEl.classList.remove('show');
+
+      /* Save timestamp for rate limit */
+      localStorage.setItem(LS_KEY, Date.now().toString());
+
+      renderNames(data.names);
+      updateCooldown();
+    } catch(err){
+      loadEl.classList.remove('show');
+      coolEl.textContent = 'Something went wrong. Try again.';
+      updateCooldown();
+    }
+  });
+
+  /* ── Paid buttons (Stripe placeholder) ── */
+  document.getElementById('kb-baby-pay-5').addEventListener('click',()=>{
+    coolEl.textContent = 'STRIPE COMING SOON — $1.99 for 5 names';
+  });
+  document.getElementById('kb-baby-pay-unlim').addEventListener('click',()=>{
+    coolEl.textContent = 'STRIPE COMING SOON — $7.99 unlimited 24hrs';
+  });
 })();
 
 /* ── STREAK BONUS TOAST ── */
