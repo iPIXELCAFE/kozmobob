@@ -1292,7 +1292,7 @@ html,body{
 }
 #advert-title{
   font-size:.68rem;letter-spacing:3px;
-  color:rgba(255,200,40,.85);text-transform:uppercase;
+  color:#fff;text-transform:uppercase;
 }
 #advert-close{
   background:none;border:1px solid rgba(255,255,255,.12);
@@ -1312,13 +1312,13 @@ html,body{
 }
 .ab-card.selected{border-color:rgba(255,200,40,.5);background:rgba(255,200,40,.05);}
 .ab-card:hover{border-color:rgba(255,200,40,.25);}
-.ab-card-name{font-size:.58rem;letter-spacing:3px;color:rgba(255,255,255,.45);margin-bottom:4px;}
-.ab-card-price{font-size:.82rem;letter-spacing:1px;color:rgba(255,200,40,.9);margin-bottom:3px;}
-.ab-card-desc{font-size:.52rem;letter-spacing:1px;color:rgba(255,255,255,.3);}
+.ab-card-name{font-size:.58rem;letter-spacing:3px;color:rgba(255,255,255,.85);margin-bottom:4px;}
+.ab-card-price{font-size:.88rem;letter-spacing:1px;color:#fff;margin-bottom:3px;text-shadow:0 0 12px rgba(255,200,40,.6);}
+.ab-card-desc{font-size:.52rem;letter-spacing:1px;color:rgba(255,255,255,.6);}
 
 .adv-field{margin-bottom:13px;}
 .adv-label{display:block;font-size:.55rem;letter-spacing:2px;
-  color:rgba(255,255,255,.38);margin-bottom:5px;text-transform:uppercase;}
+  color:rgba(255,255,255,.8);margin-bottom:5px;text-transform:uppercase;}
 .adv-input{
   width:100%;background:rgba(255,255,255,.04);
   border:1px solid rgba(255,255,255,.10);border-radius:8px;
@@ -1661,7 +1661,7 @@ select.adv-input option{background:#111;}
     <div id="advert-form-body">
 
       <!-- How it works -->
-      <div style="font-family:'Courier New',monospace;font-size:.62rem;letter-spacing:.08em;color:rgba(255,200,40,.55);text-align:center;padding:10px 0 16px;line-height:1.9;border-bottom:1px solid rgba(255,200,40,.10);margin-bottom:16px;">
+      <div style="font-family:'Courier New',monospace;font-size:.62rem;letter-spacing:.08em;color:rgba(255,255,255,.75);text-align:center;padding:10px 0 16px;line-height:1.9;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:16px;">
         Pay → join the queue → go live when it's your turn.<br>
         First come, first served. 1 hour. No scheduling.
       </div>
@@ -1680,7 +1680,7 @@ select.adv-input option{background:#111;}
         </div>
         <div class="ab-card" data-bill="message" onclick="selectBillboard('message')">
           <div class="ab-card-name">PERSONAL</div>
-          <div class="ab-card-price">$35</div>
+          <div class="ab-card-price">$19.99</div>
           <div class="ab-card-desc">Birthday · proposal · anniversary · stays as a star forever</div>
         </div>
       </div>
@@ -1804,9 +1804,9 @@ select.adv-input option{background:#111;}
       emojiField.style.display = 'block';
       fromField.style.display  = 'block';
       bizField.style.display   = 'none';
-      priceAmt.textContent  = '$35';
+      priceAmt.textContent  = '$19.99';
       priceDesc.textContent = 'Personal message · stays as a star forever';
-      payBtn.textContent    = '❆ SEND NOW — $35';
+      payBtn.textContent    = '❆ SEND NOW — $19.99';
     } else if (type === 'right') {
       emojiField.style.display = 'none';
       fromField.style.display  = 'none';
