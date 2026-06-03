@@ -3171,7 +3171,7 @@ const OracleQuery = (() => {
         const _isFreeTarot = _isTarotRead && !_isPaidSession;
         const _isFreeDailyHoro = SIGN_NAMES.has((q||'').toLowerCase().trim()) && !_isPaidSession;
         if (_liveMsg && (_isFreeTarot || _isFreeDailyHoro || (!_isTarotRead && !SIGN_NAMES.has((q||'').toLowerCase().trim()) && !_isPaidSession))) {
-          setTimeout(() => showPersonalMsgPortal(_liveMsg, ctr), 1200);
+          /* personal message portal disabled */
         }
         return;
       }
@@ -3381,11 +3381,7 @@ const OracleQuery = (() => {
     });
   }
 
-  /* Start loop after 15s initial delay so page loads first */
-  setTimeout(() => {
-    showIdlePortal();
-    setInterval(showIdlePortal, INTERVAL);
-  }, 15000);
+  /* Idle portal disabled */
 })();
 
 
@@ -4980,7 +4976,7 @@ const OracleQuery = (() => {
       if(tag){ tag.style.color = b.color.replace('.95','.40'); tag.style.borderColor = b.border; }
       currentHref = b.href;
       nameEl.style.opacity = '1';
-      if (b.msg) showTakeover(b.msg);
+      /* takeover disabled */
     }, 350);
   }
 
