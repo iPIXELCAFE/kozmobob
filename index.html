@@ -7739,7 +7739,7 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
     const res = await fetch('/api/baby-names', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ planets: planetStr, gender, city, date: dateStr, count: 3 })
+      body: JSON.stringify({ planets: planetStr, gender, city, date: dateStr, count: 1 })
     });
     if(!res.ok) throw new Error('API error');
     return res.json();
