@@ -117,9 +117,9 @@ varying vec3 vCol;
 varying float vA;
 void main(){
   vCol=aCol;
-  float tw=0.55+0.45*sin(uT*(0.5+aPhase*2.5)+aPhase*6.2832);
+  float tw=0.82+0.18*sin(uT*(0.08+aPhase*0.25)+aPhase*6.2832);
   vA=tw;
-  gl_PointSize=aSize*(0.7+0.3*tw);
+  gl_PointSize=aSize*(0.92+0.08*tw);
   gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
 }`;
 const STAR_FS=`
@@ -217,9 +217,9 @@ function addMW(count,sigma,szMin,szMax,r,g,b){
   scene.add(new THREE.Points(geo,mat));
   mwMats.push(mat);
 }
-addMW(4500,0.055,0.8,1.8,0.75,0.85,1.0);   /* bright blue-white core */
-addMW(3000,0.13,1.5,5.0,0.55,0.45,0.85);   /* purple mid glow */
-addMW(2000,0.24,4.0,10.0,0.35,0.28,0.6);   /* wide soft halo */
+addMW(3500,0.055,0.6,1.4,0.88,0.92,1.0);   /* mostly white core, hint of blue */
+addMW(1500,0.13,1.2,3.5,0.6,0.5,0.8);     /* subtle purple mid — less intense */
+addMW(800,0.22,3.0,7.0,0.3,0.25,0.5);     /* very faint wide halo */
 
 /* ── MOON (real position from today's date) ── */
 function calcMoonDir(){
