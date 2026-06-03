@@ -1,4 +1,5 @@
 /* -- KozmoBob Baby Names API -- Vercel Serverless Function -- */
+const { GIRL_NAMES, BOY_NAMES, NEUTRAL_NAMES } = require('./names');
 
 const RATE_LIMIT_WINDOW = 60 * 1000;
 const RATE_LIMIT_MAX    = 15;
@@ -117,33 +118,49 @@ module.exports = async function handler(req, res) {
   const genderLabel = gender === 'boy' ? 'boy' : gender === 'girl' ? 'girl' : 'gender-neutral';
   const cityNote = city ? ` born in ${city}` : '';
 
-  /* Use date parts as a creativity nudge so different dates get different results */
+  /* ── Pick names deterministically from the database ── */
+  const pool = gender === 'boy' ? BOY_NAMES : gender === 'girl' ? GIRL_NAMES : NEUTRAL_NAMES;
+
+  /* Build a unique index from the date + planet combo so every date gives different results */
   const dateParts = dateStr.split('-');
-  const monthNum = parseInt(dateParts[1], 10);
-  const dayNum   = parseInt(dateParts[2], 10);
-  const yearNum  = parseInt(dateParts[0], 10);
-  const seed = (monthNum * 31 + dayNum + yearNum) % 997;
+  const y = parseInt(dateParts[0], 10);
+  const m = parseInt(dateParts[1], 10);
+  const d = parseInt(dateParts[2], 10);
 
-  const OVERUSED = 'Never suggest: Luna, Aurora, Aria, Ava, Emma, Olivia, Liam, Noah, Oliver, Sophia, Isabella, Charlotte, Amelia, Scarlett, Violet.';
+  /* Map each planet sign to a number 0-11 */
+  const SIGNS = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+  const signIdx = s => SIGNS.indexOf(s) >= 0 ? SIGNS.indexOf(s) : 0;
 
-  const systemPrompt = `You are KozmoBob, a cosmic baby name oracle.
-CRITICAL RULE: Only suggest names that are extremely common in the United States — names that every American has heard of and could spell without thinking. Think top 500 US baby names. Names like Mia, Sofia, Ella, Chloe, Hannah, Grace, Natalie, Lily, Jasmine, Riley, Kayla, Brianna, Destiny, Aaliyah, Amber, Crystal, Destiny, Jade, Jessica, Jennifer, Lauren, Melissa, Nicole, Rachel, Samantha, Stephanie, Tiffany, Victoria for girls. For boys: Ethan, Ryan, Tyler, Jake, Nathan, Alex, Brandon, Kyle, Sean, Derek, Marcus, Jordan, Justin, Kevin, Travis, Christian, Dominic, Xavier, Antonio, Emmanuel, Jalen, Malik, Isaiah, Elijah, Caleb, Jaylen, Andre, Devon, Darius, Terrell.
-NO weird names. NO rare names. NO names that sound made up. NO names from mythology or history books.
-Use seed number to vary your picks — different seed = genuinely different name.
+  const sunIdx  = signIdx(serverPlanets.Sun);
+  const moonIdx = signIdx(serverPlanets.Moon);
+  const marsIdx = signIdx(serverPlanets.Mars);
+
+  /* Combine date + planet values into a spread-out index */
+  const base = (y * 366 + m * 31 + d + sunIdx * 57 + moonIdx * 31 + marsIdx * 13) % pool.length;
+
+  /* Pick `count` names spread evenly through the list from that base point */
+  const step = Math.floor(pool.length / (count + 1));
+  const pickedNames = [];
+  for (let i = 0; i < count; i++) {
+    pickedNames.push(pool[(base + i * step) % pool.length]);
+  }
+
+  const systemPrompt = `You are KozmoBob, a mystical cosmic oracle. You write short poetic cosmic explanations for baby names.
+Be specific — tie each name to the actual planet signs provided. Be warm, poetic, and confident.
 Never use markdown. Never use asterisks. Respond ONLY with valid JSON.`;
 
   const userPrompt = `A baby is due on ${dateStr}${cityNote}.
-Planetary positions at birth: ${planetStr}.
+Planetary positions: ${planetStr}.
 Gender: ${genderLabel}.
-Seed: ${seed} — MUST influence which name you pick, different seed = different name.
 
-Pick exactly ${count} extremely common, well-known American name(s) for a ${genderLabel}.
-For each name write 1-2 sentences connecting it to the planetary energy above.
+The stars have chosen these name(s) for this exact birth date: ${pickedNames.join(', ')}.
+
+For each name write 1-2 sentences explaining the cosmic connection — reference specific planets and signs from above.
 
 Respond ONLY with this JSON, no extra text:
 {
   "names": [
-    { "name": "NAME", "reason": "cosmic reason" }
+    { "name": "EXACT NAME", "reason": "cosmic explanation referencing specific planets" }
   ]
 }`;
 
