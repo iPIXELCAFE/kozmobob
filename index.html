@@ -1755,7 +1755,7 @@ select.adv-input option{background:#111;}
   <div id="kb-baby-panel">
     <button id="kb-baby-close">✕</button>
     <div id="kb-baby-title">👶 BABY NAMES</div>
-    <div id="kb-baby-sub">Enter the birth details.<br>Bob reads the stars and finds names written in the sky.</div>
+    <div id="kb-baby-sub">The stars have been holding your baby's name<br>since before they were conceived.</div>
 
     <input id="kb-baby-date" type="date" placeholder="Due date"/>
     <input id="kb-baby-city" type="text" placeholder="City (e.g. New York)" maxlength="40" autocomplete="off" spellcheck="false"/>
@@ -7671,6 +7671,7 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
   const COOL_MS = 0; /* DEV MODE — restore to: 3 * 60 * 60 * 1000 */
 
   function getCoolRemaining(){
+    if(COOL_MS === 0) return 0;
     const last = parseInt(localStorage.getItem(LS_KEY)||'0',10);
     const elapsed = Date.now() - last;
     return Math.max(0, COOL_MS - elapsed);
@@ -7738,8 +7739,23 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
   }
 
   /* ── Render name cards ── */
-  function renderNames(names){
+  function renderNames(names, zodiac){
     resultsEl.innerHTML = '';
+
+    /* ── Zodiac card ── */
+    if(zodiac){
+      const zcard = document.createElement('div');
+      zcard.style.cssText = 'background:rgba(0,255,120,.06);border:1px solid rgba(0,255,120,.25);border-radius:14px;padding:16px 20px;text-align:center;';
+      zcard.innerHTML = `
+        <div style="font-size:2rem;margin-bottom:6px;">${zodiac.symbol}</div>
+        <div style="font-family:'Courier New',monospace;font-size:.85rem;letter-spacing:4px;color:#00ff78;margin-bottom:4px;">${zodiac.sign.toUpperCase()}</div>
+        <div style="font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:1.5px;color:rgba(255,255,255,.4);margin-bottom:8px;">${zodiac.dates}</div>
+        <div style="font-family:'Courier New',monospace;font-size:.68rem;letter-spacing:.5px;color:rgba(255,255,255,.7);line-height:1.7;">Your baby will be <strong style="color:#fff;">${zodiac.trait}</strong>.</div>
+      `;
+      resultsEl.appendChild(zcard);
+    }
+
+    /* ── Name cards ── */
     names.forEach(({name, reason})=>{
       const card = document.createElement('div');
       card.className = 'kb-baby-name-card';
@@ -7782,9 +7798,9 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
       loadEl.classList.remove('show');
 
       /* Save timestamp for rate limit */
-      localStorage.setItem(LS_KEY, Date.now().toString());
+      if(COOL_MS > 0) localStorage.setItem(LS_KEY, Date.now().toString());
 
-      renderNames(data.names);
+      renderNames(data.names, data.zodiac);
       updateCooldown();
     } catch(err){
       loadEl.classList.remove('show');
