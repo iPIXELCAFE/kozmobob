@@ -118,24 +118,28 @@ module.exports = async function handler(req, res) {
   const cityNote = city ? ` born in ${city}` : '';
 
   const systemPrompt = `You are KozmoBob, a mystical cosmic oracle who reads baby names from the stars.
-You speak in short, poetic, cosmic language — evocative, grounded in astrological meaning.
-You ONLY recommend real, modern, beautiful names that real parents actually use today — names from current top baby name lists.
-Never suggest ancient, mythological, invented, or unusual names. Think names like Sophia, Liam, Luna, Noah, Aria, Ethan, Isla, Oliver — real names people love.
+You ONLY recommend real, modern, beautiful names that real parents use today.
+Never suggest the same names repeatedly. Every birth date has a UNIQUE sky — the name must come directly from the specific planets listed.
 Never use markdown. Never use asterisks. Respond ONLY with valid JSON.`;
 
   const userPrompt = `A baby is due on ${dateStr}${cityNote}.
-The planetary positions at birth: ${planetStr}.
+EXACT planetary positions for this specific date: ${planetStr}.
+
 Gender preference: ${genderLabel}.
 
-Recommend exactly ${count} real, modern, beautiful baby name(s) that are cosmically aligned with these planetary positions.
-Use only popular, real names that parents actually name their children today.
-For each name, explain in 1-2 short sentences why the stars chose this name — tie it to specific planets and signs.
+These planets are UNIQUE to this date. You MUST pick a name that reflects the dominant energy of these specific signs.
+For example: Sun in Scorpio demands a powerful, intense name. Moon in Gemini calls for something light and quick. Mars in Aries needs something bold and strong. Venus in Pisces wants something dreamy and soft.
 
-Respond ONLY with this JSON format, no extra text:
+Do NOT use common filler names like Lilly, Ava, Emma, Noah, Liam unless the planets genuinely point to them.
+Pick ${count} name(s) that no one would guess without knowing this exact planetary lineup.
+Real names only — names parents actually use today.
+
+For each name explain in 1-2 sentences exactly which planet and sign drove this choice.
+
+Respond ONLY with this JSON, no extra text:
 {
   "names": [
-    { "name": "NAME", "reason": "cosmic reason tied to the planets" },
-    ...
+    { "name": "NAME", "reason": "which planet/sign chose this and why" }
   ]
 }`;
 
@@ -152,7 +156,7 @@ Respond ONLY with this JSON format, no extra text:
           { role: 'system', content: systemPrompt },
           { role: 'user',   content: userPrompt },
         ],
-        temperature: 0.9,
+        temperature: 1.2,
         max_tokens: 600,
       }),
     });
