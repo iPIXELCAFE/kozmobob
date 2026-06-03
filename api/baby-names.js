@@ -118,14 +118,17 @@ module.exports = async function handler(req, res) {
   const cityNote = city ? ` born in ${city}` : '';
 
   const systemPrompt = `You are KozmoBob, a mystical cosmic oracle who reads baby names from the stars.
-You speak in short, poetic, cosmic language — evocative, mysterious, grounded in astrological meaning.
+You speak in short, poetic, cosmic language — evocative, grounded in astrological meaning.
+You ONLY recommend real, modern, beautiful names that real parents actually use today — names from current top baby name lists.
+Never suggest ancient, mythological, invented, or unusual names. Think names like Sophia, Liam, Luna, Noah, Aria, Ethan, Isla, Oliver — real names people love.
 Never use markdown. Never use asterisks. Respond ONLY with valid JSON.`;
 
   const userPrompt = `A baby is due on ${dateStr}${cityNote}.
 The planetary positions at birth: ${planetStr}.
 Gender preference: ${genderLabel}.
 
-Recommend exactly ${count} baby names that are cosmically aligned with these planetary positions.
+Recommend exactly ${count} real, modern, beautiful baby name(s) that are cosmically aligned with these planetary positions.
+Use only popular, real names that parents actually name their children today.
 For each name, explain in 1-2 short sentences why the stars chose this name — tie it to specific planets and signs.
 
 Respond ONLY with this JSON format, no extra text:
