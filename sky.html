@@ -271,6 +271,113 @@ addGlow(mkGlow('rgba(255,255,240,0.95)','rgb(255,255,220)',128),42,0.85);
 addGlow(mkGlow('rgba(180,200,255,0.5)','rgb(140,170,255)',256),100,0.3);
 addGlow(mkGlow('rgba(100,130,255,0.2)','rgb(80,110,200)',512),200,0.12);
 
+/* ── REAL PLANET POSITIONS ── */
+(function(){
+  const now=new Date();
+  const Y=now.getUTCFullYear(),Mo=now.getUTCMonth()+1,D=now.getUTCDate();
+  const h=now.getUTCHours()+now.getUTCMinutes()/60;
+  const JD=367*Y-Math.floor(7*(Y+Math.floor((Mo+9)/12))/4)+Math.floor(275*Mo/9)+D+1721013.5+h/24;
+  const T=(JD-2451545.0)/36525;
+  const Dj=JD-2451545;
+  const d2r=Math.PI/180;
+  const eps=23.439*d2r;
+
+  /* Geocentric ecliptic longitude → Three.js direction */
+  function eclToDir(lonDeg, latDeg){
+    const lo=lonDeg*d2r, la=(latDeg||0)*d2r;
+    const xe=Math.cos(la)*Math.cos(lo);
+    const ye=Math.cos(la)*Math.sin(lo)*Math.cos(eps)-Math.sin(la)*Math.sin(eps);
+    const ze=Math.cos(la)*Math.sin(lo)*Math.sin(eps)+Math.sin(la)*Math.cos(eps);
+    return new THREE.Vector3(xe,ze,-ye).normalize();
+  }
+
+  /* Sun longitude (for Mercury/Venus phase reference) */
+  const L0=(280.46646+36000.76983*T)%360;
+  const M0r=(357.52911+35999.05029*T)*d2r;
+  const sunLon=((L0+(1.914602-0.004817*T)*Math.sin(M0r)+0.019993*Math.sin(2*M0r))%360+360)%360;
+  const earthLon=((sunLon+180)%360+360)%360;
+
+  /* Heliocentric mean longitudes */
+  const hLon=(rate,epoch)=>((epoch+rate*Dj)%360+360)%360;
+  const mercHL=hLon(4.09234,84.457);
+  const venHL=hLon(1.60214,181.979);
+  const marsHL=hLon(0.52403,355.433);
+  const jupHL=hLon(0.08309,34.351);
+  const satHL=hLon(0.03346,50.077);
+
+  /* Heliocentric → geocentric */
+  function geo(Lp,rp){
+    const lp=Lp*d2r, le=earthLon*d2r;
+    return ((Math.atan2(rp*Math.sin(lp)-Math.sin(le), rp*Math.cos(lp)-Math.cos(le))*180/Math.PI)%360+360)%360;
+  }
+  const mercGeo=geo(mercHL,0.387);
+  const venGeo=geo(venHL,0.723);
+  const marsGeo=geo(marsHL,1.524);
+  const jupGeo=geo(jupHL,5.203);
+  const satGeo=geo(satHL,9.537);
+
+  const ZODIAC=['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+  const sign=lon=>ZODIAC[Math.floor(((lon%360)+360)%360/30)];
+
+  /* Planet definitions: name, geoLon, size, color R G B, glow scale, glow opacity */
+  const PLANETS=[
+    {name:'Venus',   symbol:'♀', lon:venGeo,  sz:22, r:1.0, g:0.97,b:0.88, gs:55, go:0.7,  sign:sign(venGeo)},
+    {name:'Jupiter', symbol:'♃', lon:jupGeo,  sz:18, r:1.0, g:0.92,b:0.72, gs:50, go:0.55, sign:sign(jupGeo)},
+    {name:'Mars',    symbol:'♂', lon:marsGeo, sz:14, r:1.0, g:0.42,b:0.22, gs:40, go:0.55, sign:sign(marsGeo)},
+    {name:'Saturn',  symbol:'♄', lon:satGeo,  sz:14, r:1.0, g:0.88,b:0.5,  gs:42, go:0.5,  sign:sign(satGeo)},
+    {name:'Mercury', symbol:'☿', lon:mercGeo, sz:8,  r:0.85,g:0.85,b:0.88, gs:24, go:0.4,  sign:sign(mercGeo)},
+  ];
+
+  /* Store planet data for raycasting */
+  window.__planets=[];
+
+  PLANETS.forEach(p=>{
+    const dir=eclToDir(p.lon,0);
+    const pos=dir.clone().multiplyScalar(368);
+
+    /* Planet disc sprite */
+    const cv=document.createElement('canvas');
+    cv.width=cv.height=64;
+    const ctx=cv.getContext('2d'),r=32;
+    const g2=ctx.createRadialGradient(r,r,0,r,r,r);
+    g2.addColorStop(0,`rgba(${Math.round(p.r*255)},${Math.round(p.g*255)},${Math.round(p.b*255)},1)`);
+    g2.addColorStop(0.4,`rgba(${Math.round(p.r*255)},${Math.round(p.g*255)},${Math.round(p.b*255)},0.8)`);
+    g2.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g2;ctx.fillRect(0,0,64,64);
+    const tex=new THREE.CanvasTexture(cv);
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false}));
+    sp.position.copy(pos);sp.scale.set(p.sz,p.sz,1);
+    scene.add(sp);
+
+    /* Glow */
+    const cv2=document.createElement('canvas');
+    cv2.width=cv2.height=256;
+    const ctx2=cv2.getContext('2d'),r2=128;
+    const g3=ctx2.createRadialGradient(r2,r2,0,r2,r2,r2);
+    g3.addColorStop(0,`rgba(${Math.round(p.r*255)},${Math.round(p.g*255)},${Math.round(p.b*255)},0.6)`);
+    g3.addColorStop(0.3,`rgba(${Math.round(p.r*255)},${Math.round(p.g*255)},${Math.round(p.b*255)},0.15)`);
+    g3.addColorStop(1,'rgba(0,0,0,0)');
+    ctx2.fillStyle=g3;ctx2.fillRect(0,0,256,256);
+    const tex2=new THREE.CanvasTexture(cv2);
+    const gsp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex2,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,opacity:p.go}));
+    gsp.position.copy(pos);gsp.scale.set(p.gs,p.gs,1);
+    scene.add(gsp);
+
+    /* Saturn ring */
+    if(p.name==='Saturn'){
+      const ringGeo=new THREE.RingGeometry(10,18,32);
+      const ringMat=new THREE.MeshBasicMaterial({color:0xd4aa55,transparent:true,opacity:0.5,side:THREE.DoubleSide,depthWrite:false});
+      const ring=new THREE.Mesh(ringGeo,ringMat);
+      ring.position.copy(pos);
+      ring.lookAt(0,0,0);
+      ring.rotateX(Math.PI/2.5);
+      scene.add(ring);
+    }
+
+    window.__planets.push({name:p.name,symbol:p.symbol,sign:p.sign,pos:pos.clone(),screen:new THREE.Vector3()});
+  });
+})();
+
 /* ── BABY STARS ── */
 let babyStars=[];
 let babyPoints=null,babyMat=null;
@@ -359,8 +466,28 @@ const mouse2=new THREE.Vector2();
 const tip=document.getElementById('tip');
 window.addEventListener('mousemove',e=>{
   mouse2.x=(e.clientX/W)*2-1;mouse2.y=-(e.clientY/H)*2+1;
-  if(!babyPoints)return;
   RC.setFromCamera(mouse2,cam);
+
+  /* Check planets first */
+  if(window.__planets&&window.__planets.length){
+    let closestPlanet=null,closestDist=Infinity;
+    window.__planets.forEach(p=>{
+      /* Project planet 3D position to screen */
+      const v=p.pos.clone().project(cam);
+      const sx=(v.x*0.5+0.5)*W, sy=(-v.y*0.5+0.5)*H;
+      const dist=Math.hypot(sx-e.clientX, sy-e.clientY);
+      if(dist<40&&dist<closestDist){closestDist=dist;closestPlanet=p;}
+    });
+    if(closestPlanet){
+      tip.className='neutral';
+      tip.style.display='block';tip.style.left=e.clientX+'px';tip.style.top=e.clientY+'px';
+      tip.innerHTML=closestPlanet.symbol+' '+closestPlanet.name+'<br><span style="opacity:.6;font-size:.5rem">'+closestPlanet.sign+'</span>';
+      return;
+    }
+  }
+
+  /* Check baby stars */
+  if(!babyPoints){tip.style.display='none';return;}
   const hits=RC.intersectObject(babyPoints);
   if(hits.length){
     const b=babyStars[hits[0].index];
@@ -368,8 +495,10 @@ window.addEventListener('mousemove',e=>{
       tip.className=b.gender||'neutral';
       tip.style.display='block';tip.style.left=e.clientX+'px';tip.style.top=e.clientY+'px';
       tip.innerHTML='✦ '+(b.name||'Baby Star')+(b.date?'<br>'+b.date:'')+(b.message?'<br><span style="opacity:.6;font-size:.5rem">'+b.message+'</span>':'');
+      return;
     }
-  } else tip.style.display='none';
+  }
+  tip.style.display='none';
 });
 
 /* ── RENDER LOOP ── */
