@@ -5124,13 +5124,10 @@ const OracleQuery = (() => {
     show(BRANDS[0]);
   };
 
-  banner.addEventListener('click', (e)=>{
-    if(e.target.closest('#mob-bot-tag')) return; /* AD button handled separately */
-    window.open(currentHref,'_blank');
-  });
   const tagEl = document.getElementById('mob-bot-tag');
   if(tagEl) tagEl.addEventListener('click', (e)=>{
     e.stopPropagation();
+    e.preventDefault();
     if(typeof openAdvertOverlay === 'function') openAdvertOverlay('message');
   });
   if (takeover) takeover.addEventListener('click', (e)=>{
