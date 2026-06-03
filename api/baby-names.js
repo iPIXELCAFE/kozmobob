@@ -117,91 +117,34 @@ module.exports = async function handler(req, res) {
   const genderLabel = gender === 'boy' ? 'boy' : gender === 'girl' ? 'girl' : 'gender-neutral';
   const cityNote = city ? ` born in ${city}` : '';
 
-  /* ── Name pools by zodiac sign ── */
-  const NAME_POOLS = {
-    boy: {
-      Aries:       ['Axel','Hunter','Ryder','Zane','Brayden'],
-      Taurus:      ['Oliver','Mason','Finn','Jasper','Cole'],
-      Gemini:      ['Dylan','Miles','Flynn','Eli','Nolan'],
-      Cancer:      ['Lucas','Noah','Emmett','Owen','Luca'],
-      Leo:         ['Sebastian','Leo','Roman','Marcus','Xavier'],
-      Virgo:       ['Ethan','Adrian','Declan','Wesley','Aaron'],
-      Libra:       ['Julian','Theo','Blake','Gavin','Ivan'],
-      Scorpio:     ['Silas','Knox','Tristan','Phoenix','Zach'],
-      Sagittarius: ['Sawyer','Hudson','Nash','Carter','Logan'],
-      Capricorn:   ['James','Elijah','Aiden','Isaiah','Colton'],
-      Aquarius:    ['Kai','Oscar','Hayes','Quinn','Nathaniel'],
-      Pisces:      ['Ezra','Liam','Jaxon','Grayson','Jackson'],
-    },
-    girl: {
-      Aries:       ['Scarlett','Ruby','Piper','Sadie','Skylar'],
-      Taurus:      ['Ivy','Isla','Gemma','Vera','Willow'],
-      Gemini:      ['Zoe','Ellie','Lexi','Paige','Claire'],
-      Cancer:      ['Luna','Nora','Hazel','Leah','Naomi'],
-      Leo:         ['Charlotte','Stella','Bella','Grace','Audrey'],
-      Virgo:       ['Amelia','Tessa','Freya','Sierra','Jade'],
-      Libra:       ['Sophia','Violet','Penelope','Elena','Kylie'],
-      Scorpio:     ['Nova','Wren','Zara','Maya','Yasmine'],
-      Sagittarius: ['Harper','Riley','Autumn','Savannah','Brooklyn'],
-      Capricorn:   ['Olivia','Emma','Isabella','Evelyn','Chloe'],
-      Aquarius:    ['Aria','Quinn','Uma','Sloane','Indigo'],
-      Pisces:      ['Ava','Mia','Zoey','Layla','Aurora'],
-    },
-    neutral: {
-      Aries:       ['Phoenix','Ryder','Sloane','Scout','Shiloh'],
-      Taurus:      ['Rowan','Sage','Wren','Ellis','Marlowe'],
-      Gemini:      ['Quinn','Emery','Finley','Drew','Cameron'],
-      Cancer:      ['River','Eden','Haven','Ocean','Sutton'],
-      Leo:         ['Logan','Blake','Parker','Tatum','Milan'],
-      Virgo:       ['Avery','Morgan','Reese','Grey','Lane'],
-      Libra:       ['Jordan','Riley','Taylor','Peyton','Kendall'],
-      Scorpio:     ['Nova','Winter','Zen','Indigo','Remi'],
-      Sagittarius: ['Skylar','Harper','Frankie','Jesse','Jaden'],
-      Capricorn:   ['Morgan','Avery','Blake','Cameron','Ellis'],
-      Aquarius:    ['Kai','Quinn','Indigo','Zen','Nova'],
-      Pisces:      ['Eden','River','Sage','Rowan','Wren'],
-    }
-  };
+  /* Use date parts as a creativity nudge so different dates get different results */
+  const dateParts = dateStr.split('-');
+  const monthNum = parseInt(dateParts[1], 10);
+  const dayNum   = parseInt(dateParts[2], 10);
+  const yearNum  = parseInt(dateParts[0], 10);
+  const seed = (monthNum * 31 + dayNum + yearNum) % 997;
 
-  /* ── Pick name deterministically from Sun + Moon signs ── */
-  const poolKey = gender === 'boy' ? 'boy' : gender === 'girl' ? 'girl' : 'neutral';
-  const sunSign  = serverPlanets.Sun;
-  const moonSign = serverPlanets.Moon;
-  const marsSign = serverPlanets.Mars;
+  const OVERUSED = 'Never suggest: Luna, Aurora, Aria, Ava, Emma, Olivia, Liam, Noah, Oliver, Sophia, Isabella, Charlotte, Amelia, Scarlett, Violet.';
 
-  const pool = NAME_POOLS[poolKey];
-  const sunPool  = pool[sunSign]  || pool['Aries'];
-  const moonPool = pool[moonSign] || pool['Cancer'];
-  const marsPool = pool[marsSign] || pool['Scorpio'];
-
-  /* Use the day-of-month as a secondary seed for variety within the same month */
-  const dayOfMonth = parseInt(dateStr.split('-')[2], 10) || 1;
-  const pickedName = sunPool[dayOfMonth % sunPool.length];
-  const secondName = moonPool[(dayOfMonth + 2) % moonPool.length];
-  const thirdName  = marsPool[(dayOfMonth + 4) % marsPool.length];
-
-  const namesToExplain = count === 1 ? [pickedName]
-                       : count === 5 ? [pickedName, secondName, thirdName, sunPool[(dayOfMonth+1)%sunPool.length], moonPool[(dayOfMonth+3)%moonPool.length]]
-                       : [pickedName, secondName, thirdName];
-
-  const planetStr2 = `Sun in ${sunSign}, Moon in ${moonSign}, Mars in ${marsSign}, Venus in ${serverPlanets.Venus}, Jupiter in ${serverPlanets.Jupiter}`;
-
-  const systemPrompt = `You are KozmoBob, a mystical cosmic oracle. You write short poetic explanations for baby names chosen by the stars.
+  const systemPrompt = `You are KozmoBob, a cosmic baby name oracle. You suggest real, modern, beautiful names that parents love today.
+You have access to thousands of names — be creative and pick something fresh and unexpected every time.
+${OVERUSED}
+Never use ancient, mythological, or invented names. Real names only.
 Never use markdown. Never use asterisks. Respond ONLY with valid JSON.`;
 
   const userPrompt = `A baby is due on ${dateStr}${cityNote}.
-Planetary positions: ${planetStr2}.
-Gender: ${genderLabel}.
+Planetary positions at birth: ${planetStr}.
+Gender preference: ${genderLabel}.
+Creativity seed: ${seed} — use this to pick something different and surprising, not the same names everyone gets.
 
-The stars have already chosen these name(s): ${namesToExplain.join(', ')}.
-
-For each name write 1-2 sentences explaining WHY the planets chose it — reference the specific signs above.
-Be poetic, cosmic, and specific to these planets.
+Suggest exactly ${count} beautiful, real, modern baby name(s) for a ${genderLabel}.
+Pick names that feel fresh — not the first names that come to mind.
+For each name write 1-2 sentences tying it to the specific planetary energy above.
 
 Respond ONLY with this JSON, no extra text:
 {
   "names": [
-    { "name": "EXACT NAME AS GIVEN", "reason": "cosmic explanation" }
+    { "name": "NAME", "reason": "cosmic reason" }
   ]
 }`;
 
@@ -218,7 +161,7 @@ Respond ONLY with this JSON, no extra text:
           { role: 'system', content: systemPrompt },
           { role: 'user',   content: userPrompt },
         ],
-        temperature: 0.85,
+        temperature: 1.1,
         max_tokens: 600,
       }),
     });
