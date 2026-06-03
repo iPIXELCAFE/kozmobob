@@ -117,29 +117,33 @@ module.exports = async function handler(req, res) {
   const genderLabel = gender === 'boy' ? 'boy' : gender === 'girl' ? 'girl' : 'gender-neutral';
   const cityNote = city ? ` born in ${city}` : '';
 
-  const systemPrompt = `You are KozmoBob, a mystical cosmic oracle who reads baby names from the stars.
-You ONLY recommend real, modern, beautiful names that real parents use today.
-Never suggest the same names repeatedly. Every birth date has a UNIQUE sky — the name must come directly from the specific planets listed.
+  const boyNames = `Liam, Noah, Oliver, Elijah, James, Aiden, Lucas, Mason, Ethan, Logan, Sebastian, Jackson, Carter, Owen, Wyatt, Hunter, Grayson, Julian, Ezra, Hudson, Nolan, Eli, Aaron, Isaiah, Adrian, Colton, Brayden, Declan, Finn, Jaxon, Kai, Leo, Miles, Nathaniel, Oscar, Roman, Sawyer, Theo, Xavier, Zane, Axel, Blake, Cole, Dylan, Emmett, Flynn, Gavin, Hayes, Ivan, Jasper, Knox, Luca, Marcus, Nash, Phoenix, Quinn, Ryder, Silas, Tristan, Wesley, Zach`;
+
+  const girlNames = `Olivia, Emma, Sophia, Ava, Isabella, Mia, Luna, Charlotte, Amelia, Harper, Evelyn, Aria, Scarlett, Lily, Chloe, Aurora, Zoey, Stella, Nora, Hazel, Elena, Violet, Maya, Layla, Penelope, Riley, Zoe, Naomi, Leah, Savannah, Brooklyn, Bella, Claire, Skylar, Ivy, Isla, Grace, Ellie, Audrey, Piper, Ruby, Sadie, Willow, Autumn, Elara, Freya, Gemma, Jade, Kylie, Lexi, Nova, Paige, Quinn, Sierra, Tessa, Uma, Vera, Wren, Xena, Yasmine, Zara`;
+
+  const neutralNames = `Riley, Avery, Jordan, Morgan, Quinn, Rowan, Sage, Skylar, Phoenix, River, Eden, Emery, Finley, Harper, Indigo, Jaden, Kendall, Logan, Milan, Nova, Parker, Reese, Sloane, Taylor, Wren, Blake, Cameron, Drew, Ellis, Frankie, Grey, Haven, Jesse, Kai, Lane, Marlowe, Ocean, Peyton, Remi, Scout, Shiloh, Sutton, Tatum, Winter, Zen`;
+
+  const nameList = genderLabel === 'boy' ? boyNames : genderLabel === 'girl' ? girlNames : neutralNames;
+
+  const systemPrompt = `You are KozmoBob, a cosmic oracle. You pick baby names from a provided list based on planetary energy.
+You MUST only choose names from the list given. No exceptions. No invented names. No ancient names.
 Never use markdown. Never use asterisks. Respond ONLY with valid JSON.`;
 
   const userPrompt = `A baby is due on ${dateStr}${cityNote}.
-EXACT planetary positions for this specific date: ${planetStr}.
-
+Planetary positions for this date: ${planetStr}.
 Gender preference: ${genderLabel}.
 
-These planets are UNIQUE to this date. You MUST pick a name that reflects the dominant energy of these specific signs.
-For example: Sun in Scorpio demands a powerful, intense name. Moon in Gemini calls for something light and quick. Mars in Aries needs something bold and strong. Venus in Pisces wants something dreamy and soft.
+Choose exactly ${count} name(s) from THIS LIST ONLY:
+${nameList}
 
-Do NOT use common filler names like Lilly, Ava, Emma, Noah, Liam unless the planets genuinely point to them.
-Pick ${count} name(s) that no one would guess without knowing this exact planetary lineup.
-Real names only — names parents actually use today.
-
-For each name explain in 1-2 sentences exactly which planet and sign drove this choice.
+Pick the name(s) whose energy best matches the dominant planets and signs above.
+Different dates have different planets — pick different names each time based on the actual planetary energy.
+For each name explain in 1-2 sentences which planet and sign chose it and why the energy matches.
 
 Respond ONLY with this JSON, no extra text:
 {
   "names": [
-    { "name": "NAME", "reason": "which planet/sign chose this and why" }
+    { "name": "NAME FROM LIST ONLY", "reason": "which planet/sign and why" }
   ]
 }`;
 
@@ -156,7 +160,7 @@ Respond ONLY with this JSON, no extra text:
           { role: 'system', content: systemPrompt },
           { role: 'user',   content: userPrompt },
         ],
-        temperature: 1.2,
+        temperature: 0.85,
         max_tokens: 600,
       }),
     });
