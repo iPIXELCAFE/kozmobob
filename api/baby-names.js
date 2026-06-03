@@ -117,33 +117,91 @@ module.exports = async function handler(req, res) {
   const genderLabel = gender === 'boy' ? 'boy' : gender === 'girl' ? 'girl' : 'gender-neutral';
   const cityNote = city ? ` born in ${city}` : '';
 
-  const boyNames = `Liam, Noah, Oliver, Elijah, James, Aiden, Lucas, Mason, Ethan, Logan, Sebastian, Jackson, Carter, Owen, Wyatt, Hunter, Grayson, Julian, Ezra, Hudson, Nolan, Eli, Aaron, Isaiah, Adrian, Colton, Brayden, Declan, Finn, Jaxon, Kai, Leo, Miles, Nathaniel, Oscar, Roman, Sawyer, Theo, Xavier, Zane, Axel, Blake, Cole, Dylan, Emmett, Flynn, Gavin, Hayes, Ivan, Jasper, Knox, Luca, Marcus, Nash, Phoenix, Quinn, Ryder, Silas, Tristan, Wesley, Zach`;
+  /* ── Name pools by zodiac sign ── */
+  const NAME_POOLS = {
+    boy: {
+      Aries:       ['Axel','Hunter','Ryder','Zane','Brayden'],
+      Taurus:      ['Oliver','Mason','Finn','Jasper','Cole'],
+      Gemini:      ['Dylan','Miles','Flynn','Eli','Nolan'],
+      Cancer:      ['Lucas','Noah','Emmett','Owen','Luca'],
+      Leo:         ['Sebastian','Leo','Roman','Marcus','Xavier'],
+      Virgo:       ['Ethan','Adrian','Declan','Wesley','Aaron'],
+      Libra:       ['Julian','Theo','Blake','Gavin','Ivan'],
+      Scorpio:     ['Silas','Knox','Tristan','Phoenix','Zach'],
+      Sagittarius: ['Sawyer','Hudson','Nash','Carter','Logan'],
+      Capricorn:   ['James','Elijah','Aiden','Isaiah','Colton'],
+      Aquarius:    ['Kai','Oscar','Hayes','Quinn','Nathaniel'],
+      Pisces:      ['Ezra','Liam','Jaxon','Grayson','Jackson'],
+    },
+    girl: {
+      Aries:       ['Scarlett','Ruby','Piper','Sadie','Skylar'],
+      Taurus:      ['Ivy','Isla','Gemma','Vera','Willow'],
+      Gemini:      ['Zoe','Ellie','Lexi','Paige','Claire'],
+      Cancer:      ['Luna','Nora','Hazel','Leah','Naomi'],
+      Leo:         ['Charlotte','Stella','Bella','Grace','Audrey'],
+      Virgo:       ['Amelia','Tessa','Freya','Sierra','Jade'],
+      Libra:       ['Sophia','Violet','Penelope','Elena','Kylie'],
+      Scorpio:     ['Nova','Wren','Zara','Maya','Yasmine'],
+      Sagittarius: ['Harper','Riley','Autumn','Savannah','Brooklyn'],
+      Capricorn:   ['Olivia','Emma','Isabella','Evelyn','Chloe'],
+      Aquarius:    ['Aria','Quinn','Uma','Sloane','Indigo'],
+      Pisces:      ['Ava','Mia','Zoey','Layla','Aurora'],
+    },
+    neutral: {
+      Aries:       ['Phoenix','Ryder','Sloane','Scout','Shiloh'],
+      Taurus:      ['Rowan','Sage','Wren','Ellis','Marlowe'],
+      Gemini:      ['Quinn','Emery','Finley','Drew','Cameron'],
+      Cancer:      ['River','Eden','Haven','Ocean','Sutton'],
+      Leo:         ['Logan','Blake','Parker','Tatum','Milan'],
+      Virgo:       ['Avery','Morgan','Reese','Grey','Lane'],
+      Libra:       ['Jordan','Riley','Taylor','Peyton','Kendall'],
+      Scorpio:     ['Nova','Winter','Zen','Indigo','Remi'],
+      Sagittarius: ['Skylar','Harper','Frankie','Jesse','Jaden'],
+      Capricorn:   ['Morgan','Avery','Blake','Cameron','Ellis'],
+      Aquarius:    ['Kai','Quinn','Indigo','Zen','Nova'],
+      Pisces:      ['Eden','River','Sage','Rowan','Wren'],
+    }
+  };
 
-  const girlNames = `Olivia, Emma, Sophia, Ava, Isabella, Mia, Luna, Charlotte, Amelia, Harper, Evelyn, Aria, Scarlett, Lily, Chloe, Aurora, Zoey, Stella, Nora, Hazel, Elena, Violet, Maya, Layla, Penelope, Riley, Zoe, Naomi, Leah, Savannah, Brooklyn, Bella, Claire, Skylar, Ivy, Isla, Grace, Ellie, Audrey, Piper, Ruby, Sadie, Willow, Autumn, Elara, Freya, Gemma, Jade, Kylie, Lexi, Nova, Paige, Quinn, Sierra, Tessa, Uma, Vera, Wren, Xena, Yasmine, Zara`;
+  /* ── Pick name deterministically from Sun + Moon signs ── */
+  const poolKey = gender === 'boy' ? 'boy' : gender === 'girl' ? 'girl' : 'neutral';
+  const sunSign  = serverPlanets.Sun;
+  const moonSign = serverPlanets.Moon;
+  const marsSign = serverPlanets.Mars;
 
-  const neutralNames = `Riley, Avery, Jordan, Morgan, Quinn, Rowan, Sage, Skylar, Phoenix, River, Eden, Emery, Finley, Harper, Indigo, Jaden, Kendall, Logan, Milan, Nova, Parker, Reese, Sloane, Taylor, Wren, Blake, Cameron, Drew, Ellis, Frankie, Grey, Haven, Jesse, Kai, Lane, Marlowe, Ocean, Peyton, Remi, Scout, Shiloh, Sutton, Tatum, Winter, Zen`;
+  const pool = NAME_POOLS[poolKey];
+  const sunPool  = pool[sunSign]  || pool['Aries'];
+  const moonPool = pool[moonSign] || pool['Cancer'];
+  const marsPool = pool[marsSign] || pool['Scorpio'];
 
-  const nameList = genderLabel === 'boy' ? boyNames : genderLabel === 'girl' ? girlNames : neutralNames;
+  /* Use the day-of-month as a secondary seed for variety within the same month */
+  const dayOfMonth = parseInt(dateStr.split('-')[2], 10) || 1;
+  const pickedName = sunPool[dayOfMonth % sunPool.length];
+  const secondName = moonPool[(dayOfMonth + 2) % moonPool.length];
+  const thirdName  = marsPool[(dayOfMonth + 4) % marsPool.length];
 
-  const systemPrompt = `You are KozmoBob, a cosmic oracle. You pick baby names from a provided list based on planetary energy.
-You MUST only choose names from the list given. No exceptions. No invented names. No ancient names.
+  const namesToExplain = count === 1 ? [pickedName]
+                       : count === 5 ? [pickedName, secondName, thirdName, sunPool[(dayOfMonth+1)%sunPool.length], moonPool[(dayOfMonth+3)%moonPool.length]]
+                       : [pickedName, secondName, thirdName];
+
+  const planetStr2 = `Sun in ${sunSign}, Moon in ${moonSign}, Mars in ${marsSign}, Venus in ${serverPlanets.Venus}, Jupiter in ${serverPlanets.Jupiter}`;
+
+  const systemPrompt = `You are KozmoBob, a mystical cosmic oracle. You write short poetic explanations for baby names chosen by the stars.
 Never use markdown. Never use asterisks. Respond ONLY with valid JSON.`;
 
   const userPrompt = `A baby is due on ${dateStr}${cityNote}.
-Planetary positions for this date: ${planetStr}.
-Gender preference: ${genderLabel}.
+Planetary positions: ${planetStr2}.
+Gender: ${genderLabel}.
 
-Choose exactly ${count} name(s) from THIS LIST ONLY:
-${nameList}
+The stars have already chosen these name(s): ${namesToExplain.join(', ')}.
 
-Pick the name(s) whose energy best matches the dominant planets and signs above.
-Different dates have different planets — pick different names each time based on the actual planetary energy.
-For each name explain in 1-2 sentences which planet and sign chose it and why the energy matches.
+For each name write 1-2 sentences explaining WHY the planets chose it — reference the specific signs above.
+Be poetic, cosmic, and specific to these planets.
 
 Respond ONLY with this JSON, no extra text:
 {
   "names": [
-    { "name": "NAME FROM LIST ONLY", "reason": "which planet/sign and why" }
+    { "name": "EXACT NAME AS GIVEN", "reason": "cosmic explanation" }
   ]
 }`;
 
