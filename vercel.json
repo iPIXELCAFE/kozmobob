@@ -1,5 +1,6 @@
 {
   "rewrites": [
-    { "source": "/message", "destination": "/message.html" }
+    { "source": "/message", "destination": "/message.html" },
+    { "source": "/sky", "destination": "/sky.html" }
   ]
 }
