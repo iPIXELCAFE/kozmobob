@@ -617,8 +617,7 @@ html,body{
     font-size:13px;letter-spacing:3px;text-transform:uppercase;
     color:#fff;
     text-shadow:0 0 14px rgba(255,215,0,.8),0 0 30px rgba(255,215,0,.4);
-    max-width:200px;overflow:hidden;white-space:nowrap;
-    z-index:3;
+    z-index:3;flex-shrink:1;
   }
   #mob-top-sub{
     font-family:'Courier New',monospace;
@@ -646,7 +645,7 @@ html,body{
   #mob-bot-banner{
     display:flex;
     position:fixed;bottom:0;left:0;right:0;
-    height:100px;z-index:30;
+    height:72px;z-index:30;
     background:linear-gradient(135deg,rgba(4,2,12,.98),rgba(8,4,20,.98));
     border-top:2px solid transparent;
     align-items:center;justify-content:space-between;
@@ -1491,21 +1490,23 @@ select.adv-input option{background:#111;}
 </div>
 
 <!-- MOBILE BOTTOM BANNER — rotating ads -->
-<div id="mob-bot-banner" onclick="openAdvertOverlay('message')">
+<div id="mob-bot-banner">
   <div id="mob-bot-banner-border"></div>
-  <!-- sym left -->
-  <div id="mob-bot-sym" style="font-size:2.2rem;line-height:1;flex-shrink:0;z-index:3;margin-right:12px;filter:drop-shadow(0 0 12px currentColor);">🎂</div>
-  <!-- center content -->
-  <div style="display:flex;flex-direction:column;justify-content:center;flex:1;z-index:3;overflow:hidden;">
-    <div id="mob-bot-msg" style="font-family:'Georgia',serif;font-size:15px;font-weight:bold;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;"></div>
-    <div id="mob-bot-from" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-    <div style="display:flex;align-items:center;gap:5px;margin-top:3px;">
-      <span id="mob-bot-live" style="font-size:6px;letter-spacing:2px;font-family:'Courier New',monospace;animation:tickerBlink 1.2s ease-in-out infinite;">◉ LIVE</span>
-      <span id="mob-bot-name" style="font-family:'Courier New',monospace;font-size:7px;letter-spacing:2px;opacity:.5;text-transform:uppercase;"></span>
-    </div>
+  <!-- live dot + sym -->
+  <div style="flex-shrink:0;z-index:3;display:flex;flex-direction:column;align-items:center;gap:3px;margin-right:10px;">
+    <span id="mob-bot-live" style="font-size:6px;letter-spacing:2px;font-family:'Courier New',monospace;animation:tickerBlink 1.2s ease-in-out infinite;color:rgba(0,255,200,.9);">◉ LIVE</span>
+    <span id="mob-bot-sym" style="font-size:1.6rem;line-height:1;">🎂</span>
   </div>
-  <!-- right CTA -->
-  <div id="mob-bot-tag" onclick="event.stopPropagation();openAdvertOverlay('message')" style="flex-shrink:0;z-index:3;margin-left:10px;font-family:'Courier New',monospace;font-size:7px;letter-spacing:2px;border:1px solid currentColor;padding:6px 10px;border-radius:4px;text-align:center;cursor:pointer;line-height:1.3;">✦<br>AD</div>
+  <!-- scrolling track -->
+  <div style="flex:1;overflow:hidden;position:relative;z-index:3;display:flex;flex-direction:column;justify-content:center;gap:2px;">
+    <div id="mob-bot-scroll-track" style="overflow:hidden;width:100%;position:relative;">
+      <div id="mob-bot-msg" style="font-family:'Georgia',serif;font-size:15px;font-weight:bold;white-space:nowrap;display:inline-block;will-change:transform;"></div>
+    </div>
+    <div id="mob-bot-from" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.7);overflow:hidden;white-space:nowrap;"></div>
+    <div id="mob-bot-name" style="font-family:'Courier New',monospace;font-size:7px;letter-spacing:2px;opacity:.4;text-transform:uppercase;overflow:hidden;white-space:nowrap;"></div>
+  </div>
+  <!-- AD button -->
+  <div id="mob-bot-tag" onclick="openAdvertOverlay('message')" style="flex-shrink:0;z-index:3;margin-left:8px;font-family:'Courier New',monospace;font-size:7px;letter-spacing:2px;border:1px solid rgba(255,255,255,.3);padding:6px 10px;border-radius:4px;text-align:center;cursor:pointer;color:rgba(255,255,255,.6);line-height:1.4;">✦<br>AD</div>
 </div>
 <div id="mob-msg-takeover">
   <div id="mob-msg-sym">🎂</div>
@@ -5029,34 +5030,84 @@ const OracleQuery = (() => {
     takeoverTimer = setTimeout(close, 9000);
   }
 
+  const msgEl  = document.getElementById('mob-bot-msg');
+  const fromEl = document.getElementById('mob-bot-from');
+  const symEl  = document.getElementById('mob-bot-sym');
+  const nameEl2 = document.getElementById('mob-bot-name');
+  const tag    = document.getElementById('mob-bot-tag');
+  const botBorder = document.getElementById('mob-bot-banner-border');
+  let scrollTimer = null;
+
+  function runScroll(el, col, onDone) {
+    /* Reset */
+    el.style.transition = 'none';
+    el.style.transform = 'translateX(0)';
+    el.style.opacity = '0';
+
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        const trackW = el.parentElement.offsetWidth;
+        const textW  = el.scrollWidth;
+        const dist   = trackW + textW;
+        /* Speed: 80px/s baseline, adjusted so each pass = ~8-12s */
+        const speed  = Math.max(60, dist / 10);
+        const dur    = (dist / speed).toFixed(2);
+
+        el.style.transition = `opacity .4s ease`;
+        el.style.opacity = '1';
+
+        setTimeout(()=>{
+          el.style.transition = `transform ${dur}s linear, opacity .4s ease`;
+          el.style.transform  = `translateX(-${dist}px)`;
+          setTimeout(()=>{
+            el.style.opacity = '0';
+            setTimeout(onDone, 400);
+          }, parseFloat(dur) * 1000 - 400);
+        }, 600); /* pause at start so user can read beginning */
+      });
+    });
+  }
+
   function show(b){
-    nameEl.style.opacity = '0';
+    if(scrollTimer) clearTimeout(scrollTimer);
+    const col = b.msg?.color || b.color;
+    currentHref = b.href;
+
+    /* Fade banner out briefly */
+    banner.style.opacity = '0';
+    banner.style.transition = 'opacity .3s ease';
+
     setTimeout(()=>{
-      nameEl.textContent  = b.name;
-      nameEl.style.color  = b.color;
-      nameEl.style.textShadow = `0 0 14px ${b.color},0 0 28px ${b.color}88`;
-      /* Update holographic border color */
-      const botBorder = document.getElementById('mob-bot-banner-border');
-      if(botBorder) botBorder.style.background = `linear-gradient(90deg,${b.color},#C77DFF,${b.color})`;
-      const msgEl  = document.getElementById('mob-bot-msg');
-      const fromEl = document.getElementById('mob-bot-from');
-      const symEl  = document.getElementById('mob-bot-sym');
-      const tag    = document.getElementById('mob-bot-tag');
-      const col    = b.msg?.color || b.color;
-      if(b.msg && b.msg.text){
-        if(symEl){ symEl.textContent = b.msg.sym || '✦'; symEl.style.color = col; }
-        if(msgEl){ msgEl.textContent = b.msg.text; msgEl.style.color = col; msgEl.style.textShadow = `0 0 16px ${col}99`; }
-        if(fromEl){ fromEl.textContent = b.msg.from || ''; fromEl.style.color = 'rgba(255,255,255,.75)'; }
-        nameEl.textContent = b.name;
-      } else {
-        if(symEl){ symEl.textContent = '✦'; symEl.style.color = b.color; }
-        if(msgEl){ msgEl.textContent = b.name; msgEl.style.color = b.color; msgEl.style.textShadow = `0 0 16px ${b.color}99`; }
-        if(fromEl){ fromEl.textContent = b.url || ''; }
-        nameEl.textContent = '';
+      /* Update sym */
+      if(symEl){ symEl.textContent = b.msg?.sym || '✦'; symEl.style.color = col; symEl.style.filter = `drop-shadow(0 0 10px ${col})`; }
+      /* Update name label */
+      if(nameEl2){ nameEl2.textContent = b.name; nameEl2.style.color = col.replace('.95','.4'); }
+      /* Update from */
+      if(fromEl){ fromEl.textContent = b.msg?.from || b.url || ''; fromEl.style.color = 'rgba(255,255,255,.65)'; }
+      /* Update border */
+      if(botBorder){ botBorder.style.background = `linear-gradient(90deg,${col},#C77DFF,${col})`; botBorder.style.backgroundSize = '300% 100%'; }
+      /* Update AD button */
+      if(tag){ tag.style.color = col; tag.style.borderColor = col.replace('.95','.4'); }
+
+      /* Set message text */
+      const text = b.msg?.text || b.name;
+      if(msgEl){
+        msgEl.textContent = text;
+        msgEl.style.color = col;
+        msgEl.style.textShadow = `0 0 18px ${col}`;
+        msgEl.style.transform = 'translateX(0)';
+        msgEl.style.opacity = '0';
       }
-      if(tag){ tag.style.color = col; tag.style.borderColor = col.replace('.95','.5'); }
-      currentHref = b.href;
-      nameEl.style.opacity = '1';
+
+      banner.style.opacity = '1';
+
+      /* Run single-pass scroll, then advance to next brand */
+      if(msgEl){
+        runScroll(msgEl, col, ()=>{
+          idx = (idx + 1) % BRANDS.length;
+          scrollTimer = setTimeout(()=> show(BRANDS[idx]), 500);
+        });
+      }
     }, 350);
   }
 
@@ -5087,9 +5138,8 @@ const OracleQuery = (() => {
     /* No URL = tap does nothing, message just displays */
   });
 
-  nameEl.style.transition = 'opacity .35s ease, color .35s ease';
+  banner.style.transition = 'opacity .3s ease';
   show(BRANDS[0]);
-  setInterval(()=>{ idx=(idx+1)%BRANDS.length; show(BRANDS[idx]); }, 10000);
 })();
 
 /* ── 10. DOMAIN DETECTION — kozmobob vs kosmobob = different right billboard ── */
