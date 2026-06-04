@@ -2072,8 +2072,8 @@ window.__KB = (() => {
 
   const save = () => { try { localStorage.setItem('__kb', JSON.stringify(s)); } catch(e){} };
 
-  /* v2 migration: wipe old 22-card collection, start fresh with 78-card deck */
-  if(s.cardVer !== 2){ s.cards = {}; s.cardVer = 2; save(); }
+  /* v3 migration: wipe old Major-Arcana-only collection, start fresh with full 78-card deck */
+  if(s.cardVer !== 3){ s.cards = {}; s.cardVer = 3; save(); }
   if(!s.cards) s.cards = {};
   if(Array.isArray(s.cards)){
     const arr = s.cards;
@@ -7618,18 +7618,40 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
   };
   const DELAYS=[0,2200,4800,7600,10800];
   function showMilestoneReading(lines){
-    const container=document.getElementById('oracle-container');
-    const readingEl=document.getElementById('oracle-micro-text');
-    if(!container||!readingEl) return;
-    readingEl.innerHTML=''; container.classList.add('visible');
+    /* Use a dedicated floating overlay — never hijack #oracle-container */
+    const existing = document.getElementById('__kb_milestone_overlay');
+    if(existing) existing.remove();
+    const ov = document.createElement('div');
+    ov.id = '__kb_milestone_overlay';
+    ov.style.cssText = [
+      'position:fixed','top:50%','left:50%',
+      'transform:translate(-50%,-50%)',
+      'z-index:9500',
+      'background:rgba(0,0,0,.88)',
+      'border:1px solid rgba(255,200,40,.28)',
+      'border-radius:12px',
+      'padding:32px 40px',
+      'max-width:520px','width:90%',
+      'text-align:center',
+      'pointer-events:none',
+      'opacity:0','transition:opacity .8s ease',
+    ].join(';');
+    document.body.appendChild(ov);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ ov.style.opacity='1'; }));
+    const lastDelay = DELAYS[lines.length-1] || (lines.length-1)*2400;
     lines.forEach((line,i)=>{
       setTimeout(()=>{
         const p=document.createElement('p');
-        p.style.cssText='opacity:0;transition:opacity 1.2s ease;margin:0 0 .9em;font-size:.82rem;letter-spacing:.06em;line-height:1.7;text-align:center;color:rgba(255,200,40,.92)';
-        p.textContent=line; readingEl.appendChild(p);
+        p.style.cssText='opacity:0;transition:opacity 1.2s ease;margin:0 0 .9em;font-size:.82rem;letter-spacing:.06em;line-height:1.7;color:rgba(255,200,40,.92)';
+        p.textContent=line; ov.appendChild(p);
         requestAnimationFrame(()=>requestAnimationFrame(()=>{ p.style.opacity='1'; }));
       }, DELAYS[i]||i*2400);
     });
+    /* Auto-dismiss 4s after last line */
+    setTimeout(()=>{
+      ov.style.opacity='0';
+      setTimeout(()=>ov.remove(), 900);
+    }, lastDelay + 4000);
   }
   window.__KBMilestone=function(total){
     if(READINGS[total]) setTimeout(()=>showMilestoneReading(READINGS[total]),1200);
