@@ -46,8 +46,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#00010e;user-select:
 .star-g-btn[data-g="girl"].sel{border-color:rgba(255,100,180,.8);color:rgba(255,140,200,1);background:rgba(255,100,180,.12)}
 .star-g-btn[data-g="neutral"].sel{border-color:rgba(200,200,255,.6);color:rgba(210,210,255,1);background:rgba(200,200,255,.08)}
 .star-field-label{font-family:'Courier New',monospace;font-size:.5rem;letter-spacing:2px;color:rgba(255,255,255,.3);align-self:flex-start}
-#star-panel input[type=text],#star-panel textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:11px 14px;font-family:'Courier New',monospace;font-size:.68rem;letter-spacing:1.5px;color:rgba(255,255,255,.85);outline:none;resize:none;transition:border-color .2s}
-#star-panel input[type=text]:focus,#star-panel textarea:focus{border-color:rgba(255,255,255,.35)}
+#star-panel input[type=date],#star-panel input[type=text],#star-panel textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:11px 14px;font-family:'Courier New',monospace;font-size:.68rem;letter-spacing:1.5px;color:rgba(255,255,255,.85);outline:none;resize:none;transition:border-color .2s}
+#star-panel input[type=date]:focus,#star-panel input[type=text]:focus,#star-panel textarea:focus{border-color:rgba(255,255,255,.35)}
+#star-panel input[type=date]{color-scheme:dark;}
 #star-charcount{font-family:'Courier New',monospace;font-size:.46rem;letter-spacing:1px;color:rgba(255,255,255,.2);align-self:flex-end}
 #star-buy{width:100%;margin-top:6px;padding:14px 0;font-family:'Courier New',monospace;font-size:.65rem;letter-spacing:2.5px;border-radius:24px;cursor:pointer;transition:all .2s;pointer-events:all}
 #star-buy.boy{background:rgba(100,160,255,.1);border:1px solid rgba(100,160,255,.5);color:rgba(130,180,255,.9)}
@@ -152,6 +153,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#00010e;user-select:
       <div class="star-g-btn" data-g="girl">♀ GIRL</div>
       <div class="star-g-btn sel" data-g="neutral">✦ NEUTRAL</div>
     </div>
+    <div class="star-field-label">DATE OF BIRTH</div>
+    <input type="date" id="star-dob"/>
     <div class="star-field-label">NAME ON STAR (OPTIONAL)</div>
     <input type="text" id="star-name" placeholder="First name, nickname, or leave blank" maxlength="30" autocomplete="off" spellcheck="false"/>
     <div class="star-field-label">TINY MESSAGE (OPTIONAL)</div>
@@ -719,6 +722,8 @@ document.getElementById('add-btn').addEventListener('click',()=>openStarPanel(''
 const SKY_DEV_MODE=true; /* DEV MODE — set false before launch */
 document.getElementById('star-buy').addEventListener('click',async()=>{
   const name=(document.getElementById('star-name').value||'').trim();
+  const dob=document.getElementById('star-dob').value||'';
+  const dobDisplay=dob?new Date(dob+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
   const message=(document.getElementById('star-message').value||'').trim();
   const msgEl=document.getElementById('star-msg');
   const buyBtn=document.getElementById('star-buy');
@@ -730,7 +735,7 @@ document.getElementById('star-buy').addEventListener('click',async()=>{
     const fwd=new THREE.Vector3();cam.getWorldDirection(fwd);
     const fpx=fwd.x+(Math.random()-0.5)*0.2,fpy=fwd.y+(Math.random()-0.5)*0.2,fpz=fwd.z+(Math.random()-0.5)*0.2;
     const fn=Math.sqrt(fpx*fpx+fpy*fpy+fpz*fpz);
-    const newStar={name:name||'New Star',message,gender:selGender,date:'Now',pos:new THREE.Vector3(fpx/fn,fpy/fn,fpz/fn).normalize()};
+    const newStar={name:name||'New Star',message,gender:selGender,date:dobDisplay||'Now',pos:new THREE.Vector3(fpx/fn,fpy/fn,fpz/fn).normalize()};
     babyStars.push(newStar);buildBaby();
     document.getElementById('star-panel').classList.remove('open');
     msgEl.textContent='';buyBtn.disabled=false;
@@ -744,7 +749,7 @@ document.getElementById('star-buy').addEventListener('click',async()=>{
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         product:'baby-star',
-        metadata:{name,message,gender:selGender,px:px/norm,py:py/norm,pz:pz/norm}
+        metadata:{name,message,gender:selGender,date:dobDisplay,px:px/norm,py:py/norm,pz:pz/norm}
       })
     });
     const data=await r.json();
