@@ -2000,6 +2000,7 @@ select.adv-input option{background:#111;}
     const joined = selectedEmojis.join('');
     if (emojiInput)  emojiInput.value      = joined;
     if (emojiPrev)   emojiPrev.textContent = joined;
+    window.__kbGetEmoji = () => joined; /* expose to other IIFEs */
   }
 
   document.querySelectorAll('.epick').forEach(el => {
@@ -5323,6 +5324,8 @@ const OracleQuery = (() => {
     BRANDS.unshift(entry);
     idx=0;
     show(BRANDS[0]);
+    /* On mobile, also fire the full-screen portal so the message is impossible to miss */
+    if(window.innerWidth <= 900) showTakeover(msg);
   };
 
   const tagEl = document.getElementById('mob-bot-tag');
@@ -7544,7 +7547,7 @@ document.addEventListener('keydown',     boot, { once: true });
       /* ── Personal message — route through checkout ── */
       if(selBill === 'message'){
         const message = (document.getElementById('advert-msg')||{}).value||'';
-        const emoji   = (document.getElementById('advert-emoji-preview')||{}).textContent||'';
+        const emoji   = (window.__kbGetEmoji && window.__kbGetEmoji()) || '';
         const fromVal = (document.getElementById('advert-from')||{}).value||'';
         const url     = (document.getElementById('advert-url')||{}).value||'';
         if(!message.trim()){ alert('Please enter your message.'); return; }
