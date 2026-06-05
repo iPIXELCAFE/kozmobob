@@ -1165,17 +1165,17 @@ html,body{
   font-family:'Courier New',monospace;font-size:.58rem;letter-spacing:1.5px;
   color:rgba(255,255,255,.3);text-align:center;line-height:1.6;
 }
-.kb-compat-select{
-  width:100%;background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,120,180,.25);border-radius:12px;
-  padding:13px 14px;
-  font-family:'Courier New',monospace;font-size:.72rem;letter-spacing:2px;
-  color:rgba(255,255,255,.9);outline:none;
-  -webkit-appearance:none;appearance:none;
-  cursor:pointer;text-align:center;
-  transition:border-color .2s;color-scheme:dark;
+.kb-compat-picker{width:100%;display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
+.kb-compat-sign{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,120,180,.15);
+  border-radius:10px;padding:8px 4px 6px;cursor:pointer;transition:all .18s;
 }
-.kb-compat-select:focus{border-color:rgba(255,120,180,.6);}
+.kb-compat-sign:hover{background:rgba(255,120,180,.1);border-color:rgba(255,120,180,.45);}
+.kb-compat-sign.sel{background:rgba(255,120,180,.18);border-color:rgba(255,120,180,.8);}
+.kb-compat-sign-sym{font-size:1.6rem;line-height:1;}
+.kb-compat-sign-name{font-family:'Courier New',monospace;font-size:.38rem;letter-spacing:1.5px;color:rgba(255,255,255,.55);text-transform:uppercase;}
+.kb-compat-sign.sel .kb-compat-sign-name{color:rgba(255,160,200,.9);}
 #kb-compat-and{
   font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:3px;
   color:rgba(255,120,180,.35);
@@ -1765,25 +1765,11 @@ select.adv-input option{background:#111;}
     <button id="kb-compat-close">✕</button>
     <div id="kb-compat-title">✦ ZODIAC COMPATIBILITY</div>
     <div id="kb-compat-sub">Real astrological match — elements, modality & aspects.</div>
-    <select id="kb-compat-a" class="kb-compat-select">
-      <option value="">— First sign —</option>
-      <option value="0">♈ Aries</option><option value="1">♉ Taurus</option>
-      <option value="2">♊ Gemini</option><option value="3">♋ Cancer</option>
-      <option value="4">♌ Leo</option><option value="5">♍ Virgo</option>
-      <option value="6">♎ Libra</option><option value="7">♏ Scorpio</option>
-      <option value="8">♐ Sagittarius</option><option value="9">♑ Capricorn</option>
-      <option value="10">♒ Aquarius</option><option value="11">♓ Pisces</option>
-    </select>
+    <div style="font-family:'Courier New',monospace;font-size:.48rem;letter-spacing:2px;color:rgba(255,120,180,.5);align-self:flex-start;">FIRST SIGN</div>
+    <div id="kb-compat-a" class="kb-compat-picker"></div>
     <div id="kb-compat-and">♡</div>
-    <select id="kb-compat-b" class="kb-compat-select">
-      <option value="">— Second sign —</option>
-      <option value="0">♈ Aries</option><option value="1">♉ Taurus</option>
-      <option value="2">♊ Gemini</option><option value="3">♋ Cancer</option>
-      <option value="4">♌ Leo</option><option value="5">♍ Virgo</option>
-      <option value="6">♎ Libra</option><option value="7">♏ Scorpio</option>
-      <option value="8">♐ Sagittarius</option><option value="9">♑ Capricorn</option>
-      <option value="10">♒ Aquarius</option><option value="11">♓ Pisces</option>
-    </select>
+    <div style="font-family:'Courier New',monospace;font-size:.48rem;letter-spacing:2px;color:rgba(255,120,180,.5);align-self:flex-start;">SECOND SIGN</div>
+    <div id="kb-compat-b" class="kb-compat-picker"></div>
     <button id="kb-compat-go">✦ CHECK COMPATIBILITY</button>
     <div id="kb-compat-result">
       <div id="kb-compat-score-row"></div>
@@ -7624,8 +7610,8 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
   const overlay=document.getElementById('kb-compat-overlay');
   const closeBtn=document.getElementById('kb-compat-close');
   const goBtn=document.getElementById('kb-compat-go');
-  const selA=document.getElementById('kb-compat-a');
-  const selB=document.getElementById('kb-compat-b');
+  const pickerA=document.getElementById('kb-compat-a');
+  const pickerB=document.getElementById('kb-compat-b');
   const result=document.getElementById('kb-compat-result');
   const scoreRow=document.getElementById('kb-compat-score-row');
   const verdictEl=document.getElementById('kb-compat-verdict');
@@ -7633,8 +7619,28 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
   if(!btn||!overlay)return;
 
   const SIGNS=['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+  const SYMS=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
   const ELEM=['Fire','Earth','Air','Water','Fire','Earth','Air','Water','Fire','Earth','Air','Water'];
   const MOD=['Cardinal','Fixed','Mutable','Cardinal','Fixed','Mutable','Cardinal','Fixed','Mutable','Cardinal','Fixed','Mutable'];
+
+  let selA=-1,selB=-1;
+
+  function buildPicker(container,onSelect){
+    SIGNS.forEach((name,i)=>{
+      const el=document.createElement('div');
+      el.className='kb-compat-sign';
+      el.dataset.i=i;
+      el.innerHTML=`<span class="kb-compat-sign-sym">${SYMS[i]}</span><span class="kb-compat-sign-name">${name}</span>`;
+      el.addEventListener('click',()=>{
+        container.querySelectorAll('.kb-compat-sign').forEach(s=>s.classList.remove('sel'));
+        el.classList.add('sel');
+        onSelect(i);
+      });
+      container.appendChild(el);
+    });
+  }
+  buildPicker(pickerA,i=>{selA=i;result.classList.remove('show');});
+  buildPicker(pickerB,i=>{selB=i;result.classList.remove('show');});
 
   /* Element compatibility table [elem A][elem B] → {score 1-5, note} */
   const ECOMP={
@@ -7702,16 +7708,17 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('visible');});
 
   goBtn.addEventListener('click',()=>{
-    const iA=parseInt(selA.value);const iB=parseInt(selB.value);
-    if(isNaN(iA)||isNaN(iB)){
-      [selA,selB].forEach(s=>{if(s.value===''){s.style.borderColor='rgba(255,80,80,.6)';setTimeout(()=>s.style.borderColor='',1200);}});
+    if(selA<0||selB<0){
+      if(selA<0)pickerA.style.outline='1px solid rgba(255,80,80,.6)';
+      if(selB<0)pickerB.style.outline='1px solid rgba(255,80,80,.6)';
+      setTimeout(()=>{pickerA.style.outline='';pickerB.style.outline='';},1200);
       return;
     }
+    const iA=selA,iB=selB;
     const c=calcCompat(iA,iB);
-    /* Stars */
     scoreRow.innerHTML='';
     for(let i=1;i<=5;i++){const s=document.createElement('span');s.className='kb-compat-star'+(i<=c.score?' on':'');s.textContent='★';scoreRow.appendChild(s);}
-    verdictEl.textContent=SIGNS[iA]+' + '+SIGNS[iB]+' — '+VERDICTS[c.score-1];
+    verdictEl.textContent=SYMS[iA]+' '+SIGNS[iA]+' + '+SYMS[iB]+' '+SIGNS[iB]+' — '+VERDICTS[c.score-1];
     detailEl.innerHTML=c.elemNote+'<br><br>'+c.aspectNote+'<br><br>'+c.modNote;
     result.classList.add('show');
   });
