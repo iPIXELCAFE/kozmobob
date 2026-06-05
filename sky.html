@@ -554,10 +554,11 @@ function lookUpdate(){
 function onDown(x,y){isDrag=true;px=x;py=y;autoRot=false;document.getElementById('hint').style.opacity='0';}
 function onMove(x,y){if(!isDrag)return;camTheta-=(x-px)*0.004;camPhi=Math.max(0.05,Math.min(Math.PI-0.05,camPhi-(y-py)*0.004));px=x;py=y;lookUpdate();}
 function onUp(){isDrag=false;setTimeout(()=>autoRot=true,5000);}
-document.addEventListener('mousedown',e=>{if(e.target.tagName!=='BUTTON'&&e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA')onDown(e.clientX,e.clientY);});
+function isUI(el){return el.closest&&(el.closest('#names-panel')||el.closest('#star-panel')||el.tagName==='BUTTON'||el.tagName==='INPUT'||el.tagName==='TEXTAREA');}
+document.addEventListener('mousedown',e=>{if(!isUI(e.target))onDown(e.clientX,e.clientY);});
 document.addEventListener('mousemove',e=>onMove(e.clientX,e.clientY));
 document.addEventListener('mouseup',onUp);
-document.addEventListener('touchstart',e=>{if(e.target.tagName!=='BUTTON'&&e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA')onDown(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+document.addEventListener('touchstart',e=>{if(!isUI(e.target))onDown(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
 document.addEventListener('touchmove',e=>onMove(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
 document.addEventListener('touchend',onUp);
 lookUpdate();
