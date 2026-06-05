@@ -2038,7 +2038,7 @@ select.adv-input option{background:#111;}
 
   /* ── Pay button — Stripe checkout ── */
   if (payBtn) payBtn.addEventListener('click', async () => {
-    const emoji   = (document.getElementById('advert-emoji-input')?.value || '').trim();
+    const emoji   = (document.getElementById('advert-emoji-preview')?.textContent || '').trim();
     const message = (document.getElementById('advert-msg')?.value || '').trim();
     const fromVal = (document.getElementById('advert-from')?.value || '').trim();
     const bizVal  = (document.getElementById('advert-biz')?.value || '').trim();
@@ -4162,7 +4162,21 @@ const OracleQuery = (() => {
   };
 
   /* ── Inject personal message into left billboard rotation ── */
+  /* Restore persisted personal message on page load */
+  (function(){
+    const saved = localStorage.getItem('__kb_live_msg');
+    if(!saved) return;
+    try {
+      const data = JSON.parse(saved);
+      /* Only restore if within 1 hour */
+      if(data._ts && Date.now() - data._ts > 3600000){ localStorage.removeItem('__kb_live_msg'); return; }
+      setTimeout(()=>{ if(window.__injectPersonalMsg) window.__injectPersonalMsg(data); }, 200);
+    } catch(e){ localStorage.removeItem('__kb_live_msg'); }
+  })();
+
   window.__injectPersonalMsg = function(data){
+    /* Save to localStorage so it survives refresh (up to 1 hour) */
+    localStorage.setItem('__kb_live_msg', JSON.stringify(Object.assign({}, data, { _ts: Date.now() })));
     /* data: { emoji, text, from, link, color } */
     const emoji  = data.emoji || '✨';
     const text   = data.text  || '';
@@ -5309,8 +5323,6 @@ const OracleQuery = (() => {
     BRANDS.unshift(entry);
     idx=0;
     show(BRANDS[0]);
-    /* Also show full-screen portal on mobile so message isn't missed */
-    showTakeover(msg);
   };
 
   const tagEl = document.getElementById('mob-bot-tag');
@@ -7532,7 +7544,7 @@ document.addEventListener('keydown',     boot, { once: true });
       /* ── Personal message — route through checkout ── */
       if(selBill === 'message'){
         const message = (document.getElementById('advert-msg')||{}).value||'';
-        const emoji   = (document.getElementById('advert-emoji')||{}).value||'✨';
+        const emoji   = (document.getElementById('advert-emoji-preview')||{}).textContent||'';
         const fromVal = (document.getElementById('advert-from')||{}).value||'';
         const url     = (document.getElementById('advert-url')||{}).value||'';
         if(!message.trim()){ alert('Please enter your message.'); return; }
