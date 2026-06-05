@@ -531,11 +531,16 @@ fetch('/api/get-stars').then(r=>r.ok?r.json():null).then(data=>{
 const COMET_TRAIL=20;
 const comets=[];let nextComet=3+Math.random()*4;
 function spawnComet(){
-  const start=new THREE.Vector3((Math.random()-0.5)*1.4,0.25+Math.random()*0.55,(Math.random()-0.5)*1.4).normalize().multiplyScalar(396);
-  const dir=new THREE.Vector3((Math.random()-0.5)*0.5,-(0.1+Math.random()*0.18),(Math.random()-0.5)*0.5).normalize();
-  const speed=16+Math.random()*12;const dur=2.8+Math.random()*2.0;
+  /* Always spawn near where camera is looking so it's guaranteed visible */
+  const fwd=new THREE.Vector3();cam.getWorldDirection(fwd);
+  const sp=0.7;
+  const sx=fwd.x+(Math.random()-0.5)*sp,sy=fwd.y+0.2+Math.random()*0.4,sz=fwd.z+(Math.random()-0.5)*sp;
+  const sn=Math.sqrt(sx*sx+sy*sy+sz*sz);
+  const start=new THREE.Vector3(sx/sn,sy/sn,sz/sn).multiplyScalar(396);
+  const dir=new THREE.Vector3((Math.random()-0.5)*0.5,-(0.15+Math.random()*0.25),(Math.random()-0.5)*0.5).normalize();
+  const speed=20+Math.random()*15;const dur=2.5+Math.random()*1.5;
   const pos=new Float32Array(COMET_TRAIL*3),szArr=new Float32Array(COMET_TRAIL),alArr=new Float32Array(COMET_TRAIL);
-  for(let i=0;i<COMET_TRAIL;i++){pos[i*3]=start.x;pos[i*3+1]=start.y;pos[i*3+2]=start.z;szArr[i]=(1-i/COMET_TRAIL)*11+1;alArr[i]=0;}
+  for(let i=0;i<COMET_TRAIL;i++){pos[i*3]=start.x;pos[i*3+1]=start.y;pos[i*3+2]=start.z;szArr[i]=(1-i/COMET_TRAIL)*28+2;alArr[i]=0;}
   const geo=new THREE.BufferGeometry();
   geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
   geo.setAttribute('aSize',new THREE.BufferAttribute(szArr,1));
@@ -622,7 +627,7 @@ const clock=new THREE.Clock();let lastT=0;
     const s=comets[i];s.life+=dt;
     if(s.life>=s.dur){scene.remove(s.pts);s.geo.dispose();comets.splice(i,1);continue;}
     const hd=s.speed*s.life;
-    const fi=Math.min(s.life/0.3,1.0),fo=s.life>s.dur-0.6?(s.dur-s.life)/0.6:1.0,ga=fi*fo;
+    const fo=s.life>s.dur-0.5?(s.dur-s.life)/0.5:1.0,ga=fo;
     for(let j=0;j<COMET_TRAIL;j++){
       const tj=j/COMET_TRAIL,d=Math.max(0,hd-tj*38);
       const p=s.start.clone().addScaledVector(s.dir,d);
