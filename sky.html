@@ -93,6 +93,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#00010e;user-select:
 #np-place{background:rgba(0,255,120,.1);border:1px solid rgba(0,255,120,.4);color:#00ff78}
 #np-place:hover{background:rgba(0,255,120,.2)}
 #np-more{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);font-size:.58rem}
+/* ── STAR BIRTH ── */
+#birth-flash{position:fixed;inset:0;z-index:200;pointer-events:none;opacity:0;}
+#birth-label{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-family:'Courier New',monospace;font-size:clamp(.9rem,3vw,1.5rem);letter-spacing:5px;text-transform:uppercase;color:#fff;opacity:0;pointer-events:none;z-index:201;text-align:center;white-space:nowrap;}
+/* ── PLANET COMPASS ── */
+.p-arrow{position:fixed;pointer-events:none;z-index:25;display:flex;align-items:center;gap:5px;font-family:'Courier New',monospace;font-size:.44rem;letter-spacing:1.5px;color:rgba(255,255,255,.65);opacity:0;transition:opacity .5s;white-space:nowrap;transform-origin:center center;}
+.p-arrow-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -156,6 +162,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#00010e;user-select:
   </div>
 </div>
 
+<div id="birth-flash"></div>
+<div id="birth-label"></div>
+<div id="planet-compass"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
@@ -283,6 +292,20 @@ addMW(3500,0.055,0.6,1.4,0.88,0.92,1.0);   /* mostly white core, hint of blue */
 addMW(1500,0.13,1.2,3.5,0.6,0.5,0.8);     /* subtle purple mid — less intense */
 addMW(800,0.22,3.0,7.0,0.3,0.25,0.5);     /* very faint wide halo */
 
+/* ── PLANET + COMET SHADERS ── */
+const NOISE_SRC='float phash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float pn2d(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(phash(i),phash(i+vec2(1,0)),f.x),mix(phash(i+vec2(0,1)),phash(i+vec2(1,1)),f.x),f.y);}float pfbm(vec2 p){return pn2d(p)*0.5+pn2d(p*2.1)*0.25+pn2d(p*4.3)*0.125;}';
+const PLANET_VS='varying vec2 vUv;varying vec3 vNormal;varying vec3 vView;uniform float uRot;void main(){vUv=vec2(uv.x+uRot,uv.y);vNormal=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.0);vView=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}';
+const ATMO_VS='varying vec3 vNormal;varying vec3 vView;void main(){vNormal=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.0);vView=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}';
+const ATMO_FS='precision mediump float;varying vec3 vNormal;varying vec3 vView;uniform vec3 uC;void main(){float d=abs(dot(vNormal,vView));float rim=pow(1.0-d,3.5);gl_FragColor=vec4(uC,rim*0.65);}';
+const JUP_FS='precision mediump float;varying vec2 vUv;varying vec3 vNormal;varying vec3 vView;uniform float uRot;'+NOISE_SRC+'void main(){float ndv=dot(vNormal,vView);float turb=pfbm(vUv*4.0)*1.2;float b=sin(vUv.y*20.0+turb)*0.5+0.5;float b2=sin(vUv.y*8.0+pfbm(vUv*2.0)*1.5)*0.5+0.5;float b3=cos(vUv.y*35.0+turb*0.5)*0.5+0.5;vec3 c1=vec3(0.88,0.60,0.35);vec3 c2=vec3(0.96,0.90,0.78);vec3 c3=vec3(0.65,0.38,0.22);vec3 c4=vec3(0.99,0.96,0.90);vec3 col=mix(c1,c2,b);col=mix(col,c3,b2*0.45);col=mix(col,c4,b3*0.2);vec2 gp=vec2(mod(vUv.x,1.0)-0.28,vUv.y-0.41);gp.x*=1.8;float spot=smoothstep(0.09,0.03,length(gp));col=mix(col,vec3(0.72,0.24,0.15),spot);col*=0.2+0.8*smoothstep(0.0,0.5,ndv);col+=vec3(0.85,0.68,0.42)*pow(1.0-abs(ndv),3.5)*0.35;gl_FragColor=vec4(col,1.0);}';
+const SAT_FS='precision mediump float;varying vec2 vUv;varying vec3 vNormal;varying vec3 vView;uniform float uRot;'+NOISE_SRC+'void main(){float ndv=dot(vNormal,vView);float turb=pfbm(vUv*3.5);float b=sin(vUv.y*16.0+turb)*0.5+0.5;float b2=cos(vUv.y*6.0+pfbm(vUv*1.8)*1.2)*0.5+0.5;vec3 col=mix(vec3(0.82,0.68,0.40),vec3(0.92,0.80,0.52),b);col=mix(col,vec3(0.98,0.92,0.72),b2*0.3);col*=0.2+0.8*smoothstep(0.0,0.5,ndv);col+=vec3(0.92,0.82,0.55)*pow(1.0-abs(ndv),3.5)*0.3;gl_FragColor=vec4(col,1.0);}';
+const MARS_FS='precision mediump float;varying vec2 vUv;varying vec3 vNormal;varying vec3 vView;uniform float uRot;'+NOISE_SRC+'void main(){float ndv=dot(vNormal,vView);float n=pfbm(vUv*5.0);float n2=pfbm(vUv*9.0+vec2(3.7,2.1));vec3 col=mix(vec3(0.45,0.18,0.09),vec3(0.78,0.30,0.14),smoothstep(0.25,0.6,n));col=mix(col,vec3(0.88,0.52,0.32),smoothstep(0.65,0.9,n2)*0.45);float pole=abs(vUv.y-0.5)*2.0;col=mix(col,vec3(0.92,0.90,0.90),smoothstep(0.80,0.93,pole));col*=0.15+0.85*smoothstep(0.0,0.45,ndv);col+=vec3(0.88,0.45,0.28)*pow(1.0-abs(ndv),5.0)*0.35;gl_FragColor=vec4(col,1.0);}';
+const VEN_FS='precision mediump float;varying vec2 vUv;varying vec3 vNormal;varying vec3 vView;uniform float uRot;'+NOISE_SRC+'void main(){float ndv=dot(vNormal,vView);float sw=pfbm(vUv*2.5+vec2(pfbm(vUv*1.8)*1.2,pfbm(vUv*2.2)*1.2));float sw2=pfbm(vUv*5.0+vec2(sw*1.5,0.0));vec3 col=mix(vec3(0.95,0.85,0.70),vec3(1.0,0.93,0.62),sw);col=mix(col,vec3(0.88,0.74,0.50),sw2*0.45);col*=0.55+0.45*smoothstep(0.0,0.35,ndv);col+=vec3(1.0,0.88,0.45)*pow(1.0-abs(ndv),2.2)*0.7;gl_FragColor=vec4(col,1.0);}';
+const MERC_FS='precision mediump float;varying vec2 vUv;varying vec3 vNormal;varying vec3 vView;uniform float uRot;'+NOISE_SRC+'void main(){float ndv=dot(vNormal,vView);float n=pfbm(vUv*6.0);float n2=pfbm(vUv*14.0+vec2(5.2,3.8));vec3 col=mix(vec3(0.26,0.23,0.21),vec3(0.50,0.46,0.42),smoothstep(0.2,0.58,n));col=mix(col,vec3(0.70,0.66,0.62),smoothstep(0.68,0.88,n2)*0.55);col*=0.05+0.95*smoothstep(0.0,0.55,ndv);gl_FragColor=vec4(col,1.0);}';
+const COMET_VS='attribute float aSize;attribute float aAlpha;varying float vAlpha;void main(){vAlpha=aAlpha;gl_PointSize=aSize;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}';
+const COMET_FS='precision mediump float;varying float vAlpha;void main(){vec2 uv=gl_PointCoord-0.5;float d=length(uv);if(d>0.5)discard;float a=(1.0-smoothstep(0.05,0.5,d))*vAlpha;gl_FragColor=vec4(1.0,0.97,0.92,a);}';
+const planetMats=[];
+
 /* ── MOON (real position from today's date) ── */
 function calcMoonDir(){
   const now=new Date();
@@ -381,62 +404,70 @@ addGlow(mkGlow('rgba(100,130,255,0.2)','rgb(80,110,200)',512),200,0.12);
   const ZODIAC=['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
   const sign=lon=>ZODIAC[Math.floor(((lon%360)+360)%360/30)];
 
-  /* Planet definitions: name, geoLon, size, color R G B, glow scale, glow opacity */
-  const PLANETS=[
-    {name:'Venus',   symbol:'♀', lon:venGeo,  sz:22, r:1.0, g:0.97,b:0.88, gs:55, go:0.7,  sign:sign(venGeo)},
-    {name:'Jupiter', symbol:'♃', lon:jupGeo,  sz:18, r:1.0, g:0.92,b:0.72, gs:50, go:0.55, sign:sign(jupGeo)},
-    {name:'Mars',    symbol:'♂', lon:marsGeo, sz:14, r:1.0, g:0.42,b:0.22, gs:40, go:0.55, sign:sign(marsGeo)},
-    {name:'Saturn',  symbol:'♄', lon:satGeo,  sz:14, r:1.0, g:0.88,b:0.5,  gs:42, go:0.5,  sign:sign(satGeo)},
-    {name:'Mercury', symbol:'☿', lon:mercGeo, sz:8,  r:0.85,g:0.85,b:0.88, gs:24, go:0.4,  sign:sign(mercGeo)},
+  /* Planet definitions: name, geoLon, sphere radius, fragment shader, atmosphere color, ring */
+  const PLANET_DATA=[
+    {name:'Venus',   symbol:'♀', lon:venGeo,  r:13, fs:VEN_FS,  atm:[1.0,0.88,0.45], atmS:1.20, sign:sign(venGeo)},
+    {name:'Jupiter', symbol:'♃', lon:jupGeo,  r:19, fs:JUP_FS,  atm:[0.85,0.68,0.42], atmS:1.13, sign:sign(jupGeo)},
+    {name:'Mars',    symbol:'♂', lon:marsGeo, r:9,  fs:MARS_FS, atm:[0.88,0.45,0.28], atmS:1.18, sign:sign(marsGeo)},
+    {name:'Saturn',  symbol:'♄', lon:satGeo,  r:13, fs:SAT_FS,  atm:[0.92,0.82,0.55], atmS:1.13, ring:true, sign:sign(satGeo)},
+    {name:'Mercury', symbol:'☿', lon:mercGeo, r:6,  fs:MERC_FS, atm:null, sign:sign(mercGeo)},
   ];
 
   /* Store planet data for raycasting */
   window.__planets=[];
 
-  PLANETS.forEach(p=>{
+  PLANET_DATA.forEach(p=>{
     const dir=eclToDir(p.lon,0);
     const pos=dir.clone().multiplyScalar(368);
 
-    /* Planet disc sprite */
-    const cv=document.createElement('canvas');
-    cv.width=cv.height=64;
-    const ctx=cv.getContext('2d'),r=32;
-    const g2=ctx.createRadialGradient(r,r,0,r,r,r);
-    g2.addColorStop(0,`rgba(${Math.round(p.r*255)},${Math.round(p.g*255)},${Math.round(p.b*255)},1)`);
-    g2.addColorStop(0.4,`rgba(${Math.round(p.r*255)},${Math.round(p.g*255)},${Math.round(p.b*255)},0.8)`);
-    g2.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=g2;ctx.fillRect(0,0,64,64);
-    const tex=new THREE.CanvasTexture(cv);
-    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false}));
-    sp.position.copy(pos);sp.scale.set(p.sz,p.sz,1);
-    scene.add(sp);
+    /* 3D sphere with procedural shader */
+    const mat=new THREE.ShaderMaterial({vertexShader:PLANET_VS,fragmentShader:p.fs,uniforms:{uRot:{value:0}}});
+    planetMats.push({mat,speed:0.010+Math.random()*0.008});
+    const mesh=new THREE.Mesh(new THREE.SphereGeometry(p.r,48,24),mat);
+    mesh.position.copy(pos);
+    scene.add(mesh);
 
-    /* Glow */
-    const cv2=document.createElement('canvas');
-    cv2.width=cv2.height=256;
-    const ctx2=cv2.getContext('2d'),r2=128;
-    const g3=ctx2.createRadialGradient(r2,r2,0,r2,r2,r2);
-    g3.addColorStop(0,`rgba(${Math.round(p.r*255)},${Math.round(p.g*255)},${Math.round(p.b*255)},0.6)`);
-    g3.addColorStop(0.3,`rgba(${Math.round(p.r*255)},${Math.round(p.g*255)},${Math.round(p.b*255)},0.15)`);
-    g3.addColorStop(1,'rgba(0,0,0,0)');
-    ctx2.fillStyle=g3;ctx2.fillRect(0,0,256,256);
-    const tex2=new THREE.CanvasTexture(cv2);
-    const gsp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex2,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,opacity:p.go}));
-    gsp.position.copy(pos);gsp.scale.set(p.gs,p.gs,1);
-    scene.add(gsp);
+    /* Atmosphere rim glow */
+    if(p.atm){
+      const atm=new THREE.ShaderMaterial({vertexShader:ATMO_VS,fragmentShader:ATMO_FS,uniforms:{uC:{value:new THREE.Vector3(p.atm[0],p.atm[1],p.atm[2])}},transparent:true,depthWrite:false,side:THREE.FrontSide,blending:THREE.AdditiveBlending});
+      const atmMesh=new THREE.Mesh(new THREE.SphereGeometry(p.r*p.atmS,32,16),atm);
+      atmMesh.position.copy(pos);
+      scene.add(atmMesh);
+    }
 
-    /* Saturn ring */
-    if(p.name==='Saturn'){
-      const ringGeo=new THREE.RingGeometry(10,18,32);
-      const ringMat=new THREE.MeshBasicMaterial({color:0xd4aa55,transparent:true,opacity:0.5,side:THREE.DoubleSide,depthWrite:false});
+    /* Saturn ring with canvas gradient texture */
+    if(p.ring){
+      const rc=document.createElement('canvas');rc.width=256;rc.height=1;
+      const rx=rc.getContext('2d'),rg=rx.createLinearGradient(0,0,256,0);
+      rg.addColorStop(0,'rgba(210,185,130,0.05)');rg.addColorStop(0.18,'rgba(215,188,132,0.65)');
+      rg.addColorStop(0.44,'rgba(195,168,115,0.55)');rg.addColorStop(0.52,'rgba(210,185,130,0.08)');
+      rg.addColorStop(0.62,'rgba(205,178,125,0.45)');rg.addColorStop(0.84,'rgba(210,185,130,0.30)');
+      rg.addColorStop(1,'rgba(210,185,130,0.02)');
+      rx.fillStyle=rg;rx.fillRect(0,0,256,1);
+      const rTex=new THREE.CanvasTexture(rc);
+      const ringMat=new THREE.MeshBasicMaterial({map:rTex,transparent:true,side:THREE.DoubleSide,depthWrite:false});
+      const ringGeo=new THREE.RingGeometry(p.r*1.38,p.r*2.25,64);
       const ring=new THREE.Mesh(ringGeo,ringMat);
-      ring.position.copy(pos);
-      ring.lookAt(0,0,0);
-      ring.rotateX(Math.PI/2.5);
+      ring.position.copy(pos);ring.lookAt(0,0,0);ring.rotateX(Math.PI/2.5);
       scene.add(ring);
     }
 
-    window.__planets.push({name:p.name,symbol:p.symbol,sign:p.sign,pos:pos.clone(),screen:new THREE.Vector3()});
+    window.__planets.push({name:p.name,symbol:p.symbol,sign:p.sign,pos:pos.clone()});
+  });
+})();
+
+/* ── PLANET COMPASS INIT ── */
+(function(){
+  const compass=document.getElementById('planet-compass');
+  if(!compass||!window.__planets)return;
+  const PCOLS={Venus:'#ffe070',Jupiter:'#e8a055',Mars:'#ff6633',Saturn:'#d4aa55',Mercury:'#aaaaaa'};
+  window.__planets.forEach(p=>{
+    const arrow=document.createElement('div');arrow.className='p-arrow';
+    const dot=document.createElement('div');dot.className='p-arrow-dot';
+    dot.style.background=PCOLS[p.name]||'#fff';
+    const lbl=document.createElement('span');lbl.textContent=p.symbol+' '+p.name.slice(0,3).toUpperCase();
+    arrow.appendChild(dot);arrow.appendChild(lbl);
+    compass.appendChild(arrow);p.arrow=arrow;
   });
 })();
 
@@ -493,17 +524,23 @@ fetch('/api/get-stars').then(r=>r.ok?r.json():null).then(data=>{
   buildBaby();
 }).catch(()=>{});
 
-/* ── SHOOTING STARS ── */
-const shooters=[];let nextShoot=12+Math.random()*15;
-function spawnShooter(){
-  const start=new THREE.Vector3((Math.random()-0.5)*1.6,0.2+Math.random()*0.7,(Math.random()-0.5)*1.6).normalize().multiplyScalar(398);
-  const dir=new THREE.Vector3((Math.random()-0.5)*0.6,-(0.15+Math.random()*0.35),(Math.random()-0.5)*0.6).normalize();
-  const end=start.clone().addScaledVector(dir,60+Math.random()*100);
-  const geo=new THREE.BufferGeometry().setFromPoints([start,end]);
-  const mat=new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending});
-  const line=new THREE.Line(geo,mat);
-  scene.add(line);
-  shooters.push({line,mat,life:0,dur:0.5+Math.random()*0.8});
+/* ── COMETS ── */
+const COMET_TRAIL=20;
+const comets=[];let nextComet=18+Math.random()*22;
+function spawnComet(){
+  const start=new THREE.Vector3((Math.random()-0.5)*1.4,0.25+Math.random()*0.55,(Math.random()-0.5)*1.4).normalize().multiplyScalar(396);
+  const dir=new THREE.Vector3((Math.random()-0.5)*0.5,-(0.1+Math.random()*0.18),(Math.random()-0.5)*0.5).normalize();
+  const speed=16+Math.random()*12;const dur=2.8+Math.random()*2.0;
+  const pos=new Float32Array(COMET_TRAIL*3),szArr=new Float32Array(COMET_TRAIL),alArr=new Float32Array(COMET_TRAIL);
+  for(let i=0;i<COMET_TRAIL;i++){pos[i*3]=start.x;pos[i*3+1]=start.y;pos[i*3+2]=start.z;szArr[i]=(1-i/COMET_TRAIL)*11+1;alArr[i]=0;}
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('aSize',new THREE.BufferAttribute(szArr,1));
+  geo.setAttribute('aAlpha',new THREE.BufferAttribute(alArr,1));
+  const mat=new THREE.ShaderMaterial({vertexShader:COMET_VS,fragmentShader:COMET_FS,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
+  const pts=new THREE.Points(geo,mat);
+  scene.add(pts);
+  comets.push({pts,geo,pos,szArr,alArr,dir,speed,start:start.clone(),life:0,dur});
 }
 
 /* ── CAMERA ── */
@@ -572,16 +609,77 @@ const clock=new THREE.Clock();let lastT=0;
   mwMats.forEach(m=>m.uniforms.uT.value=t);
   if(babyMat)babyMat.uniforms.uT.value=t;
   if(autoRot&&!isDrag){camTheta+=0.00003;lookUpdate();}
-  nextShoot-=dt;
-  if(nextShoot<=0){spawnShooter();nextShoot=10+Math.random()*18;}
-  for(let i=shooters.length-1;i>=0;i--){
-    const s=shooters[i];s.life+=dt;const p=s.life/s.dur;
-    s.mat.opacity=p<0.15?p/0.15:(1-(p-0.15)/0.85)*0.9;
-    if(s.life>=s.dur){scene.remove(s.line);s.line.geometry.dispose();s.mat.dispose();shooters.splice(i,1);}
+  /* Planet rotations */
+  planetMats.forEach(p=>p.mat.uniforms.uRot.value+=p.speed*dt);
+  /* Comets */
+  nextComet-=dt;
+  if(nextComet<=0){spawnComet();nextComet=28+Math.random()*32;}
+  for(let i=comets.length-1;i>=0;i--){
+    const s=comets[i];s.life+=dt;
+    if(s.life>=s.dur){scene.remove(s.pts);s.geo.dispose();comets.splice(i,1);continue;}
+    const hd=s.speed*s.life;
+    const fi=Math.min(s.life/0.3,1.0),fo=s.life>s.dur-0.6?(s.dur-s.life)/0.6:1.0,ga=fi*fo;
+    for(let j=0;j<COMET_TRAIL;j++){
+      const tj=j/COMET_TRAIL,d=Math.max(0,hd-tj*38);
+      const p=s.start.clone().addScaledVector(s.dir,d);
+      s.pos[j*3]=p.x;s.pos[j*3+1]=p.y;s.pos[j*3+2]=p.z;s.alArr[j]=(1-tj)*ga;
+    }
+    s.geo.attributes.position.needsUpdate=true;s.geo.attributes.aAlpha.needsUpdate=true;
+  }
+  /* Planet compass arrows */
+  if(window.__planets){
+    const iW=innerWidth,iH=innerHeight,cx=iW/2,cy=iH/2,mg=32;
+    window.__planets.forEach(p=>{
+      if(!p.arrow)return;
+      const v=p.pos.clone().project(cam);
+      const sx=(v.x*0.5+0.5)*iW,sy=(-v.y*0.5+0.5)*iH;
+      const onScreen=v.z<1&&sx>-40&&sx<iW+40&&sy>-40&&sy<iH+40;
+      if(onScreen){p.arrow.style.opacity='0';}
+      else{
+        const dx=sx-cx,dy=sy-cy,ang=Math.atan2(dy,dx);
+        const mxW=cx-mg,mxH=cy-mg;
+        let ex,ey;
+        if(Math.abs(Math.cos(ang)*mxH)>Math.abs(Math.sin(ang)*mxW)){
+          ex=cx+Math.sign(dx)*mxW;ey=cy+Math.sign(dx)*mxW*Math.tan(ang);
+        }else{
+          ey=cy+Math.sign(dy)*mxH;ex=Math.abs(Math.tan(ang))>0.001?cx+Math.sign(dy)*mxH/Math.tan(ang):cx;
+        }
+        p.arrow.style.opacity='1';p.arrow.style.left=ex+'px';p.arrow.style.top=ey+'px';
+        p.arrow.style.transform=`translate(-50%,-50%) rotate(${ang}rad)`;
+      }
+    });
   }
   renderer.render(scene,cam);
 })();
 window.addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();});
+
+/* ── STAR BIRTH ANIMATION ── */
+function playBirth(newStar,nameStr,gender){
+  const starPos=newStar.pos.clone().multiplyScalar(390);
+  const c3={boy:new THREE.Color(0x6699ff),girl:new THREE.Color(0xff66aa),neutral:new THREE.Color(0xbbbbff)};
+  const col=c3[gender]||c3.neutral;
+  for(let ri=0;ri<3;ri++){
+    const rMat=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.6,side:THREE.DoubleSide,depthWrite:false});
+    const rGeo=new THREE.RingGeometry(0.1,0.5,48);
+    const rMesh=new THREE.Mesh(rGeo,rMat);
+    rMesh.position.copy(starPos);rMesh.lookAt(0,0,0);scene.add(rMesh);
+    let rL=-ri*0.3,rD=1.8;
+    const aR=()=>{rL+=0.016;if(rL<0){requestAnimationFrame(aR);return;}const pp=rL/rD;rMesh.scale.setScalar(1+22*pp);rMat.opacity=(1-pp)*0.45;if(rL<rD)requestAnimationFrame(aR);else{scene.remove(rMesh);rGeo.dispose();rMat.dispose();}};
+    requestAnimationFrame(aR);
+  }
+  const flash=document.getElementById('birth-flash');
+  const fc={boy:'rgba(100,150,255,0.6)',girl:'rgba(255,100,170,0.6)',neutral:'rgba(180,180,255,0.6)'};
+  flash.style.background=fc[gender]||fc.neutral;
+  flash.style.transition='none';flash.style.opacity='1';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{flash.style.transition='opacity 1.0s ease';flash.style.opacity='0';}));
+  const lbl=document.getElementById('birth-label');
+  const lc={boy:'rgba(130,180,255,1)',girl:'rgba(255,140,200,1)',neutral:'rgba(200,200,255,1)'};
+  const tc=lc[gender]||lc.neutral;
+  lbl.textContent=(nameStr||'A NEW STAR')+' ✦';
+  lbl.style.color=tc;lbl.style.textShadow=`0 0 40px ${tc},0 0 80px ${tc}`;
+  lbl.style.transition='none';lbl.style.opacity='1';lbl.style.transform='translate(-50%,-50%)';
+  setTimeout(()=>{lbl.style.transition='all 2.2s ease-out';lbl.style.opacity='0';lbl.style.transform='translate(-50%,-72%)';},120);
+}
 
 /* ── PLACE STAR PANEL ── */
 let selGender='neutral';
@@ -628,10 +726,15 @@ document.getElementById('star-buy').addEventListener('click',async()=>{
   const px=(Math.random()*2-1),py=Math.random()*0.8+0.1,pz=(Math.random()*2-1);
   const norm=Math.sqrt(px*px+py*py+pz*pz);
   if(SKY_DEV_MODE){
-    babyStars.push({name:name||'Test Star',message,gender:selGender,date:'Now',pos:new THREE.Vector3(px/norm,py/norm,pz/norm).normalize()});
-    buildBaby();
+    /* Place star in front of camera so it's always visible */
+    const fwd=new THREE.Vector3();cam.getWorldDirection(fwd);
+    const fpx=fwd.x+(Math.random()-0.5)*0.2,fpy=fwd.y+(Math.random()-0.5)*0.2,fpz=fwd.z+(Math.random()-0.5)*0.2;
+    const fn=Math.sqrt(fpx*fpx+fpy*fpy+fpz*fpz);
+    const newStar={name:name||'New Star',message,gender:selGender,date:'Now',pos:new THREE.Vector3(fpx/fn,fpy/fn,fpz/fn).normalize()};
+    babyStars.push(newStar);buildBaby();
     document.getElementById('star-panel').classList.remove('open');
     msgEl.textContent='';buyBtn.disabled=false;
+    playBirth(newStar,name,selGender);
     return;
   }
   msgEl.textContent='Opening checkout...';
