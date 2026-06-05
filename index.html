@@ -707,7 +707,11 @@ html,body{
     text-transform:uppercase;
     background:rgba(0,207,255,.08);
     transition:all .2s;z-index:3;
-    box-shadow:0 0 10px rgba(0,207,255,.2);
+    animation:adGlowBlue 2.4s ease-in-out infinite;
+  }
+  @keyframes adGlowBlue{
+    0%,100%{box-shadow:0 0 6px rgba(0,207,255,.2);border-color:rgba(0,207,255,.4);color:rgba(0,207,255,.8);}
+    50%{box-shadow:0 0 18px rgba(0,207,255,.6),0 0 32px rgba(0,207,255,.2);border-color:rgba(0,207,255,.9);color:rgba(80,230,255,1);}
   }
   #mob-bot-tag:hover{
     color:#fff;border-color:rgba(0,207,255,1);
@@ -1565,6 +1569,7 @@ select.adv-input option{background:#111;}
   transition:background .2s,color .2s;pointer-events:all;
   position:relative;z-index:10;
   flex-shrink:0;
+  animation:adGlow 2.4s ease-in-out infinite;
 }
 .adv-chip:hover{background:rgba(255,200,40,.07);color:rgba(255,200,40,.9);}
 
@@ -1631,7 +1636,7 @@ select.adv-input option{background:#111;}
     <div id="mob-bot-name" style="font-family:'Courier New',monospace;font-size:7px;letter-spacing:2px;opacity:.4;text-transform:uppercase;overflow:hidden;white-space:nowrap;"></div>
   </div>
   <!-- AD button -->
-  <div id="mob-bot-tag" style="flex-shrink:0;z-index:3;margin-left:8px;font-family:'Courier New',monospace;font-size:7px;letter-spacing:2px;border:1px solid rgba(255,255,255,.3);padding:6px 10px;border-radius:4px;text-align:center;cursor:pointer;color:rgba(255,255,255,.6);line-height:1.4;">✦<br>AD</div>
+  <div id="mob-bot-tag" style="margin-left:8px;text-align:center;line-height:1.4;cursor:pointer;">✦<br>AD</div>
 </div>
 <div id="mob-msg-takeover">
   <div id="mob-msg-sym">🎂</div>
