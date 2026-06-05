@@ -1165,16 +1165,17 @@ html,body{
   font-family:'Courier New',monospace;font-size:.58rem;letter-spacing:1.5px;
   color:rgba(255,255,255,.3);text-align:center;line-height:1.6;
 }
-#kb-compat-a, #kb-compat-b{
-  width:100%;background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,120,180,.2);border-radius:10px;
-  padding:11px 14px;
+.kb-compat-select{
+  width:100%;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,120,180,.25);border-radius:12px;
+  padding:13px 14px;
   font-family:'Courier New',monospace;font-size:.72rem;letter-spacing:2px;
-  color:rgba(255,255,255,.85);
-  outline:none;text-align:center;
-  transition:border-color .2s;
+  color:rgba(255,255,255,.9);outline:none;
+  -webkit-appearance:none;appearance:none;
+  cursor:pointer;text-align:center;
+  transition:border-color .2s;color-scheme:dark;
 }
-#kb-compat-a:focus,#kb-compat-b:focus{border-color:rgba(255,120,180,.55);}
+.kb-compat-select:focus{border-color:rgba(255,120,180,.6);}
 #kb-compat-and{
   font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:3px;
   color:rgba(255,120,180,.35);
@@ -1189,6 +1190,22 @@ html,body{
   transition:background .2s,border-color .2s,color .2s;
 }
 #kb-compat-go:hover{background:rgba(255,120,180,.2);border-color:rgba(255,120,180,.65);color:rgba(255,160,200,.98);}
+#kb-compat-result{
+  width:100%;display:none;flex-direction:column;gap:10px;
+  border-top:1px solid rgba(255,120,180,.15);padding-top:14px;
+}
+#kb-compat-result.show{display:flex;}
+#kb-compat-score-row{display:flex;align-items:center;justify-content:center;gap:4px;}
+.kb-compat-star{font-size:1rem;color:rgba(255,120,180,.25);}
+.kb-compat-star.on{color:rgba(255,120,180,.9);}
+#kb-compat-verdict{
+  font-family:'Courier New',monospace;font-size:.7rem;letter-spacing:2px;
+  color:rgba(255,160,200,.9);text-align:center;line-height:1.5;
+}
+#kb-compat-detail{
+  font-family:'Courier New',monospace;font-size:.56rem;letter-spacing:1px;
+  color:rgba(255,255,255,.45);text-align:center;line-height:1.9;
+}
 @media(max-width:900px){
   #kb-sound-btn{top:80px;right:4px;}
   #kb-compat-btn{top:80px;right:50px;}
@@ -1742,16 +1759,37 @@ select.adv-input option{background:#111;}
   </div>
 </div>
 
-<!-- ── COMPATIBILITY READING OVERLAY ── -->
+<!-- ── COMPATIBILITY OVERLAY ── -->
 <div id="kb-compat-overlay">
   <div id="kb-compat-panel">
     <button id="kb-compat-close">✕</button>
-    <div id="kb-compat-title">✦ COMPATIBILITY</div>
-    <div id="kb-compat-sub">Enter two names. Bob reads the energy between them.</div>
-    <input id="kb-compat-a" type="text" placeholder="First name" maxlength="30" autocomplete="off" spellcheck="false"/>
-    <div id="kb-compat-and">and</div>
-    <input id="kb-compat-b" type="text" placeholder="Second name" maxlength="30" autocomplete="off" spellcheck="false"/>
-    <button id="kb-compat-go">✦ READ THE ENERGY</button>
+    <div id="kb-compat-title">✦ ZODIAC COMPATIBILITY</div>
+    <div id="kb-compat-sub">Real astrological match — elements, modality & aspects.</div>
+    <select id="kb-compat-a" class="kb-compat-select">
+      <option value="">— First sign —</option>
+      <option value="0">♈ Aries</option><option value="1">♉ Taurus</option>
+      <option value="2">♊ Gemini</option><option value="3">♋ Cancer</option>
+      <option value="4">♌ Leo</option><option value="5">♍ Virgo</option>
+      <option value="6">♎ Libra</option><option value="7">♏ Scorpio</option>
+      <option value="8">♐ Sagittarius</option><option value="9">♑ Capricorn</option>
+      <option value="10">♒ Aquarius</option><option value="11">♓ Pisces</option>
+    </select>
+    <div id="kb-compat-and">♡</div>
+    <select id="kb-compat-b" class="kb-compat-select">
+      <option value="">— Second sign —</option>
+      <option value="0">♈ Aries</option><option value="1">♉ Taurus</option>
+      <option value="2">♊ Gemini</option><option value="3">♋ Cancer</option>
+      <option value="4">♌ Leo</option><option value="5">♍ Virgo</option>
+      <option value="6">♎ Libra</option><option value="7">♏ Scorpio</option>
+      <option value="8">♐ Sagittarius</option><option value="9">♑ Capricorn</option>
+      <option value="10">♒ Aquarius</option><option value="11">♓ Pisces</option>
+    </select>
+    <button id="kb-compat-go">✦ CHECK COMPATIBILITY</button>
+    <div id="kb-compat-result">
+      <div id="kb-compat-score-row"></div>
+      <div id="kb-compat-verdict"></div>
+      <div id="kb-compat-detail"></div>
+    </div>
   </div>
 </div>
 
@@ -7580,32 +7618,103 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
   });
 })();
 
-/* ── COMPATIBILITY READING ── */
+/* ── ZODIAC COMPATIBILITY ── */
 (function(){
-  const btn     = document.getElementById('kb-compat-btn');
-  const overlay = document.getElementById('kb-compat-overlay');
-  const closeBtn= document.getElementById('kb-compat-close');
-  const goBtn   = document.getElementById('kb-compat-go');
-  const inputA  = document.getElementById('kb-compat-a');
-  const inputB  = document.getElementById('kb-compat-b');
-  if(!btn||!overlay) return;
-  btn.addEventListener('click',e=>{e.stopPropagation();overlay.classList.add('visible');inputA.focus();});
+  const btn=document.getElementById('kb-compat-btn');
+  const overlay=document.getElementById('kb-compat-overlay');
+  const closeBtn=document.getElementById('kb-compat-close');
+  const goBtn=document.getElementById('kb-compat-go');
+  const selA=document.getElementById('kb-compat-a');
+  const selB=document.getElementById('kb-compat-b');
+  const result=document.getElementById('kb-compat-result');
+  const scoreRow=document.getElementById('kb-compat-score-row');
+  const verdictEl=document.getElementById('kb-compat-verdict');
+  const detailEl=document.getElementById('kb-compat-detail');
+  if(!btn||!overlay)return;
+
+  const SIGNS=['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+  const ELEM=['Fire','Earth','Air','Water','Fire','Earth','Air','Water','Fire','Earth','Air','Water'];
+  const MOD=['Cardinal','Fixed','Mutable','Cardinal','Fixed','Mutable','Cardinal','Fixed','Mutable','Cardinal','Fixed','Mutable'];
+
+  /* Element compatibility table [elem A][elem B] → {score 1-5, note} */
+  const ECOMP={
+    'Fire,Fire':{s:4,n:'Passionate and electric — you match each other\'s fire but can burn out fast.'},
+    'Fire,Air': {s:5,n:'Air feeds Fire. One of the most naturally energizing pairings in the zodiac.'},
+    'Air,Fire': {s:5,n:'Air feeds Fire. One of the most naturally energizing pairings in the zodiac.'},
+    'Fire,Earth':{s:2,n:'Fire moves fast, Earth moves slow. This takes serious patience from both sides.'},
+    'Earth,Fire':{s:2,n:'Fire moves fast, Earth moves slow. This takes serious patience from both sides.'},
+    'Fire,Water':{s:2,n:'Steam or flood. Intense attraction but emotionally exhausting long-term.'},
+    'Water,Fire':{s:2,n:'Steam or flood. Intense attraction but emotionally exhausting long-term.'},
+    'Earth,Earth':{s:4,n:'Extremely stable foundation. Can get too comfortable — growth requires effort.'},
+    'Earth,Water':{s:5,n:'Water nourishes Earth. Deeply supportive, emotionally in sync.'},
+    'Water,Earth':{s:5,n:'Water nourishes Earth. Deeply supportive, emotionally in sync.'},
+    'Earth,Air': {s:2,n:'Earth wants roots, Air wants freedom. Fundamentally different needs.'},
+    'Air,Earth': {s:2,n:'Earth wants roots, Air wants freedom. Fundamentally different needs.'},
+    'Air,Air':   {s:4,n:'Brilliant minds in sync. Risk of too much talk, not enough depth.'},
+    'Air,Water': {s:3,n:'Intellectually curious but emotionally mismatched. Takes real work.'},
+    'Water,Air': {s:3,n:'Intellectually curious but emotionally mismatched. Takes real work.'},
+    'Water,Water':{s:5,n:'Psychically connected, deeply empathic. Can drown each other in emotion.'},
+  };
+
+  /* Aspect scores based on sign distance (0–6) */
+  const ASPECT=[
+    {name:'Conjunction',s:4,note:'Same sign energy — intense mirror. You see yourself in each other.'},
+    {name:'Semi-sextile',s:2,note:'Different worlds. Attraction exists but friction is constant.'},
+    {name:'Sextile',s:4,note:'Natural ease and support. One of the most compatible aspects.'},
+    {name:'Square',s:3,note:'Friction and tension — but this drives growth if you let it.'},
+    {name:'Trine',s:5,note:'The best aspect. Same element, effortless flow, deep understanding.'},
+    {name:'Quincunx',s:1,note:'Constant adjustment. You operate on completely different frequencies.'},
+    {name:'Opposition',s:3,note:'Magnetic opposites. Deeply attracted, deeply different.'},
+  ];
+
+  /* Modality note */
+  function modalNote(mA,mB){
+    if(mA===mB){
+      if(mA==='Cardinal')return'Both Cardinal — two leaders, power struggles possible.';
+      if(mA==='Fixed')return'Both Fixed — stubborn and loyal in equal measure.';
+      return'Both Mutable — adaptable together, but hard to make decisions.';
+    }
+    if((mA==='Cardinal'&&mB==='Fixed')||(mA==='Fixed'&&mB==='Cardinal'))return'Cardinal initiates, Fixed commits — good balance of spark and follow-through.';
+    if((mA==='Cardinal'&&mB==='Mutable')||(mA==='Mutable'&&mB==='Cardinal'))return'Cardinal leads, Mutable adapts — Cardinal can steamroll if not careful.';
+    return'Fixed grounds, Mutable flows — works well when Fixed doesn\'t become controlling.';
+  }
+
+  function calcCompat(iA,iB){
+    const dist=Math.min(Math.abs(iA-iB),12-Math.abs(iA-iB));
+    const eKey=ELEM[iA]+','+ELEM[iB];
+    const ec=ECOMP[eKey]||{s:3,n:'Mixed elemental energy.'};
+    const asp=ASPECT[dist];
+    const raw=Math.round((ec.s*0.5+asp.s*0.5));
+    const score=Math.max(1,Math.min(5,raw));
+    return{score,aspect:asp.name,aspectNote:asp.note,elemNote:ec.n,modNote:modalNote(MOD[iA],MOD[iB])};
+  }
+
+  const VERDICTS=[
+    'Rough terrain ahead. Growth is possible — but it\'s work.',
+    'Challenging but not impossible. Chemistry exists. Commitment required.',
+    'Mixed energy. Strong in some areas, difficult in others.',
+    'Solid match. Natural chemistry with room to grow.',
+    'Exceptional compatibility. The stars genuinely align here.',
+  ];
+
+  btn.addEventListener('click',e=>{e.stopPropagation();overlay.classList.add('visible');result.classList.remove('show');});
   closeBtn.addEventListener('click',()=>overlay.classList.remove('visible'));
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('visible');});
-  function fireReading(){
-    const a=(inputA.value||'').trim();
-    const b=(inputB.value||'').trim();
-    if(!a||!b){
-      [inputA,inputB].forEach(el=>{if(!el.value.trim()){el.style.borderColor='rgba(255,80,80,.6)';setTimeout(()=>el.style.borderColor='',1200);}});
+
+  goBtn.addEventListener('click',()=>{
+    const iA=parseInt(selA.value);const iB=parseInt(selB.value);
+    if(isNaN(iA)||isNaN(iB)){
+      [selA,selB].forEach(s=>{if(s.value===''){s.style.borderColor='rgba(255,80,80,.6)';setTimeout(()=>s.style.borderColor='',1200);}});
       return;
     }
-    overlay.classList.remove('visible');
-    inputA.value=''; inputB.value='';
-    const question='Compatibility reading between '+a+' and '+b+'. What is the energy between them? What works, what challenges them, and what the universe sees for their connection.';
-    if(window.OracleQuery) window.OracleQuery.submit(question);
-  }
-  goBtn.addEventListener('click',fireReading);
-  [inputA,inputB].forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter')fireReading();}));
+    const c=calcCompat(iA,iB);
+    /* Stars */
+    scoreRow.innerHTML='';
+    for(let i=1;i<=5;i++){const s=document.createElement('span');s.className='kb-compat-star'+(i<=c.score?' on':'');s.textContent='★';scoreRow.appendChild(s);}
+    verdictEl.textContent=SIGNS[iA]+' + '+SIGNS[iB]+' — '+VERDICTS[c.score-1];
+    detailEl.innerHTML=c.elemNote+'<br><br>'+c.aspectNote+'<br><br>'+c.modNote;
+    result.classList.add('show');
+  });
 })();
 
 /* ── COLLECTION MILESTONE READINGS ── */
