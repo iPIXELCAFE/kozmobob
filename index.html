@@ -2050,6 +2050,7 @@ select.adv-input option{background:#111;}
       if (!message) { alert('Please enter your message.'); return; }
       product  = 'personal-message';
       metadata = { message, emoji, fromVal, url, deviceId };
+      sessionStorage.setItem('__kb_personal_msg', JSON.stringify({ text: message, emoji, from: fromVal, link: url }));
     } else if (currentBill === 'right') {
       product  = 'billboard-premium';
       metadata = { message: bizVal, emoji, url, deviceId };
@@ -3526,6 +3527,21 @@ const OracleQuery = (() => {
     'reading-yearly':  'yearly',
     'tarot-deep':      'tarot-deep',
   };
+
+  /* ── Personal message — inject into billboard ── */
+  if (product === 'personal-message') {
+    const raw = sessionStorage.getItem('__kb_personal_msg');
+    sessionStorage.removeItem('__kb_personal_msg');
+    if (raw) {
+      const data = JSON.parse(raw);
+      function tryInject(n) {
+        if (window.__injectPersonalMsg) { window.__injectPersonalMsg(data); return; }
+        if (n > 0) setTimeout(() => tryInject(n - 1), 300);
+      }
+      tryInject(20);
+    }
+    return;
+  }
 
   const mode = READING_MODES[product];
   if(!mode) return; /* starmap handled separately */
@@ -7509,6 +7525,19 @@ document.addEventListener('keydown',     boot, { once: true });
       const succDiv = document.getElementById('advert-success');
       const frmDiv  = document.getElementById('advert-form-body');
       const shareUrl = 'https://www.kozmobob.com';
+
+      /* ── Personal message — route through checkout ── */
+      if(selBill === 'message'){
+        const message = (document.getElementById('advert-msg')||{}).value||'';
+        const emoji   = (document.getElementById('advert-emoji')||{}).value||'✨';
+        const fromVal = (document.getElementById('advert-from')||{}).value||'';
+        const url     = (document.getElementById('advert-url')||{}).value||'';
+        if(!message.trim()){ alert('Please enter your message.'); return; }
+        sessionStorage.setItem('__kb_personal_msg', JSON.stringify({ text: message.trim(), emoji, from: fromVal.trim(), link: url.trim() }));
+        goToCheckout('personal-message', { message: message.trim(), emoji, fromVal, url, deviceId: localStorage.getItem('__kb_device')||'' });
+        return;
+      }
+
       if(frmDiv) frmDiv.style.display = 'none';
       if(succDiv) succDiv.style.display = 'block';
       if(selBill==='right'){
