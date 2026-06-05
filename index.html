@@ -633,7 +633,11 @@ html,body{
     padding:5px 10px;border-radius:4px;
     background:rgba(255,200,40,.08);
     transition:all .2s;z-index:3;
-    box-shadow:0 0 10px rgba(255,200,40,.2);
+    animation:adGlow 2.4s ease-in-out infinite;
+  }
+  @keyframes adGlow{
+    0%,100%{box-shadow:0 0 6px rgba(255,200,40,.2);border-color:rgba(255,200,40,.4);color:rgba(255,200,40,.8);}
+    50%{box-shadow:0 0 18px rgba(255,200,40,.6),0 0 32px rgba(255,200,40,.2);border-color:rgba(255,200,40,.9);color:rgba(255,220,80,1);}
   }
   #mob-top-tag:hover{
     color:#fff;border-color:rgba(255,200,40,1);
@@ -1607,7 +1611,7 @@ select.adv-input option{background:#111;}
     <span id="mob-top-name">iPIXEL CAFE</span>
   </div>
   <span id="mob-top-sub">ipixelcafe.com</span>
-  <span id="mob-top-tag" onclick="event.stopPropagation();openAdvertOverlay('top')" style="cursor:pointer;">✦ ADVERTISE</span>
+  <span id="mob-top-tag" onclick="event.stopPropagation();openAdvertOverlay('top')" style="cursor:pointer;">✦ AD</span>
 </div>
 
 <!-- MOBILE BOTTOM BANNER — rotating ads -->
