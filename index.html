@@ -1950,7 +1950,7 @@ select.adv-input option{background:#111;}
    ══════════════════════════════════════════════════════════════ */
 (function(){
   const MAX_EMOJI = 5;
-  let selectedEmojis = ['✨'];
+  let selectedEmojis = [];
 
   const overlay   = document.getElementById('advert-overlay');
   const closeBtn  = document.getElementById('advert-close');
@@ -4214,7 +4214,7 @@ const OracleQuery = (() => {
       accent:col, rgb, bg:'#030200',
       url: data.link || 'https://kozmobob.com',
       draw: drawPersonal,
-      frames: AD_FRAMES * 6  /* ~1 min on screen */
+      frames: AD_FRAMES  /* normal rotation slot, same as other brands */
     };
     BRANDS.unshift(slot);
     adIdx=0; adFrame=0;
@@ -5299,15 +5299,18 @@ const OracleQuery = (() => {
 
   /* Inject personal message into mobile banner */
   window.__injectMobileMsgBanner = function(data){
+    const msg = { sym:data.emoji||'✨', text:data.text||'', from:data.from||'', color:'#FFD700', href:data.link||'' };
     const entry = {
       name: (data.emoji||'✨')+' MESSAGE',
       url:'kozmobob.com', href:'https://kozmobob.com',
       color:'rgba(255,215,0,.95)', border:'rgba(255,215,0,.40)',
-      msg:{ sym:data.emoji||'✨', text:data.text||'', from:data.from||'', color:'#FFD700', href:data.link||'' }
+      msg
     };
     BRANDS.unshift(entry);
     idx=0;
     show(BRANDS[0]);
+    /* Also show full-screen portal on mobile so message isn't missed */
+    showTakeover(msg);
   };
 
   const tagEl = document.getElementById('mob-bot-tag');
