@@ -529,7 +529,7 @@ fetch('/api/get-stars').then(r=>r.ok?r.json():null).then(data=>{
 
 /* ── COMETS ── */
 const COMET_TRAIL=20;
-const comets=[];let nextComet=18+Math.random()*22;
+const comets=[];let nextComet=3+Math.random()*4;
 function spawnComet(){
   const start=new THREE.Vector3((Math.random()-0.5)*1.4,0.25+Math.random()*0.55,(Math.random()-0.5)*1.4).normalize().multiplyScalar(396);
   const dir=new THREE.Vector3((Math.random()-0.5)*0.5,-(0.1+Math.random()*0.18),(Math.random()-0.5)*0.5).normalize();
@@ -617,7 +617,7 @@ const clock=new THREE.Clock();let lastT=0;
   planetMats.forEach(p=>p.mat.uniforms.uRot.value+=p.speed*dt);
   /* Comets */
   nextComet-=dt;
-  if(nextComet<=0){spawnComet();nextComet=28+Math.random()*32;}
+  if(nextComet<=0){spawnComet();nextComet=6+Math.random()*8;}
   for(let i=comets.length-1;i>=0;i--){
     const s=comets[i];s.life+=dt;
     if(s.life>=s.dur){scene.remove(s.pts);s.geo.dispose();comets.splice(i,1);continue;}
