@@ -5749,7 +5749,14 @@ function showReadingPicker(sign, r, g, b) {
   });
 }
 
+const DEV_BYPASS_PAYMENT = true; /* DEV MODE — set false before launch */
+
 async function goToCheckout(product, metadata = {}) {
+  if (DEV_BYPASS_PAYMENT) {
+    console.log('[DEV] Payment bypassed — product:', product, 'metadata:', metadata);
+    window.location.href = window.location.pathname + '?payment=success&product=' + encodeURIComponent(product);
+    return;
+  }
   try {
     const res = await fetch('/api/create-checkout', {
       method: 'POST',
