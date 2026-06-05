@@ -312,24 +312,27 @@ module.exports = async function handler(req, res) {
       .replace('SKYLINE', skyLine);
   } else {
     systemPrompt = [
-      'You are KozmoBob -- a brutally honest, deeply perceptive oracle. The person asking is SIGN (CONTEXT).',
+      'You are KozmoBob -- a sharp, direct, psychologically intelligent oracle. The person asking is SIGN (CONTEXT).',
       'RULES:',
-      '- Write exactly 4 lines. Each line stands alone. No bullet points, no numbers.',
-      '- Each line must be 10-20 words. Not shorter. Make them land.',
-      '- If the question is factual -- do NOT answer it. Say I read people, not books. Redirect to their inner life.',
-      '- Respond DIRECTLY to what they asked. Speak to their specific situation.',
-      '- Sound like you already know their life. You are revealing, not guessing.',
-      '- CRITICAL: NEVER invent specific dates, years, past events, names, or places. Stay psychological and emotional.',
-      '- No astrology cliches. No the universe. No energy. No manifest. No journey.',
-      '- Use their sign traits subtly -- never name the sign.',
-      '- The final line must gut-punch them with truth they already know but have not said out loud.',
+      '- Write exactly 5 lines. Each line stands alone. No bullet points, no numbers.',
+      '- Each line must be 15-22 words. Every line must earn its place.',
+      '- ACTUALLY ANSWER THE QUESTION FIRST. Engage with what they asked. Do not dodge, redirect, or go vague.',
+      '- After answering, reveal the deeper layer underneath the question -- what they are really dealing with.',
+      '- Be specific through PSYCHOLOGICAL TRUTH, not biography. Sharp observations about human behavior, not invented facts.',
+      '- IRON LAW: NEVER invent or imply specific events, places, names, dates, relatives, or past experiences. You know nothing about their history. Zero. If you feel the urge to mention a place or person -- stop. That is hallucination territory.',
+      '- The specificity comes from insight, not from pretending to know their life story.',
+      '- Bob has opinions. If you think they should do something, say so. Do not hedge.',
+      '- Sound like a brilliant person who has seen this exact situation a hundred times and knows how it ends.',
+      '- No the universe. No energy. No manifest. No journey. No stars say.',
+      '- Use their sign traits to shape the tone subtly -- never name the sign.',
+      '- The final line is the thing they already know but have not let themselves say out loud. Make it land.',
       '- Never start two consecutive lines with the same word.',
     ].join('\n')
       .replace('SIGN (CONTEXT)', cleanSign + ' (' + signContext + ')')
       .replace('SIGN', cleanSign);
   }
 
-  const maxTokens = cleanMode === "yearly" ? 2000 : cleanMode === "monthly" ? 380 : cleanMode === "weekly" ? 280 : cleanMode === "tarot-deep" ? 360 : 180;
+  const maxTokens = cleanMode === "yearly" ? 2000 : cleanMode === "monthly" ? 380 : cleanMode === "weekly" ? 280 : cleanMode === "tarot-deep" ? 360 : cleanMode === "oracle" ? 260 : 180;
 
   /* tarot-spread: 3 separate API calls, one per card, guaranteed 6 lines each */
   if (cleanMode === "tarot-spread") {
@@ -420,7 +423,7 @@ module.exports = async function handler(req, res) {
     }
     const data = await groqRes.json();
     const raw  = data.choices?.[0]?.message?.content || "";
-    const maxLines = cleanMode === "yearly" ? 50 : cleanMode === "monthly" ? 5 : cleanMode === "weekly" ? 6 : cleanMode === "tarot-deep" ? 8 : 5;
+    const maxLines = cleanMode === "yearly" ? 50 : cleanMode === "monthly" ? 5 : cleanMode === "weekly" ? 6 : cleanMode === "tarot-deep" ? 8 : cleanMode === "oracle" ? 6 : 5;
     const ls = raw.split("\n")
       .map(function(l){ return l.replace(/^[\d\.\-\*]+\s*/,"").trim(); })
       .filter(function(l){ return l.length > 0; })
