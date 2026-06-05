@@ -618,15 +618,23 @@ document.getElementById('star-close').addEventListener('click',closeStarPanel);
 document.getElementById('star-panel').addEventListener('click',e=>{if(e.target===document.getElementById('star-panel'))closeStarPanel();});
 document.getElementById('add-btn').addEventListener('click',()=>openStarPanel('','neutral'));
 
+const SKY_DEV_MODE=true; /* DEV MODE — set false before launch */
 document.getElementById('star-buy').addEventListener('click',async()=>{
   const name=(document.getElementById('star-name').value||'').trim();
   const message=(document.getElementById('star-message').value||'').trim();
   const msgEl=document.getElementById('star-msg');
   const buyBtn=document.getElementById('star-buy');
   buyBtn.disabled=true;
-  msgEl.textContent='Opening checkout...';
   const px=(Math.random()*2-1),py=Math.random()*0.8+0.1,pz=(Math.random()*2-1);
   const norm=Math.sqrt(px*px+py*py+pz*pz);
+  if(SKY_DEV_MODE){
+    babyStars.push({name:name||'Test Star',message,gender:selGender,date:'Now',pos:new THREE.Vector3(px/norm,py/norm,pz/norm).normalize()});
+    buildBaby();
+    document.getElementById('star-panel').classList.remove('open');
+    msgEl.textContent='';buyBtn.disabled=false;
+    return;
+  }
+  msgEl.textContent='Opening checkout...';
   try{
     const r=await fetch('/api/create-checkout',{
       method:'POST',
