@@ -635,10 +635,6 @@ html,body{
     transition:all .2s;z-index:3;
     animation:adGlow 2.4s ease-in-out infinite;
   }
-  @keyframes adGlow{
-    0%,100%{box-shadow:0 0 6px rgba(255,200,40,.2);border-color:rgba(255,200,40,.4);color:rgba(255,200,40,.8);}
-    50%{box-shadow:0 0 18px rgba(255,200,40,.6),0 0 32px rgba(255,200,40,.2);border-color:rgba(255,200,40,.9);color:rgba(255,220,80,1);}
-  }
   #mob-top-tag:hover{
     color:#fff;border-color:rgba(255,200,40,1);
     box-shadow:0 0 20px rgba(255,200,40,.6);
@@ -708,10 +704,6 @@ html,body{
     background:rgba(0,207,255,.08);
     transition:all .2s;z-index:3;
     animation:adGlowBlue 2.4s ease-in-out infinite;
-  }
-  @keyframes adGlowBlue{
-    0%,100%{box-shadow:0 0 6px rgba(0,207,255,.2);border-color:rgba(0,207,255,.4);color:rgba(0,207,255,.8);}
-    50%{box-shadow:0 0 18px rgba(0,207,255,.6),0 0 32px rgba(0,207,255,.2);border-color:rgba(0,207,255,.9);color:rgba(80,230,255,1);}
   }
   #mob-bot-tag:hover{
     color:#fff;border-color:rgba(0,207,255,1);
@@ -1573,6 +1565,14 @@ select.adv-input option{background:#111;}
 }
 .adv-chip:hover{background:rgba(255,200,40,.07);color:rgba(255,200,40,.9);}
 
+@keyframes adGlow{
+  0%,100%{box-shadow:0 0 6px rgba(255,200,40,.2);border-color:rgba(255,200,40,.4);color:rgba(255,200,40,.8);}
+  50%{box-shadow:0 0 18px rgba(255,200,40,.6),0 0 32px rgba(255,200,40,.2);border-color:rgba(255,200,40,.9);color:rgba(255,220,80,1);}
+}
+@keyframes adGlowBlue{
+  0%,100%{box-shadow:0 0 6px rgba(0,207,255,.2);border-color:rgba(0,207,255,.4);color:rgba(0,207,255,.8);}
+  50%{box-shadow:0 0 18px rgba(0,207,255,.6),0 0 32px rgba(0,207,255,.2);border-color:rgba(0,207,255,.9);color:rgba(80,230,255,1);}
+}
 @keyframes __kb_flipIn {
   from { opacity:0; transform:perspective(600px) rotateY(90deg) scale(.9); }
   to   { opacity:1; transform:perspective(600px) rotateY(0deg)  scale(1);  }
@@ -1632,8 +1632,8 @@ select.adv-input option{background:#111;}
     <div id="mob-bot-scroll-track" style="overflow:hidden;width:100%;position:relative;">
       <div id="mob-bot-msg" style="font-family:'Georgia',serif;font-size:15px;font-weight:bold;white-space:nowrap;display:inline-block;will-change:transform;"></div>
     </div>
-    <div id="mob-bot-from" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.7);overflow:hidden;white-space:nowrap;"></div>
-    <div id="mob-bot-name" style="font-family:'Courier New',monospace;font-size:7px;letter-spacing:2px;opacity:.4;text-transform:uppercase;overflow:hidden;white-space:nowrap;"></div>
+    <div id="mob-bot-from" style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.95);overflow:hidden;white-space:nowrap;"></div>
+    <div id="mob-bot-name" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.75);text-transform:uppercase;overflow:hidden;white-space:nowrap;"></div>
   </div>
   <!-- AD button -->
   <div id="mob-bot-tag" style="margin-left:8px;text-align:center;line-height:1.4;cursor:pointer;">✦<br>AD</div>
