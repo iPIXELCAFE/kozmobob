@@ -1628,7 +1628,7 @@ select.adv-input option{background:#111;}
     <span id="mob-bot-sym" style="font-size:1.6rem;line-height:1;">🎂</span>
   </div>
   <!-- scrolling track -->
-  <div style="flex:1;overflow:hidden;position:relative;z-index:3;display:flex;flex-direction:column;justify-content:center;gap:2px;">
+  <div style="flex:1;min-width:0;overflow:hidden;position:relative;z-index:3;display:flex;flex-direction:column;justify-content:center;gap:2px;">
     <div id="mob-bot-scroll-track" style="overflow:hidden;width:100%;position:relative;">
       <div id="mob-bot-msg" style="font-family:'Georgia',serif;font-size:15px;font-weight:bold;white-space:nowrap;display:inline-block;will-change:transform;"></div>
     </div>
@@ -5340,15 +5340,17 @@ const OracleQuery = (() => {
   let scrollTimer = null;
 
   function runScroll(el, col, onDone) {
-    const trackW = el.parentElement.offsetWidth;
-    const textW  = el.scrollWidth;
-    const dist   = trackW + textW;
-    const speed  = Math.max(60, dist / 10);
+    /* Use window.innerWidth as start offset — guarantees text enters from
+       right edge of screen even if flex container hasn't measured yet */
+    const startX = window.innerWidth;
+    const textW  = el.scrollWidth || (el.textContent.length * 9);
+    const dist   = startX + textW;
+    const speed  = Math.max(80, dist / 10);
     const dur    = (dist / speed).toFixed(2);
 
     /* Start fully off-screen RIGHT, scroll to LEFT */
     el.style.transition = 'none';
-    el.style.transform  = `translateX(${trackW}px)`;
+    el.style.transform  = `translateX(${startX}px)`;
     el.style.opacity    = '0';
 
     requestAnimationFrame(()=>{
