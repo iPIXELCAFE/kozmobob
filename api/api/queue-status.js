@@ -11,10 +11,8 @@ const CORS = {
 };
 
 module.exports = async function handler(req, res) {
-  if (req.method === 'OPTIONS') {
-    return res.status(204).set(CORS).end();
-  }
   Object.entries(CORS).forEach(([k, v]) => res.setHeader(k, v));
+  if (req.method === 'OPTIONS') return res.status(204).end();
 
   try {
     const KV_URL   = process.env.KV_REST_API_URL;
