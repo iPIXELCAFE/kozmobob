@@ -1926,6 +1926,19 @@ select.adv-input option{background:#111;}
         <input class="adv-input" id="advert-url" type="url" placeholder="https://"/>
       </div>
 
+      <!-- Hours + Priority (community/premium only) -->
+      <div id="advert-booking-opts">
+        <div class="adv-field" style="margin-bottom:4px;">
+          <label class="adv-label">How Many Hours?</label>
+          <select class="adv-input" id="advert-hours" style="cursor:pointer;background:#0a0a14;color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:6px;padding:8px 10px;font-family:'Courier New',monospace;font-size:.68rem;letter-spacing:.08em;"></select>
+        </div>
+        <div id="advert-queue-status" style="font-family:'Courier New',monospace;font-size:.58rem;letter-spacing:.08em;color:rgba(255,200,40,.6);text-align:center;padding:5px 0 2px;min-height:18px;"></div>
+        <div id="advert-priority-wrap" onclick="window.__kbTogglePriority&&window.__kbTogglePriority()">
+          <div class="adv-priority-title">⚡ PRIORITY JUMP — +$9.99</div>
+          <div class="adv-priority-desc">Skip to front of queue · one-time flat fee</div>
+        </div>
+      </div>
+
       <!-- Price -->
       <div id="advert-price-wrap">
         <div id="advert-price-amount">$55</div>
@@ -1946,52 +1959,118 @@ select.adv-input option{background:#111;}
 
 <script>
 /* ══════════════════════════════════════════════════════════════
-   ADVERT OVERLAY — open, close, billboard select, multi-emoji
+   ADVERT OVERLAY — open, close, billboard select, multi-emoji,
+   hours selector, priority jump, queue status
    ══════════════════════════════════════════════════════════════ */
 (function(){
-  const MAX_EMOJI = 5;
-  let selectedEmojis = [];
+  const MAX_EMOJI   = 5;
+  const RATE_COMM   = 55;   /* $55/hr community — no discounts */
+  const RATE_PREM   = 250;  /* $250/hr premium  — no discounts */
+  const PRIORITY_FEE= 9.99; /* flat +$9.99 priority jump       */
 
-  const overlay   = document.getElementById('advert-overlay');
-  const closeBtn  = document.getElementById('advert-close');
-  const emojiField= document.getElementById('advert-emoji-field');
-  const fromField = document.getElementById('advert-from-field');
-  const bizField  = document.getElementById('advert-biz-field');
-  const emojiInput= document.getElementById('advert-emoji');
-  const emojiPrev = document.getElementById('advert-emoji-preview');
-  const msgArea   = document.getElementById('advert-msg');
-  const msgCount  = document.getElementById('advert-msg-count');
-  const priceAmt  = document.getElementById('advert-price-amount');
-  const priceDesc = document.getElementById('advert-price-desc');
-  const payBtn    = document.getElementById('advert-pay-btn');
-  const billCards = document.querySelectorAll('.ab-card');
-  let currentBill = 'left';
+  let selectedEmojis = [];
+  let currentBill    = 'left';
+  let selectedHours  = 1;
+  let priorityOn     = false;
+
+  const overlay      = document.getElementById('advert-overlay');
+  const closeBtn     = document.getElementById('advert-close');
+  const emojiField   = document.getElementById('advert-emoji-field');
+  const fromField    = document.getElementById('advert-from-field');
+  const bizField     = document.getElementById('advert-biz-field');
+  const emojiInput   = document.getElementById('advert-emoji');
+  const emojiPrev    = document.getElementById('advert-emoji-preview');
+  const msgArea      = document.getElementById('advert-msg');
+  const msgCount     = document.getElementById('advert-msg-count');
+  const priceAmt     = document.getElementById('advert-price-amount');
+  const priceDesc    = document.getElementById('advert-price-desc');
+  const payBtn       = document.getElementById('advert-pay-btn');
+  const billCards    = document.querySelectorAll('.ab-card');
+  const bookingOpts  = document.getElementById('advert-booking-opts');
+  const hoursSelect  = document.getElementById('advert-hours');
+  const queueStatus  = document.getElementById('advert-queue-status');
+  const priorityWrap = document.getElementById('advert-priority-wrap');
+
+  /* ── Populate hours dropdown 1-24 ── */
+  if (hoursSelect) {
+    for (let h = 1; h <= 24; h++) {
+      const opt = document.createElement('option');
+      opt.value = h;
+      opt.textContent = h === 1 ? '1 hour' : h + ' hours';
+      hoursSelect.appendChild(opt);
+    }
+    hoursSelect.addEventListener('change', () => {
+      selectedHours = parseInt(hoursSelect.value, 10) || 1;
+      refreshPrice();
+    });
+  }
+
+  /* ── Priority toggle ── */
+  window.__kbTogglePriority = function() {
+    priorityOn = !priorityOn;
+    if (priorityWrap) priorityWrap.classList.toggle('active', priorityOn);
+    refreshPrice();
+  };
+
+  /* ── Recalculate and display price ── */
+  function refreshPrice() {
+    if (currentBill === 'message') return;
+    const rate  = currentBill === 'right' ? RATE_PREM : RATE_COMM;
+    const base  = rate * selectedHours;
+    const total = priorityOn ? base + PRIORITY_FEE : base;
+    const hrs   = selectedHours === 1 ? '1 hour' : selectedHours + ' hours';
+    const type  = currentBill === 'right' ? 'Premium billboard · yours alone' : 'Community billboard · rotating with others';
+    const pri   = priorityOn ? ' + ⚡ priority jump' : '';
+    if (priceAmt)  priceAmt.textContent  = '$' + (Number.isInteger(total) ? total : total.toFixed(2));
+    if (priceDesc) priceDesc.textContent = hrs + ' · ' + type + pri;
+    if (payBtn)    payBtn.textContent    = '❆ BOOK NOW — $' + (Number.isInteger(total) ? total : total.toFixed(2));
+  }
+
+  /* ── Fetch queue status ── */
+  async function fetchQueueStatus() {
+    if (!queueStatus) return;
+    try {
+      const r = await fetch('/api/queue-status');
+      if (!r.ok) throw new Error();
+      const d = await r.json();
+      const inQueue = d.count || 0;
+      const waitHrs = d.wait_hours || 0;
+      if (inQueue === 0) {
+        queueStatus.textContent = '✦ Queue is empty — go live immediately';
+        queueStatus.style.color = 'rgba(0,255,120,.7)';
+      } else {
+        const waitTxt = waitHrs <= 1 ? 'under 1 hr wait' : '~' + waitHrs + ' hr wait';
+        queueStatus.textContent = inQueue + ' in queue · ' + waitTxt;
+        queueStatus.style.color = 'rgba(255,200,40,.6)';
+      }
+    } catch(e) {
+      queueStatus.textContent = '';
+    }
+  }
 
   /* ── Billboard selector ── */
   window.selectBillboard = function(type) {
     currentBill = type;
     billCards.forEach(c => c.classList.toggle('selected', c.dataset.bill === type));
     if (type === 'message') {
-      emojiField.style.display = 'block';
-      fromField.style.display  = 'block';
-      bizField.style.display   = 'none';
-      priceAmt.textContent  = '$19.99';
-      priceDesc.textContent = 'Personal message · stays as a star forever';
-      payBtn.textContent    = '❆ SEND NOW — $19.99';
-    } else if (type === 'right') {
-      emojiField.style.display = 'none';
-      fromField.style.display  = 'none';
-      bizField.style.display   = 'block';
-      priceAmt.textContent  = '$250';
-      priceDesc.textContent = '1 hour · Premium billboard · yours alone';
-      payBtn.textContent    = '❆ BOOK NOW — $250';
+      if (emojiField)   emojiField.style.display  = 'block';
+      if (fromField)    fromField.style.display   = 'block';
+      if (bizField)     bizField.style.display    = 'none';
+      if (bookingOpts)  bookingOpts.style.display = 'none';
+      if (priorityWrap) priorityWrap.style.display= 'none';
+      if (priceAmt)     priceAmt.textContent      = '$19.99';
+      if (priceDesc)    priceDesc.textContent     = 'Personal message · stays as a star forever';
+      if (payBtn)       payBtn.textContent        = '❆ SEND NOW — $19.99';
     } else {
-      emojiField.style.display = 'none';
-      fromField.style.display  = 'none';
-      bizField.style.display   = 'block';
-      priceAmt.textContent  = '$55';
-      priceDesc.textContent = '1 hour · Community billboard · first come first served';
-      payBtn.textContent    = '❆ BOOK NOW — $55';
+      if (emojiField)   emojiField.style.display  = 'none';
+      if (fromField)    fromField.style.display   = 'none';
+      if (bizField)     bizField.style.display    = 'block';
+      if (bookingOpts)  bookingOpts.style.display = 'block';
+      if (priorityWrap) priorityWrap.style.display= 'flex';
+      selectedHours = 1;
+      if (hoursSelect) hoursSelect.value = 1;
+      refreshPrice();
+      fetchQueueStatus();
     }
   };
 
@@ -2000,7 +2079,7 @@ select.adv-input option{background:#111;}
     const joined = selectedEmojis.join('');
     if (emojiInput)  emojiInput.value      = joined;
     if (emojiPrev)   emojiPrev.textContent = joined;
-    window.__kbGetEmoji = () => joined; /* expose to other IIFEs */
+    window.__kbGetEmoji = () => joined;
   }
 
   document.querySelectorAll('.epick').forEach(el => {
@@ -2008,15 +2087,12 @@ select.adv-input option{background:#111;}
       const e = el.dataset.e;
       const idx = selectedEmojis.indexOf(e);
       if (idx > -1) {
-        /* Deselect */
         selectedEmojis.splice(idx, 1);
         el.classList.remove('selected');
       } else if (selectedEmojis.length < MAX_EMOJI) {
-        /* Select */
         selectedEmojis.push(e);
         el.classList.add('selected');
       } else {
-        /* At limit — flash the preview */
         if (emojiPrev) { emojiPrev.style.opacity='.3'; setTimeout(()=>emojiPrev.style.opacity='1',200); }
       }
       updateEmojiDisplay();
@@ -2031,7 +2107,9 @@ select.adv-input option{background:#111;}
   /* ── Open / close ── */
   window.openAdvertOverlay = function(slot) {
     if (!overlay) return;
-    selectBillboard(slot === 'message' ? 'message' : 'left');
+    priorityOn = false;
+    if (priorityWrap) priorityWrap.classList.remove('active');
+    selectBillboard(slot === 'message' ? 'message' : slot === 'right' ? 'right' : 'left');
     overlay.classList.add('visible');
   };
   if (closeBtn) closeBtn.addEventListener('click', () => overlay.classList.remove('visible'));
@@ -2039,11 +2117,12 @@ select.adv-input option{background:#111;}
 
   /* ── Pay button — Stripe checkout ── */
   if (payBtn) payBtn.addEventListener('click', async () => {
-    const emoji   = (document.getElementById('advert-emoji-preview')?.textContent || '').trim();
-    const message = (document.getElementById('advert-msg')?.value || '').trim();
-    const fromVal = (document.getElementById('advert-from')?.value || '').trim();
-    const bizVal  = (document.getElementById('advert-biz')?.value || '').trim();
-    const url     = bizVal || '';
+    const emoji    = (window.__kbGetEmoji && window.__kbGetEmoji()) || '';
+    const message  = (document.getElementById('advert-msg')?.value || '').trim();
+    const fromVal  = (document.getElementById('advert-from')?.value || '').trim();
+    const bizVal   = (document.getElementById('advert-biz')?.value || '').trim();
+    const rawUrl   = ((document.getElementById('advert-url')?.value || '')).trim();
+    const url      = rawUrl && !rawUrl.match(/^https?:\/\//) ? 'https://' + rawUrl : rawUrl;
     const deviceId = localStorage.getItem('__kb_device') || '';
 
     let product, metadata;
@@ -2054,10 +2133,10 @@ select.adv-input option{background:#111;}
       sessionStorage.setItem('__kb_personal_msg', JSON.stringify({ text: message, emoji, from: fromVal, link: url }));
     } else if (currentBill === 'right') {
       product  = 'billboard-premium';
-      metadata = { message: bizVal, emoji, url, deviceId };
+      metadata = { message: bizVal, url, deviceId, hours: selectedHours, priority: priorityOn ? 1 : 0 };
     } else {
       product  = 'billboard-community';
-      metadata = { message: bizVal, emoji, url, deviceId };
+      metadata = { message: bizVal, url, deviceId, hours: selectedHours, priority: priorityOn ? 1 : 0 };
     }
 
     payBtn.textContent = '✦ Redirecting...';
@@ -4462,9 +4541,20 @@ const OracleQuery = (() => {
         lines = (_d.lines || []).slice(0, 4);
       } catch(e) {}
       if (!lines.length) {
-        const fb = CARD_READINGS[card.n] || (card.n + '. ' + card.k + '.');
-        const rawSents = fb.match(/[^.!?]+[.!?]+/g) || [fb];
-        lines = rawSents.map(s => s.trim()).filter(Boolean).slice(0, 4);
+        if (CARD_READINGS[card.n]) {
+          const rawSents = CARD_READINGS[card.n].match(/[^.!?]+[.!?]+/g) || [CARD_READINGS[card.n]];
+          lines = rawSents.map(s => s.trim()).filter(Boolean).slice(0, 4);
+        } else {
+          /* Minor arcana fallback — suit-based 4-line reading */
+          const _suit = card.n.split(' ').pop(); /* Cups, Swords, Pentacles, Wands */
+          const SUIT_FB = {
+            'Cups':      ['What you are feeling right now is not an overreaction — it is information.', 'A relationship in your life is asking for more honesty than you have been giving it.', 'The emotional weight you have been carrying belongs to a story you can finally put down.', 'Open what has been closed. The risk of connection is smaller than the cost of withholding.'],
+            'Swords':    ['The story you keep telling yourself about this situation is the thing keeping you stuck.', 'A decision that has been hanging over you already has an answer — you have been avoiding it.', 'The sharpest tool you have is clarity. Use it on yourself before anyone else.', 'What looks like conflict from the outside is just the mind trying to outrun what the body already knows.'],
+            'Pentacles': ['Something you built or started has more value than you are currently giving it credit for.', 'A practical move — small, concrete, today — changes the financial picture more than any plan.', 'The security you are looking for cannot come from the outside. It is built from the inside out.', 'Stop waiting for the right moment. The ground under your feet is solid enough to start.'],
+            'Wands':     ['The energy you have been holding back is the exact thing this situation needs.', 'You started something for a reason that is still true — do not let the middle of it fool you.', 'The doubt you feel is not a sign to stop. It is a sign you are getting close to something real.', 'Move. The direction matters less than the fact of moving. Momentum is its own answer.'],
+          };
+          lines = SUIT_FB[_suit] || ['Something in this card speaks directly to where you are right now.', 'The pattern you keep encountering is a teacher, not a punishment.', 'What you resist is usually the thing that would free you.', 'The answer is simpler than the question you have been asking.'];
+        }
       }
       if (cardReadAbort) { cooldown = false; return; }
       teaser.innerHTML = '';
@@ -5282,42 +5372,23 @@ const OracleQuery = (() => {
     const col = b.msg?.color || b.color;
     currentHref = b.href;
 
-    /* Fade banner out briefly */
-    banner.style.opacity = '0';
-    banner.style.transition = 'opacity .3s ease';
+    /* Update content immediately — no banner fade (was causing blink between each brand) */
+    if(symEl){ symEl.textContent = b.msg?.sym || '✦'; symEl.style.color = col; symEl.style.filter = `drop-shadow(0 0 10px ${col})`; }
+    if(nameEl2){ nameEl2.textContent = b.name; nameEl2.style.color = col.replace('.95','.4'); }
+    if(fromEl){ fromEl.textContent = b.msg?.from || b.url || ''; fromEl.style.color = 'rgba(255,255,255,.65)'; }
+    if(botBorder){ botBorder.style.background = `linear-gradient(90deg,${col},#C77DFF,${col})`; botBorder.style.backgroundSize = '300% 100%'; }
+    if(tag){ tag.style.color = col; tag.style.borderColor = col.replace('.95','.4'); }
 
-    setTimeout(()=>{
-      /* Update sym */
-      if(symEl){ symEl.textContent = b.msg?.sym || '✦'; symEl.style.color = col; symEl.style.filter = `drop-shadow(0 0 10px ${col})`; }
-      /* Update name label */
-      if(nameEl2){ nameEl2.textContent = b.name; nameEl2.style.color = col.replace('.95','.4'); }
-      /* Update from */
-      if(fromEl){ fromEl.textContent = b.msg?.from || b.url || ''; fromEl.style.color = 'rgba(255,255,255,.65)'; }
-      /* Update border */
-      if(botBorder){ botBorder.style.background = `linear-gradient(90deg,${col},#C77DFF,${col})`; botBorder.style.backgroundSize = '300% 100%'; }
-      /* Update AD button */
-      if(tag){ tag.style.color = col; tag.style.borderColor = col.replace('.95','.4'); }
-
-      /* Set message text */
-      const text = b.msg?.text || b.name;
-      if(msgEl){
-        msgEl.textContent = text;
-        msgEl.style.color = col;
-        msgEl.style.textShadow = `0 0 18px ${col}`;
-        msgEl.style.transform = 'translateX(0)';
-        msgEl.style.opacity = '0';
-      }
-
-      banner.style.opacity = '1';
-
-      /* Run scroll — advance to next brand only after current scroll completes */
-      if(msgEl){
-        runScroll(msgEl, col, ()=>{
-          idx = (idx + 1) % BRANDS.length;
-          scrollTimer = setTimeout(()=> show(BRANDS[idx]), 500);
-        });
-      }
-    }, 350);
+    const text = b.msg?.text || b.name;
+    if(msgEl){
+      msgEl.textContent = text;
+      msgEl.style.color = col;
+      msgEl.style.textShadow = `0 0 18px ${col}`;
+      runScroll(msgEl, col, ()=>{
+        idx = (idx + 1) % BRANDS.length;
+        scrollTimer = setTimeout(()=> show(BRANDS[idx]), 500);
+      });
+    }
   }
 
   /* Inject personal message into mobile banner */
@@ -7545,30 +7616,13 @@ document.addEventListener('keydown',     boot, { once: true });
 
   /* ──────────────────────────────────────────────
      OVERLAY: open, billboard select, controls
+     NOTE: openAdvertOverlay and payBtn.onclick are
+     handled by the first IIFE above — do not override.
   ────────────────────────────────────────────── */
-  window.openAdvertOverlay = function(bill){
-    selBill = bill||'left';
-    selHours = 1; priorityOn = false;
-    selSlot = null; selPremDate = null; selPremHours = 1;
-    if(overlay) overlay.classList.add('visible');
-    /* Activate the correct billboard card */
-    if(window.selectBillboard){
-      window.selectBillboard(bill==='message'?'message':bill==='right'?'right':'left');
-    }
-    /* Build pricing UI for commercial slots */
-    if(bill !== 'message'){
-      buildDatePicker();
-      buildScheduleTable();
-      buildCommDatePicker();
-      buildCommSlotTable();
-      buildCommHoursButtons();
-    }
-    updatePriceDisplay();
-  };
-
-  /* ── Pay button — full booking handler ── */
-  if(payBtn){
-    payBtn.onclick = function(){
+  /* window.openAdvertOverlay — DISABLED: handled by first IIFE */
+  /* if(payBtn){ payBtn.onclick — DISABLED: handled by first IIFE */
+  if(false && payBtn){
+    var __unusedPayHandler = function(){
       const biz     = (document.getElementById('advert-biz')||{}).value||'';
       const subEl   = document.getElementById('advert-success-msg');
       const succDiv = document.getElementById('advert-success');
