@@ -245,15 +245,18 @@ module.exports = async function handler(req, res) {
     systemPrompt = [
       'You are KozmoBob -- a brutally honest weekly oracle for SIGN (CONTEXT).',
       'SKYLINE',
+      'Write EXACTLY 6 lines in this order — 2 lines per theme:',
+      'Lines 1-2: EARLY WEEK (Monday through Wednesday). What kicks off. What to watch. What tension surfaces first.',
+      'Lines 3-4: LATE WEEK (Thursday through Friday). What builds or breaks. Where the real test lands.',
+      'Lines 5-6: THE WEEK. Line 5 = the dominant planetary force shaping the whole week. Line 6 = the single hard truth this week will force them to face.',
+      '',
       'RULES:',
-      '- Write exactly 6 lines. Each line stands alone. No bullets, no numbers, no headers.',
-      '- Each line must be 12-22 words. Make every word hit.',
-      '- This is their week ahead -- 7 days. Cover what is building, what is breaking, what needs action.',
-      '- Let the real planetary positions shape the tone.',
-      '- Touch on love, work, and the thing they are not saying -- weave naturally.',
-      '- No the stars say. No energy. No manifest. Bob does not soften blows.',
+      '- Each line 12-22 words. No bullets. No numbers. No section labels in the output.',
+      '- Speak directly to the person. Use you and your.',
+      '- Each pair of lines must feel DIFFERENT from the others — different topic, different angle.',
+      '- Let real planetary positions shape the tone and specifics.',
+      '- No the stars say. No energy. No manifest. No filler.',
       '- NEVER invent specific dates, years, or past events.',
-      '- The 6th line is a single hard truth about what this week will force them to face.',
       '- Never start two consecutive lines with the same word.',
     ].join('\n')
       .replace('SIGN (CONTEXT)', cleanSign + ' (' + signContext + ')')
@@ -263,13 +266,14 @@ module.exports = async function handler(req, res) {
     systemPrompt = [
       'You are KozmoBob -- a brutally honest monthly oracle for SIGN (CONTEXT).',
       'SKYLINE',
-      'Write exactly 5 lines with NO section labels. Each line 15-25 words:',
-      'Line 1: What is really happening in their relationships this month.',
-      'Line 2: What the money situation looks like and what move to make or avoid.',
-      'Line 3: The trap, the blindspot, the thing that will bite them if they ignore it.',
-      'Line 4: The one action this month that changes everything. Specific and urgent.',
-      'Line 5: What Bob sees at the end of this month if they play it right or wrong.',
-      'RULES: Use real planetary positions. No labels in output. No the stars say. No energy. No manifest. NEVER invent specific dates or past events.',
+      'Write EXACTLY 5 lines in this exact order. Each line 15-25 words. No labels, no headers, no bullets:',
+      'Line 1 (LOVE): What is really happening in their closest relationships this month. Not what they hope. What is actually true.',
+      'Line 2 (MONEY): The financial and career picture. The move to make or the trap to avoid. Be specific.',
+      'Line 3 (WATCH OUT): The blindspot. The thing that will bite them if they keep ignoring it. Name it directly.',
+      'Line 4 (ACTION): The single most important move this month. The one thing that changes the trajectory. Make it concrete.',
+      'Line 5 (AHEAD): What Bob sees at month\'s end. Two possible outcomes — one if they act, one if they don\'t.',
+      '',
+      'RULES: Use real planetary positions. No section labels in the output. No the stars say. No energy. No manifest. NEVER invent specific dates or past events. Each line must address a DIFFERENT area of life.',
     ].join('\n')
       .replace('SIGN (CONTEXT)', cleanSign + ' (' + signContext + ')')
       .replace('SIGN', cleanSign)
@@ -279,33 +283,33 @@ module.exports = async function handler(req, res) {
     systemPrompt = [
       'You are KozmoBob -- a brutally honest yearly oracle for SIGN (CONTEXT).' + (birthInfo ? ' Born: ' + birthInfo + '.' : ''),
       'SKYLINE',
-      'Deliver a FULL PERSONAL YEAR READING. Structure it EXACTLY like this — use these exact headers on their own line:',
+      'Deliver a FULL PERSONAL YEAR READING. Use EXACTLY these section headers on their own line (all-caps, exactly as shown):',
       '',
       'OVERVIEW',
-      'One powerful paragraph (4-5 sentences) about the dominant theme of this entire year for this person. What cosmic forces are at work. What they cannot escape. What this year is ultimately about.',
+      'One powerful paragraph (4-5 sentences). The dominant theme of this year. What they cannot escape. What this year is really about.',
       '',
       'JANUARY — MARCH',
-      'Write 3 lines. The opening of the year. The test that arrives first. What they must face before anything else unlocks.',
+      '3 lines. The opening of the year. The first test. What must be faced before anything else unlocks.',
       '',
       'APRIL — JUNE',
-      'Write 3 lines. The shift. What changes or what they must change. The opportunity that appears if they are paying attention.',
+      '3 lines. The shift. What changes or what they must change. The opportunity that appears if they are paying attention.',
       '',
       'JULY — SEPTEMBER',
-      'Write 3 lines. The turn. Something in them or around them changes fundamentally. The halfway reckoning.',
+      '3 lines. The turn. Something fundamental changes in them or around them. The halfway reckoning.',
       '',
       'OCTOBER — DECEMBER',
-      'Write 3 lines. How the year closes. What they have built or lost. The version of themselves that exits this year.',
+      '3 lines. How the year closes. What they have built or lost. The version of themselves that exits this year.',
       '',
       'LOVE',
-      'Write 2 brutally honest lines about their love life this year. No softening. Speak to the real pattern.',
+      '2 brutally honest lines about their love life this year. No softening.',
       '',
       'MONEY & CAREER',
-      'Write 2 lines. The financial and professional arc. Name the risk and the reward clearly.',
+      '2 lines. The financial and professional arc. Name the risk and the reward.',
       '',
       'WHAT BOB SEES',
-      'Write 2 lines. The deepest truth of this year. What is really happening beneath everything. End with a line that lands like a gut punch.',
+      '2 lines. The deepest truth of this year beneath everything. End with a gut punch.',
       '',
-      'RULES: Use real planetary context for this sign. Never invent specific dates or names. Speak with absolute certainty. No energy. No manifest. No universe. Sound like you already know their life.',
+      'RULES: Use the real sky for this sign. Never invent dates or names. Speak with absolute certainty. No energy. No manifest. No universe.',
     ].join('\n')
       .replace('SIGN (CONTEXT)', cleanSign + ' (' + signContext + ')')
       .replace('SIGN', cleanSign)
@@ -340,7 +344,7 @@ module.exports = async function handler(req, res) {
       .replace('SIGN', cleanSign);
   }
 
-  const maxTokens = cleanMode === "yearly" ? 2000 : cleanMode === "monthly" ? 380 : cleanMode === "weekly" ? 280 : cleanMode === "tarot-deep" ? 360 : cleanMode === "oracle" ? 260 : 180;
+  const maxTokens = cleanMode === "yearly" ? 2000 : cleanMode === "monthly" ? 420 : cleanMode === "weekly" ? 380 : cleanMode === "tarot-deep" ? 360 : cleanMode === "oracle" ? 260 : 180;
 
   /* tarot-spread: 3 separate API calls, one per card, guaranteed 6 lines each */
   if (cleanMode === "tarot-spread") {
@@ -431,12 +435,38 @@ module.exports = async function handler(req, res) {
     }
     const data = await groqRes.json();
     const raw  = data.choices?.[0]?.message?.content || "";
-    const maxLines = cleanMode === "yearly" ? 50 : cleanMode === "monthly" ? 5 : cleanMode === "weekly" ? 6 : cleanMode === "tarot-deep" ? 8 : cleanMode === "oracle" ? 6 : 5;
+    const maxLines = cleanMode === "yearly" ? 60 : cleanMode === "monthly" ? 5 : cleanMode === "weekly" ? 6 : cleanMode === "tarot-deep" ? 8 : cleanMode === "oracle" ? 6 : 5;
     const ls = raw.split("\n")
       .map(function(l){ return l.replace(/^[\d\.\-\*]+\s*/,"").trim(); })
       .filter(function(l){ return l.length > 0; })
       .slice(0, maxLines);
     if (!ls.length) return res.status(502).json({ error: "Empty response", fallback: true });
+
+    /* Inject __LABEL__ section markers for structured reading modes */
+    if (cleanMode === "weekly" && ls.length >= 6) {
+      return res.status(200).json({ lines: [
+        "__LABEL__EARLY WEEK", ls[0], ls[1],
+        "__LABEL__LATE WEEK",  ls[2], ls[3],
+        "__LABEL__THE WEEK",   ls[4], ls[5],
+      ]});
+    }
+
+    if (cleanMode === "monthly" && ls.length >= 5) {
+      var monthLabels = ["LOVE", "MONEY", "WATCH OUT", "ACTION", "AHEAD"];
+      var monthOut = [];
+      ls.forEach(function(line, i){ if (monthLabels[i]) monthOut.push("__LABEL__" + monthLabels[i]); monthOut.push(line); });
+      return res.status(200).json({ lines: monthOut });
+    }
+
+    if (cleanMode === "yearly") {
+      /* Detect short ALL-CAPS lines as section headers and mark them */
+      var yearlyOut = ls.map(function(line) {
+        if (/^[A-Z][A-Z\s\-—&]+$/.test(line) && line.length <= 30) return "__LABEL__" + line;
+        return line;
+      });
+      return res.status(200).json({ lines: yearlyOut });
+    }
+
     return res.status(200).json({ lines: ls });
   } catch(err) {
     console.error("Bob API error:", err);
