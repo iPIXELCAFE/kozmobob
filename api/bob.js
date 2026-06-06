@@ -280,22 +280,41 @@ module.exports = async function handler(req, res) {
       .replace('SKYLINE', skyLine);
   } else if (cleanMode === 'yearly') {
     const birthInfo = cleanQ.match(/BORN:\s*([^\|]+)/i) ? cleanQ.match(/BORN:\s*([^\|]+)/i)[1].trim() : null;
+    const nowDate = new Date();
+    const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const currentMonthIdx = nowDate.getMonth();
+    const currentMonthName = MONTH_NAMES[currentMonthIdx];
+    const currentYear = nowDate.getFullYear();
+    /* Build next 12 months with their years */
+    const next12 = [];
+    for (var mi = 0; mi < 12; mi++) {
+      var idx = (currentMonthIdx + mi) % 12;
+      var yr  = currentYear + Math.floor((currentMonthIdx + mi) / 12);
+      next12.push(MONTH_NAMES[idx] + ' ' + yr);
+    }
+    const yearWindow = next12[0] + ' through ' + next12[11];
+    const monthList  = next12.join(', ');
     systemPrompt = [
       'You are KozmoBob — a deep-sight oracle delivering a full YEAR AHEAD reading for SIGN (CONTEXT).' + (birthInfo ? ' Born: ' + birthInfo + '.' : ''),
       'SKYLINE',
       '',
-      'This is a premium $24.99 annual reading. It must be COMPLETELY different from daily, weekly, and monthly readings. Nothing is recycled. No "this week", no "today", no "this month". Everything is full-year scale.',
+      'TODAY IS ' + currentMonthName + ' ' + currentYear + '. This reading covers the next 12 months: ' + yearWindow + '. The exact months available to reference: ' + monthList + '. NEVER reference any month outside this window.',
+      '',
+      'This is a premium $24.99 annual reading. It must be COMPLETELY different from daily, weekly, and monthly readings. Nothing is recycled. No "this week", no "today". Everything covers the full 12 months ahead.',
       '',
       'CRITICAL RULES:',
       '- Every section must be 160-200 words. No shorter. No exceptions.',
-      '- Name specific months and windows throughout (e.g. "mid-April through late May", "the final weeks of October").',
-      '- Use real planetary transits relevant to this sign this year: Saturn, Jupiter, Mars, Venus, Mercury, eclipses, retrogrades.',
-      '- Every claim must be specific to this sign this year. No generic astrology.',
+      '- Name specific months from this list only: ' + monthList + '.',
+      '- Use real planetary transits for this 12-month window: Saturn, Jupiter, Mars, Venus, Mercury, eclipses, retrogrades across both ' + currentYear + ' and ' + (currentYear + 1) + '.',
+      '- Every claim must be specific to this sign. No generic astrology.',
+      '- NEVER name the sign in the body of the reading. Not once. Not "Capricorn" or "Aries" or any sign name.',
       '- BANNED WORDS: energy, manifest, universe, journey, healing, trauma, toxic, boundary, empower, paradigm, deep-seated, penchant, blessing, resonate, vibrate, align, exciting, amazing, incredible, wonderful.',
+      '- BANNED PHRASES: "emerge stronger", "emerge stronger and wiser", "by the end of the year", "you will need to", "key to success", "stay focused and determined", "stay grounded", "the universe has", "trust the process", "trust that".',
       '- Name the real risks. Name the real rewards. No positivity washing.',
       '- Write in second person (you/your).',
       '- Speak with absolute certainty. Not "may" or "might" — declare what will happen.',
       '- NEVER invent names, places, or specific events. Only real planetary cycles.',
+      '- Every section must end differently. No section can close the same way as another.',
       '',
       'Write EXACTLY these 12 section headers, each on its own line, ALL-CAPS exactly as shown. After each header write the section body as flowing paragraphs — no bullet points, no numbered lists:',
       '',
