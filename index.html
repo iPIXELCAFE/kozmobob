@@ -331,7 +331,7 @@ html,body{
   transition:opacity .6s ease;
 }
 @media(max-width:768px){
-  #card-teaser{top:calc(50% - 210px);font-size:clamp(.8rem,3.2vw,.98rem);}
+  #card-teaser{top:calc(50% - 210px);font-size:clamp(.8rem,3.2vw,.98rem);z-index:9990!important;}
 }
 #card-teaser.visible{opacity:1;pointer-events:all;}
 #spread-area{
@@ -1386,7 +1386,7 @@ html,body{
    ADVERT OVERLAY — self-serve billboard booking
    ════════════════════════════════════════════════════ */
 #advert-overlay{
-  position:fixed;inset:0;z-index:90;
+  position:fixed;inset:0;z-index:99995;
   background:rgba(0,0,0,.93);
   display:flex;align-items:center;justify-content:center;
   opacity:0;pointer-events:none;
@@ -1834,7 +1834,7 @@ select.adv-input option{background:#111;}
       <!-- How it works -->
       <div style="font-family:'Courier New',monospace;font-size:.62rem;letter-spacing:.08em;color:rgba(255,255,255,.75);text-align:center;padding:10px 0 16px;line-height:1.9;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:16px;">
         Pay → join the queue → go live when it's your turn.<br>
-        First come, first served. 1 hour. No scheduling.
+        First come, first served. After your run, you re-enter the queue.
       </div>
 
       <!-- Billboard selector -->
@@ -5438,14 +5438,14 @@ const OracleQuery = (() => {
   if(tagEl) tagEl.addEventListener('click', (e)=>{
     e.stopPropagation();
     e.preventDefault();
-    if(typeof openAdvertOverlay === 'function') openAdvertOverlay('message');
+    if(typeof openAdvertOverlay === 'function') openAdvertOverlay('left');
   });
   if (takeover) takeover.addEventListener('click', (e)=>{
     e.stopPropagation();
     const b = BRANDS[idx];
     if (b.msg && b.msg.sym === '✦') {
       /* Advertise Here slot — open ad overlay */
-      if (typeof openAdvertOverlay === 'function') openAdvertOverlay('bottom');
+      if (typeof openAdvertOverlay === 'function') openAdvertOverlay('left');
     } else if (b.msg && b.msg.href) {
       /* Personal message with a business URL */
       window.open(b.msg.href, '_blank');
