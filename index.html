@@ -2767,22 +2767,27 @@ const OracleQuery = (() => {
     if (!vs.length) return null;
 
     _voice =
-      /* T1 — Neural / Natural (best on any platform) */
-      vs.find(v => /natural/i.test(v.name) && /en[-_]US/i.test(v.lang))                      ||
-      vs.find(v => /natural/i.test(v.name) && /en/i.test(v.lang))                            ||
+      /* T1 — Windows 11 Online Neural (best quality, need internet) */
+      vs.find(v => /aria online/i.test(v.name))                                               ||
+      vs.find(v => /jenny online/i.test(v.name))                                              ||
+      vs.find(v => /michelle online/i.test(v.name))                                           ||
+      vs.find(v => /ana online/i.test(v.name))                                                ||
+      /* T2 — Any Natural/Neural female voice */
+      vs.find(v => /natural/i.test(v.name) && /en[-_]US/i.test(v.lang) && !/guy|davis|roger|jason|tony|christopher|eric/i.test(v.name)) ||
+      vs.find(v => /natural/i.test(v.name) && /en/i.test(v.lang)       && !/guy|davis|roger|jason|tony|christopher|eric/i.test(v.name)) ||
       vs.find(v => /aria/i.test(v.name)    && /microsoft/i.test(v.name))                     ||
       vs.find(v => /jenny/i.test(v.name)   && /microsoft/i.test(v.name))                     ||
-      /* T2 — Apple enhanced / Siri (Mac & iOS) */
+      vs.find(v => /michelle/i.test(v.name)&& /microsoft/i.test(v.name))                     ||
+      /* T3 — Apple enhanced / Siri (Mac & iOS) */
       vs.find(v => /samantha/i.test(v.name) && /enhanced/i.test(v.name))                     ||
       vs.find(v => /siri/i.test(v.name)     && /en[-_]US/i.test(v.lang))                     ||
       vs.find(v => /siri/i.test(v.name)     && /en/i.test(v.lang))                           ||
-      /* T3 — Google US (skip UK — it's the robot the user hates) */
+      /* T4 — Google US */
       vs.find(v => /google/i.test(v.name)   && /us english/i.test(v.name))                   ||
       vs.find(v => /google/i.test(v.name)   && /en[-_]US/i.test(v.lang))                     ||
-      /* T4 — Standard local quality voices */
+      /* T5 — Standard local */
       vs.find(v => /samantha/i.test(v.name))                                                  ||
       vs.find(v => /zira/i.test(v.name))                                                      ||
-      /* T5 — Any US English, hard-exclude known robotic / non-US voices */
       vs.find(v =>
         /en[-_]US/i.test(v.lang) && v.localService &&
         !/kate|serena|daniel|rishi|karen|moira|fiona|tessa|oliver|fred/i.test(v.name)
@@ -2804,25 +2809,32 @@ const OracleQuery = (() => {
     const vs = speechSynthesis.getVoices();
     if (!vs.length) return null;
     _maleVoice =
-      /* Windows Microsoft */
+      /* T1 — Windows 11 Online Neural male (best quality) */
+      vs.find(v => /guy online/i.test(v.name))                             ||
+      vs.find(v => /davis online/i.test(v.name))                           ||
+      vs.find(v => /roger online/i.test(v.name))                           ||
+      vs.find(v => /jason online/i.test(v.name))                           ||
+      vs.find(v => /tony online/i.test(v.name))                            ||
+      vs.find(v => /christopher online/i.test(v.name))                     ||
+      vs.find(v => /eric online/i.test(v.name))                            ||
+      /* T2 — Any Natural/Neural male */
+      vs.find(v => /natural/i.test(v.name) && /guy|davis|roger|jason|tony|christopher|eric/i.test(v.name)) ||
+      vs.find(v => /natural/i.test(v.name) && /en[-_]US/i.test(v.lang))   ||
+      /* T3 — Windows standard male */
+      vs.find(v => /guy/i.test(v.name)     && /microsoft/i.test(v.name))  ||
       vs.find(v => /david/i.test(v.name)   && /microsoft/i.test(v.name))  ||
       vs.find(v => /mark/i.test(v.name)    && /microsoft/i.test(v.name))  ||
-      vs.find(v => /guy/i.test(v.name)     && /microsoft/i.test(v.name))  ||
       vs.find(v => /ryan/i.test(v.name)    && /microsoft/i.test(v.name))  ||
-      /* macOS / iOS */
+      /* T4 — macOS / iOS */
       vs.find(v => /alex/i.test(v.name))                                   ||
       vs.find(v => /tom/i.test(v.name)     && /en/i.test(v.lang))         ||
       vs.find(v => /daniel/i.test(v.name)  && /en[-_]GB/i.test(v.lang))   ||
-      vs.find(v => /oliver/i.test(v.name)  && /en/i.test(v.lang))         ||
-      /* Android / Samsung / Google */
-      vs.find(v => /google/i.test(v.name)  && /male/i.test(v.name))       ||
+      /* T5 — Android / Google */
       vs.find(v => /google/i.test(v.name)  && /uk english male/i.test(v.name)) ||
       vs.find(v => /male/i.test(v.name)    && /en/i.test(v.lang))         ||
-      vs.find(v => /en[-_]GB/i.test(v.lang) && v !== _voice)              ||
-      /* Last resort: any English voice that isn't the female pick */
       vs.find(v => /en[-_]US/i.test(v.lang) && v !== _voice)              ||
       vs.find(v => /en/i.test(v.lang)       && v !== _voice)              ||
-      null; /* return null — pitch alone will differentiate on Android */
+      null;
     return _maleVoice;
   }
   if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
