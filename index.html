@@ -3657,8 +3657,14 @@ const OracleQuery = (() => {
         var _injectAttempts = 30;
         var _injectTimer = setInterval(function() {
           _injectAttempts--;
-          var fn = adData.type === 'right' ? window.__injectRightAd : window.__injectLeftAd;
-          if (fn) { fn(adData); clearInterval(_injectTimer); return; }
+          var desktopFn = adData.type === 'right' ? window.__injectRightAd : window.__injectLeftAd;
+          var mobileFn  = window.__injectMobileAdBanner;
+          if (desktopFn || mobileFn) {
+            if (desktopFn) desktopFn(adData);
+            if (mobileFn)  mobileFn(adData);
+            clearInterval(_injectTimer);
+            return;
+          }
           if (_injectAttempts <= 0) clearInterval(_injectTimer);
         }, 200);
       }
@@ -5477,6 +5483,37 @@ const OracleQuery = (() => {
       ov.addEventListener('click', e=>{ if(e.target===ov) close(); });
       setTimeout(close, 10000);
     }
+  };
+
+  /* ── Inject community/premium billboard ad into mobile banner ── */
+  window.__injectMobileAdBanner = function(ad){
+    if(!ad || !ad.biz) return;
+    const isPriority = !!ad.priority;
+    const col = isPriority ? 'rgba(255,215,0,.95)' : 'rgba(255,200,80,.90)';
+    const entry = {
+      id: '__user_ad__',
+      name: (isPriority ? '⚡ ' : '✦ ') + ad.biz.toUpperCase(),
+      url:  ad.url || 'kozmobob.com',
+      href: ad.url || 'https://kozmobob.com',
+      color: col, border: 'rgba(255,215,0,.40)',
+      msg: {
+        sym:   isPriority ? '⚡' : '✦',
+        text:  ad.msg || ad.biz.toUpperCase(),
+        from:  ad.url || '',
+        color: isPriority ? '#FFD700' : '#FFCC44'
+      }
+    };
+    const ex = BRANDS.findIndex(b => b.id === '__user_ad__');
+    if(ex > -1) BRANDS.splice(ex, 1);
+    BRANDS.unshift(entry);
+    idx = 0;
+    show(BRANDS[0]);
+    /* Remove after booked hours */
+    const ms = (ad.hours || 1) * 3600000;
+    setTimeout(()=>{
+      const i = BRANDS.findIndex(b => b.id === '__user_ad__');
+      if(i > -1){ BRANDS.splice(i,1); if(idx >= BRANDS.length) idx=0; }
+    }, ms);
   };
 
   const tagEl = document.getElementById('mob-bot-tag');
