@@ -2139,6 +2139,18 @@ select.adv-input option{background:#111;}
       metadata = { message: bizVal, url, deviceId, hours: selectedHours, priority: priorityOn ? 1 : 0 };
     }
 
+    /* Save ad data so success handler can inject it live */
+    if (currentBill !== 'message') {
+      sessionStorage.setItem('__kb_billboard_ad', JSON.stringify({
+        biz:      bizVal || 'YOUR BRAND',
+        msg:      message,
+        url:      url,
+        hours:    selectedHours,
+        priority: priorityOn ? 1 : 0,
+        type:     currentBill  /* 'left' (community) or 'right' (premium) */
+      }));
+    }
+
     payBtn.textContent = '✦ Redirecting...';
     payBtn.disabled = true;
     await goToCheckout(product, metadata);
@@ -3634,6 +3646,24 @@ const OracleQuery = (() => {
   /* ── Billboard booking confirmed ── */
   if (product === 'billboard-community' || product === 'billboard-premium') {
     const tier  = product === 'billboard-premium' ? 'Premium' : 'Community';
+
+    /* Inject the ad live immediately */
+    const raw = sessionStorage.getItem('__kb_billboard_ad');
+    sessionStorage.removeItem('__kb_billboard_ad');
+    if (raw) {
+      var adData = null;
+      try { adData = JSON.parse(raw); } catch(e) {}
+      if (adData && adData.biz) {
+        var _injectAttempts = 30;
+        var _injectTimer = setInterval(function() {
+          _injectAttempts--;
+          var fn = adData.type === 'right' ? window.__injectRightAd : window.__injectLeftAd;
+          if (fn) { fn(adData); clearInterval(_injectTimer); return; }
+          if (_injectAttempts <= 0) clearInterval(_injectTimer);
+        }, 200);
+      }
+    }
+
     const toast = document.createElement('div');
     toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#080808;border:1px solid rgba(255,200,40,.45);border-radius:16px;padding:32px 28px;z-index:99999;font-family:Courier New,monospace;text-align:center;max-width:min(340px,88vw);';
     toast.innerHTML = '<div style="font-size:2rem;margin-bottom:12px;">✦</div>'
