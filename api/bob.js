@@ -281,35 +281,59 @@ module.exports = async function handler(req, res) {
   } else if (cleanMode === 'yearly') {
     const birthInfo = cleanQ.match(/BORN:\s*([^\|]+)/i) ? cleanQ.match(/BORN:\s*([^\|]+)/i)[1].trim() : null;
     systemPrompt = [
-      'You are KozmoBob -- a brutally honest yearly oracle for SIGN (CONTEXT).' + (birthInfo ? ' Born: ' + birthInfo + '.' : ''),
+      'You are KozmoBob — a deep-sight oracle delivering a full YEAR AHEAD reading for SIGN (CONTEXT).' + (birthInfo ? ' Born: ' + birthInfo + '.' : ''),
       'SKYLINE',
-      'Deliver a FULL PERSONAL YEAR READING. Use EXACTLY these section headers on their own line (all-caps, exactly as shown):',
+      '',
+      'This is a premium $24.99 annual reading. It must be COMPLETELY different from daily, weekly, and monthly readings. Nothing is recycled. No "this week", no "today", no "this month". Everything is full-year scale.',
+      '',
+      'CRITICAL RULES:',
+      '- Every section must be 160-200 words. No shorter. No exceptions.',
+      '- Name specific months and windows throughout (e.g. "mid-April through late May", "the final weeks of October").',
+      '- Use real planetary transits relevant to this sign this year: Saturn, Jupiter, Mars, Venus, Mercury, eclipses, retrogrades.',
+      '- Every claim must be specific to this sign this year. No generic astrology.',
+      '- BANNED WORDS: energy, manifest, universe, journey, healing, trauma, toxic, boundary, empower, paradigm, deep-seated, penchant, blessing, resonate, vibrate, align, exciting, amazing, incredible, wonderful.',
+      '- Name the real risks. Name the real rewards. No positivity washing.',
+      '- Write in second person (you/your).',
+      '- Speak with absolute certainty. Not "may" or "might" — declare what will happen.',
+      '- NEVER invent names, places, or specific events. Only real planetary cycles.',
+      '',
+      'Write EXACTLY these 12 section headers, each on its own line, ALL-CAPS exactly as shown. After each header write the section body as flowing paragraphs — no bullet points, no numbered lists:',
       '',
       'OVERVIEW',
-      'One powerful paragraph (4-5 sentences). The dominant theme of this year. What they cannot escape. What this year is really about.',
+      'The year\'s single defining force for this sign. What this year is fundamentally demanding. What it will take from them and what it will give in return. The planetary configuration that makes this year unlike any recent one for this sign. What they cannot avoid and what they must not waste. 160-200 words.',
       '',
-      'JANUARY — MARCH',
-      '3 lines. The opening of the year. The first test. What must be faced before anything else unlocks.',
+      'LOVE & INTIMACY',
+      'All close bonds — partner, potential partner, and the closest friendships. What structurally shifts in how they give and receive closeness this year. Name the months where love is tested and where it can deepen. What an existing partner will require from them. What someone single will encounter and when. The honest truth about what this sign needs to stop doing in relationships. 160-200 words.',
       '',
-      'APRIL — JUNE',
-      '3 lines. The shift. What changes or what they must change. The opportunity that appears if they are paying attention.',
+      'MONEY & RESOURCES',
+      'The full financial arc of the year. Is this a building year or a clearing year for this sign? Name the specific months where money moves — when income can grow, when to hold. The financial risk this sign is most likely to take and whether it pays off. What they are undervaluing. What is draining them financially without their full awareness. 160-200 words.',
       '',
-      'JULY — SEPTEMBER',
-      '3 lines. The turn. Something fundamental changes in them or around them. The halfway reckoning.',
+      'CAREER & PUBLIC LIFE',
+      'Professional trajectory, reputation, ambition, and visibility. What doors open and exactly when. What professional chapter is ending whether they accept it or not. The specific move that matters most this year career-wise. The mistake that is easy to make and costly to undo. How this sign\'s public reputation shifts over the year and what drives that shift. 160-200 words.',
       '',
-      'OCTOBER — DECEMBER',
-      '3 lines. How the year closes. What they have built or lost. The version of themselves that exits this year.',
+      'HEALTH & PHYSICAL ENERGY',
+      'Physical energy cycles across the full year — not psychology, the body itself. When energy peaks and when the body will demand rest. Specific months where pushing through is counterproductive. The area of physical health that needs consistent attention this year. What happens to their sleep, appetite, or physical rhythm under the year\'s dominant transits. What restores them fastest. 160-200 words.',
       '',
-      'LOVE',
-      '2 brutally honest lines about their love life this year. No softening.',
+      'HOME & FAMILY',
+      'Living situation, domestic life, family bonds, and roots. What shifts in the home environment this year — a move, a renovation, a change in who lives there, or a change in how home feels. The family relationship that will surface and demand resolution. What this sign is building or dismantling in their domestic foundation. The month this becomes undeniable. 160-200 words.',
       '',
-      'MONEY & CAREER',
-      '2 lines. The financial and professional arc. Name the risk and the reward.',
+      'MIND & COMMUNICATION',
+      'How they think, speak, write, and negotiate this year. What changes in their communication style under the year\'s transits. The conversation they have been postponing that cannot wait past a specific point this year. The mental pattern that runs on repeat and what breaks it. The skill or subject that pays off if pursued. How their words land differently this year than before. 160-200 words.',
       '',
-      'WHAT BOB SEES',
-      '2 lines. The deepest truth of this year beneath everything. End with a gut punch.',
+      'CREATIVITY & EXPRESSION',
+      'When and how their creative power peaks this year. The specific form of expression calling them — not generically, but what is pressing through in particular. What has been blocking it and what removes that block. The window in the year when anything they make carries unusual force. What they create in this window has a longer life than they expect. 160-200 words.',
       '',
-      'RULES: Use the real sky for this sign. Never invent dates or names. Speak with absolute certainty. No energy. No manifest. No universe.',
+      'SHADOW & HIDDEN FORCES',
+      'What is operating beneath the surface this year. The fear this sign is not naming out loud. The old pattern — not a personality trait, a specific behavioral loop — that will try to run the year if unchecked. What they will be forced to face that they have been successfully postponing. Name it directly. Do not soften this section. This is the most important section. 160-200 words.',
+      '',
+      'CHALLENGES & WHAT BREAKS YOU OPEN',
+      'The specific tests this year will bring. Not warnings — certainties. When they arrive, how long they last, and what they are actually for beneath the difficulty. The challenge that looks like a setback or a loss but is the hinge point of the entire year. What this sign will be capable of after passing through it that they are not capable of now. 160-200 words.',
+      '',
+      'THE WILDCARD',
+      'Something this sign will not see coming. Not a disaster — an honest look at the unexpected shift that changes the landscape of the year. An encounter, a reversal, an opening that arrives from an angle they are not watching. Do not make this vague. Make it specific to this sign\'s year. 100-130 words.',
+      '',
+      'BOB SEES THIS',
+      'The deepest truth of the year for this sign. What is really happening beneath all of it. The single thing they need to hear that makes the whole year make sense. Not encouragement. The truth. End with one sentence — short, declarative, unforgettable — that lands like a fact and does not let go. 100-130 words.',
     ].join('\n')
       .replace('SIGN (CONTEXT)', cleanSign + ' (' + signContext + ')')
       .replace('SIGN', cleanSign)
@@ -344,7 +368,7 @@ module.exports = async function handler(req, res) {
       .replace('SIGN', cleanSign);
   }
 
-  const maxTokens = cleanMode === "yearly" ? 2000 : cleanMode === "monthly" ? 420 : cleanMode === "weekly" ? 380 : cleanMode === "tarot-deep" ? 360 : cleanMode === "oracle" ? 260 : 180;
+  const maxTokens = cleanMode === "yearly" ? 4000 : cleanMode === "monthly" ? 420 : cleanMode === "weekly" ? 380 : cleanMode === "tarot-deep" ? 360 : cleanMode === "oracle" ? 260 : 180;
 
   /* tarot-spread: 3 separate API calls, one per card, guaranteed 6 lines each */
   if (cleanMode === "tarot-spread") {
@@ -435,7 +459,7 @@ module.exports = async function handler(req, res) {
     }
     const data = await groqRes.json();
     const raw  = data.choices?.[0]?.message?.content || "";
-    const maxLines = cleanMode === "yearly" ? 60 : cleanMode === "monthly" ? 5 : cleanMode === "weekly" ? 6 : cleanMode === "tarot-deep" ? 8 : cleanMode === "oracle" ? 6 : 5;
+    const maxLines = cleanMode === "yearly" ? 300 : cleanMode === "monthly" ? 5 : cleanMode === "weekly" ? 6 : cleanMode === "tarot-deep" ? 8 : cleanMode === "oracle" ? 6 : 5;
     const ls = raw.split("\n")
       .map(function(l){ return l.replace(/^[\d\.\-\*]+\s*/,"").trim(); })
       .filter(function(l){ return l.length > 0; })
@@ -459,9 +483,9 @@ module.exports = async function handler(req, res) {
     }
 
     if (cleanMode === "yearly") {
-      /* Detect short ALL-CAPS lines as section headers and mark them */
+      /* Detect ALL-CAPS lines (no lowercase) as section headers */
       var yearlyOut = ls.map(function(line) {
-        if (/^[A-Z][A-Z\s\-—&]+$/.test(line) && line.length <= 30) return "__LABEL__" + line;
+        if (line.length >= 3 && line.length <= 45 && !/[a-z]/.test(line) && /[A-Z]/.test(line)) return "__LABEL__" + line;
         return line;
       });
       return res.status(200).json({ lines: yearlyOut });
