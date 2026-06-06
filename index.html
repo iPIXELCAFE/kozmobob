@@ -4053,43 +4053,63 @@ const OracleQuery = (() => {
     const [r,g,b] = B.rgb;
     ctx.fillStyle=B.bg; ctx.fillRect(0,0,W,H);
 
-    const cx=W/2, cy=H*0.36;
+    const cx=W/2;
     const pulse=Math.sin(t*Math.PI*2)*0.06;
 
-    const grd=ctx.createRadialGradient(cx,cy,0,cx,cy,90);
-    grd.addColorStop(0,`rgba(${r},${g},${b},${0.14+pulse})`);
-    grd.addColorStop(1,'transparent');
-    ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
-
-    /* animated pixel grid */
-    const gs=9, cols=Math.ceil(88/gs), rows=Math.ceil(88/gs);
-    const gx=cx-(cols*gs)/2, gy=cy-(rows*gs)/2;
+    /* ── animated pixel grid — upper section ── */
+    const gridCy=H*0.27;
+    const gs=8, cols=Math.ceil(96/gs), rows=Math.ceil(78/gs);
+    const gx=cx-(cols*gs)/2, gy=gridCy-(rows*gs)/2;
     for(let row=0;row<rows;row++){
       for(let col=0;col<cols;col++){
         const dist=Math.sqrt((col-cols/2)**2+(row-rows/2)**2);
         const wave=Math.sin(t*Math.PI*6 - dist*0.85)*0.5+0.5;
-        if(wave>0.35){
+        if(wave>0.30){
           ctx.fillStyle=B.accent;
-          ctx.globalAlpha=wave*0.88;
+          ctx.globalAlpha=wave*0.92;
           ctx.fillRect(gx+col*gs+1, gy+row*gs+1, gs-2, gs-2);
         }
       }
     }
     ctx.globalAlpha=1;
 
-    /* wordmark */
-    ctx.textAlign='center';
-    const ty=cy+58;
-    ctx.fillStyle=B.accent; ctx.font=`bold 13px 'Courier New',monospace`;
-    ctx.fillText('iPIXEL',cx,ty);
-    ctx.font=`8px 'Courier New',monospace`;
-    ctx.fillStyle=`rgba(${r},${g},${b},.65)`;
-    ctx.fillText('C A F E',cx,ty+15);
+    /* ── glow halo behind wordmark ── */
+    const wordY=H*0.52;
+    const grd=ctx.createRadialGradient(cx,wordY,0,cx,wordY,85);
+    grd.addColorStop(0,`rgba(${r},${g},${b},${0.18+pulse})`);
+    grd.addColorStop(1,'transparent');
+    ctx.fillStyle=grd; ctx.fillRect(0,wordY-65,W,170);
 
-    ctx.fillStyle=`rgba(${r},${g},${b},.45)`;
-    ctx.font=`7.5px 'Courier New',monospace`;
-    ctx.fillText('YOUR BRAND.', cx, ty+35);
-    ctx.fillText('IMMORTALIZED.', cx, ty+48);
+    /* ── wordmark ── */
+    ctx.textAlign='center';
+    ctx.fillStyle=B.accent;
+    ctx.font=`bold 22px 'Courier New',monospace`;
+    ctx.fillText('iPIXEL',cx,wordY);
+    ctx.font=`bold 10px 'Courier New',monospace`;
+    ctx.fillStyle=`rgba(${r},${g},${b},.60)`;
+    ctx.fillText('C · A · F · E',cx,wordY+17);
+
+    /* thin rule */
+    ctx.strokeStyle=`rgba(${r},${g},${b},.25)`;
+    ctx.lineWidth=0.8;
+    ctx.beginPath(); ctx.moveTo(cx-58,wordY+27); ctx.lineTo(cx+58,wordY+27); ctx.stroke();
+
+    /* ── monument tagline ── */
+    ctx.fillStyle=`rgba(${r},${g},${b},.85)`;
+    ctx.font=`bold 9.5px 'Courier New',monospace`;
+    ctx.fillText('1ST DIGITAL MONUMENT',cx,wordY+43);
+
+    ctx.fillStyle=`rgba(${r},${g},${b},.52)`;
+    ctx.font=`8px 'Courier New',monospace`;
+    ctx.fillText('LEAVE YOUR MESSAGE',cx,wordY+59);
+
+    ctx.fillStyle=`rgba(${r},${g},${b},.70)`;
+    ctx.font=`bold 9px 'Courier New',monospace`;
+    ctx.fillText('F O R E V E R',cx,wordY+74);
+
+    ctx.fillStyle=`rgba(${r},${g},${b},.28)`;
+    ctx.font=`7px 'Courier New',monospace`;
+    ctx.fillText('ipixelcafe.com',cx,wordY+94);
 
     drawHUD(t, B.accent, B.rgb);
   }
@@ -4100,56 +4120,63 @@ const OracleQuery = (() => {
     const [r,g,b] = B.rgb;
     ctx.fillStyle=B.bg; ctx.fillRect(0,0,W,H);
 
-    const cx=W/2, cy=H*0.34;
+    const cx=W/2, cy=H*0.27;
     const pulse=Math.sin(t*Math.PI*1.8)*0.07;
 
     /* warm glow */
-    const grd=ctx.createRadialGradient(cx,cy,0,cx,cy,85);
+    const grd=ctx.createRadialGradient(cx,cy,0,cx,cy,110);
     grd.addColorStop(0,`rgba(${r},${g},${b},${0.18+pulse})`);
     grd.addColorStop(1,'transparent');
     ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
 
     /* animated steam wisps */
-    ctx.strokeStyle=`rgba(${r},${g},${b},.55)`;
-    ctx.lineWidth=1.5;
+    ctx.lineWidth=1.8; ctx.lineCap='round';
     for(let i=0;i<3;i++){
-      const ox=cx-18+i*18;
+      const ox=cx-20+i*20;
       const phase=t*Math.PI*2.2+(i*1.2);
       ctx.beginPath();
-      ctx.moveTo(ox, cy+8);
-      for(let y=0;y<38;y++){
-        const x=ox + Math.sin(phase+y*0.22)*6;
-        ctx.lineTo(x, cy+8-y);
+      ctx.moveTo(ox, cy+14);
+      for(let y=0;y<52;y++){
+        const x=ox + Math.sin(phase+y*0.20)*8;
+        ctx.lineTo(x, cy+14-y);
       }
-      ctx.globalAlpha=0.55-i*0.08;
+      ctx.strokeStyle=`rgba(${r},${g},${b},${0.55-i*0.10})`;
       ctx.stroke();
     }
-    ctx.globalAlpha=1;
 
-    /* fork icon — simple lines */
-    const fx=cx, fy=cy-30;
-    ctx.strokeStyle=B.accent; ctx.lineWidth=2; ctx.lineCap='round';
-    /* handle */
-    ctx.beginPath(); ctx.moveTo(fx,fy+14); ctx.lineTo(fx,fy+38); ctx.stroke();
-    /* tines */
+    /* fork icon — bigger */
+    const fx=cx, fy=cy-46;
+    ctx.strokeStyle=B.accent; ctx.lineWidth=2.5; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(fx,fy+20); ctx.lineTo(fx,fy+52); ctx.stroke();
     for(let i=-1;i<=1;i++){
-      ctx.beginPath(); ctx.moveTo(fx+i*5,fy); ctx.lineTo(fx+i*5,fy+12); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(fx+i*6,fy); ctx.lineTo(fx+i*6,fy+17); ctx.stroke();
     }
-    ctx.beginPath(); ctx.arc(fx,fy+13,5.5,0,Math.PI); ctx.stroke();
+    ctx.beginPath(); ctx.arc(fx,fy+19,7,0,Math.PI); ctx.stroke();
 
     /* wordmark */
+    const ty=H*0.52;
     ctx.textAlign='center';
-    const ty=cy+58;
-    ctx.fillStyle=B.accent; ctx.font=`bold 14px 'Courier New',monospace`;
+    ctx.fillStyle=B.accent;
+    ctx.font=`bold 22px 'Courier New',monospace`;
     ctx.fillText('NOVELLA',cx,ty);
-    ctx.font=`7.5px 'Courier New',monospace`;
-    ctx.fillStyle=`rgba(${r},${g},${b},.60)`;
-    ctx.fillText('I T A L I A N  K I T C H E N',cx,ty+14);
 
-    ctx.fillStyle=`rgba(${r},${g},${b},.42)`;
+    ctx.font=`9px 'Courier New',monospace`;
+    ctx.fillStyle=`rgba(${r},${g},${b},.62)`;
+    ctx.fillText('I T A L I A N  K I T C H E N',cx,ty+17);
+
+    /* thin rule */
+    ctx.strokeStyle=`rgba(${r},${g},${b},.22)`;
+    ctx.lineWidth=0.8;
+    ctx.beginPath(); ctx.moveTo(cx-54,ty+27); ctx.lineTo(cx+54,ty+27); ctx.stroke();
+
+    ctx.fillStyle=`rgba(${r},${g},${b},.58)`;
+    ctx.font=`8.5px 'Courier New',monospace`;
+    ctx.fillText('PIZZA · PASTA',cx,ty+43);
+    ctx.fillText('PERFECTION',cx,ty+57);
+
+    ctx.fillStyle=`rgba(${r},${g},${b},.28)`;
     ctx.font=`7px 'Courier New',monospace`;
-    ctx.fillText('PIZZA & PASTA PERFECTION', cx, ty+33);
-    ctx.fillText('NOVELLALV.COM', cx, ty+46);
+    ctx.fillText('novellalv.com',cx,ty+76);
 
     drawHUD(t, B.accent, B.rgb);
   }
@@ -5327,8 +5354,8 @@ const OracleQuery = (() => {
   if(!banner || !nameEl) return;
 
   const BRANDS = [
-    { name:'iPIXEL CAFE',    url:'ipixelcafe.com',  href:'https://www.ipixelcafe.com', color:'rgba(255,215,0,.95)',  border:'rgba(255,215,0,.30)'  },
-    { name:'NOVELLA LV',     url:'novellalv.com',   href:'https://www.novellalv.com',  color:'rgba(255,80,40,.95)', border:'rgba(255,80,40,.30)'  },
+    { name:'iPIXEL CAFE',    url:'ipixelcafe.com',  href:'https://www.ipixelcafe.com', color:'rgba(0,207,255,.95)',  border:'rgba(0,207,255,.30)',  msg:{sym:'⚡',text:'1st Digital Monument · Leave Your Message Forever · Lock Your Legacy',from:'ipixelcafe.com',color:'#00CFFF'} },
+    { name:'NOVELLA LV',     url:'novellalv.com',   href:'https://www.novellalv.com',  color:'rgba(255,80,40,.95)', border:'rgba(255,80,40,.30)',   msg:{sym:'🍷',text:'Authentic Italian Kitchen · Pizza & Pasta Perfection · Las Vegas',from:'novellalv.com',color:'#FF5533'} },
     { name:'YOUR BRAND',     url:'kozmobob.com',    href:'https://kozmobob.com',        color:'rgba(170,136,255,.95)',border:'rgba(170,136,255,.30)', msg:{sym:'✦',text:'Advertise Here',from:'kozmobob.com',color:'#AA88FF'} },
     { name:'HAPPY 30TH MIKE', url:'kozmobob.com', href:'https://kozmobob.com', color:'rgba(255,215,0,.95)',  border:'rgba(255,215,0,.40)',   msg:{sym:'🎂✨',text:'Happy 30th Mike! From your crew at Table 5 — we see you, legend.', from:'', color:'#FFD700'} },
     { name:'SHE SAID YES',   url:'kozmobob.com', href:'https://kozmobob.com', color:'rgba(255,105,180,.95)',border:'rgba(255,105,180,.40)',msg:{sym:'💍',text:'She said YES. Sarah & Marco — June 2026 forever.', from:'', color:'#FF88CC'} },
@@ -5387,31 +5414,33 @@ const OracleQuery = (() => {
   const tag    = document.getElementById('mob-bot-tag');
   const botBorder = document.getElementById('mob-bot-banner-border');
   let scrollTimer = null;
+  let _scrollGen  = 0; /* incremented each show() — cancels stale animation callbacks */
 
   function runScroll(el, col, onDone) {
-    /* Use window.innerWidth as start offset — guarantees text enters from
-       right edge of screen even if flex container hasn't measured yet */
+    const gen    = ++_scrollGen;
     const startX = window.innerWidth;
     const textW  = el.scrollWidth || (el.textContent.length * 9);
     const dist   = startX + textW;
     const speed  = Math.max(80, dist / 10);
     const dur    = (dist / speed).toFixed(2);
 
-    /* Start fully off-screen RIGHT, scroll to LEFT */
     el.style.transition = 'none';
     el.style.transform  = `translateX(${startX}px)`;
     el.style.opacity    = '0';
 
     requestAnimationFrame(()=>{
       requestAnimationFrame(()=>{
+        if(_scrollGen !== gen) return;
         el.style.transition = `opacity .3s ease`;
         el.style.opacity    = '1';
         setTimeout(()=>{
+          if(_scrollGen !== gen) return;
           el.style.transition = `transform ${dur}s linear`;
           el.style.transform  = `translateX(-${textW}px)`;
           setTimeout(()=>{
+            if(_scrollGen !== gen) return;
             el.style.opacity = '0';
-            setTimeout(onDone, 400);
+            setTimeout(()=>{ if(_scrollGen === gen) onDone(); }, 400);
           }, parseFloat(dur) * 1000 - 300);
         }, 300);
       });
