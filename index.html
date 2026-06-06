@@ -760,8 +760,8 @@ html,body{
   #oracle-input{padding:16px 0;font-size:.78rem}
   #oracle-placeholder{font-size:.65rem;letter-spacing:.22em}
 
-  /* Spread cards */
-  #spread-area{gap:6px;top:42%;transform:translate(-50%,-50%);}
+  /* Spread cards — above reading panel on mobile */
+  #spread-area{gap:6px;top:42%;transform:translate(-50%,-50%);z-index:9980!important;}
 }
 #lqb-ticker-year{
   font-family:'Courier New',monospace;
@@ -3263,8 +3263,15 @@ const OracleQuery = (() => {
     const mode = pickerMode || (isHoroscope ? 'horoscope' : /^tarot/i.test(q) ? 'tarot' : 'oracle');
     const modeLabels = { weekly: 'weekly', monthly: 'monthly', yearly: 'yearly' };
     /* For zodiac clicks, send a real horoscope question */
+    const _now = new Date();
+    const _dateStr = _now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+    const _monthStr = _now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    const _yearStr = _now.getFullYear();
     const question = isHoroscope
-      ? (modeLabels[mode] ? `Give ${qLow} a powerful, specific ${mode} reading. What do they need to know?` : `Give ${qLow} a powerful, specific daily horoscope reading for today. What do they need to hear right now?`)
+      ? (mode === 'weekly' ? `Give ${qLow} a powerful, specific weekly reading for the week of ${_dateStr}. What do they need to know?`
+       : mode === 'monthly' ? `Give ${qLow} a powerful, specific monthly reading for ${_monthStr}. What do they need to know?`
+       : mode === 'yearly' ? `Give ${qLow} a powerful, specific yearly reading for ${_yearStr}. What will define their entire year?`
+       : `Give ${qLow} a powerful, specific daily horoscope reading for ${_dateStr}. What do they need to hear right now?`)
       : q;
     try {
       const res = await Promise.race([
@@ -3352,7 +3359,8 @@ const OracleQuery = (() => {
     const _isPaidSession = window.__KB.isPaid()
       || localStorage.getItem('__kb_dev') === '1'
       || ['weekly','monthly','yearly','tarot-deep'].includes(_lastMode);
-    if (!_isTarotRead && !_isPaidSession) {
+    const _hasMobileCards = window.innerWidth <= 900 && document.getElementById('spread-area')?.children.length > 0;
+    if (!_isTarotRead && !_isPaidSession && !_hasMobileCards) {
       const SPONSORS = [
         { msg:'Seal your story forever at iPIXEL CAFE — digital time capsules for every moment.', url:'https://www.ipixelcafe.com', tts:'Seal your story forever at iPixel Cafe — digital time capsules for every moment.' },
         { msg:'Authentic Italian, Las Vegas. Pizza and pasta perfection at Novella.', url:'https://www.novellalv.com' },
@@ -5302,7 +5310,7 @@ const OracleQuery = (() => {
 
       banner.style.opacity = '1';
 
-      /* Run single-pass scroll, then advance to next brand */
+      /* Run scroll — advance to next brand only after current scroll completes */
       if(msgEl){
         runScroll(msgEl, col, ()=>{
           idx = (idx + 1) % BRANDS.length;
@@ -5316,14 +5324,24 @@ const OracleQuery = (() => {
   window.__injectMobileMsgBanner = function(data){
     const msg = { sym:data.emoji||'✨', text:data.text||'', from:data.from||'', color:'#FFD700', href:data.link||'' };
     const entry = {
+      id: '__personal_msg__',
       name: (data.emoji||'✨')+' MESSAGE',
-      url:'kozmobob.com', href:'https://kozmobob.com',
+      url: data.link || 'kozmobob.com',
+      href: data.link || 'https://kozmobob.com',
       color:'rgba(255,215,0,.95)', border:'rgba(255,215,0,.40)',
       msg
     };
+    /* Remove any existing personal message slot first */
+    const _existing = BRANDS.findIndex(b => b.id === '__personal_msg__');
+    if(_existing > -1) BRANDS.splice(_existing, 1);
     BRANDS.unshift(entry);
     idx=0;
     show(BRANDS[0]);
+    /* Remove from rotation after 1 hour */
+    setTimeout(()=>{
+      const i = BRANDS.findIndex(b => b.id === '__personal_msg__');
+      if(i > -1){ BRANDS.splice(i,1); if(idx >= BRANDS.length) idx=0; }
+    }, 3600000);
     /* On mobile, show a direct full-screen portal */
     if(window.innerWidth <= 900 && msg.text) {
       const col = msg.color || '#FFD700';
@@ -5362,6 +5380,11 @@ const OracleQuery = (() => {
       window.open(b.msg.href, '_blank');
     }
     /* No URL = tap does nothing, message just displays */
+  });
+
+  /* Banner tap — open current brand URL */
+  banner.addEventListener('click', ()=>{
+    if(currentHref && currentHref !== '#') window.open(currentHref, '_blank');
   });
 
   banner.style.transition = 'opacity .3s ease';
@@ -5634,17 +5657,8 @@ function showTarotContext(tier, cardName, allCards) {
         if (hint) hint.remove();
 
         if (data.lines && data.lines.length) {
-          /* For spread, inject section labels between card groups */
+          /* API already injects __LABEL__ markers — use lines as-is */
           let finalLines = data.lines;
-          if (isSpread && data.lines.length >= 3) {
-            const lpc = Math.ceil(data.lines.length / 3);
-            const labels = ['-- PAST --','-- PRESENT --','-- FUTURE --'];
-            finalLines = [];
-            data.lines.forEach((line, i) => {
-              if (i % lpc === 0) finalLines.push('__LABEL__' + labels[Math.floor(i/lpc)]);
-              finalLines.push(line);
-            });
-          }
           /* Store lines + save info — read() picks them up for voice+typewriter */
           window.__KBPrefetchedLines = finalLines;
           window.__KBSuppressPortal = true;
