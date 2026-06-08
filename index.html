@@ -4351,10 +4351,17 @@ const OracleQuery = (() => {
     /* Priority = 2× longer on screen per slot (~22s vs ~11s) */
     const slot = { id:'user-ad', name:ad.biz.toUpperCase(), accent, rgb, bg:'#040300',
       url: ad.url||'#', draw:drawUserAd,
-      ms: ad._remainMs || (isPriority ? AD_MS * 2 : AD_MS) };
+      ms: isPriority ? AD_MS * 2 : AD_MS };
     BRANDS.unshift(slot);
 
     adIdx = 0; adFrame = 0; slotStartTime = Date.now();
+
+    /* Remove from rotation when booking time expires */
+    const _bookingMs = ad._remainMs || (ad.hours||1) * 3600000;
+    setTimeout(()=>{
+      const i = BRANDS.findIndex(b=>b.id==='user-ad');
+      if(i > -1){ BRANDS.splice(i,1); localStorage.removeItem('__kb_live_ad'); if(adIdx >= BRANDS.length) adIdx=0; }
+    }, _bookingMs);
     /* click handled by existing guarded listener above */
     tickerBrand.textContent = (isPriority ? '⚡ ' : '') + ad.biz.toUpperCase();
 
