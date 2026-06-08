@@ -3995,8 +3995,10 @@ const OracleQuery = (() => {
   let adFrame    = 0;
   let glitching  = false;
   let glitchLeft = 0;
-  const AD_FRAMES     = 660;  // ~11s at 60fps
+  const AD_FRAMES     = 660;  // used for draw(t) progress only
+  const AD_MS         = 11000; // 11s per slot — real time, not frames
   const GLITCH_FRAMES = 28;   // ~0.47s
+  let slotStartTime   = Date.now();
 
   /* ── Helpers ── */
   function hex2rgb(h){ const n=parseInt(h.slice(1),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
@@ -4243,6 +4245,7 @@ const OracleQuery = (() => {
         glitching=false;
         adIdx=(adIdx+1)%BRANDS.length;
         adFrame=0;
+        slotStartTime=Date.now();
         tickerBrand.textContent=BRANDS[adIdx].name;
         syncBorder(BRANDS[adIdx].rgb);
       }
@@ -4250,10 +4253,11 @@ const OracleQuery = (() => {
     }
 
     adFrame++;
-    const curFrames = BRANDS[adIdx].frames || AD_FRAMES;
-    if(adFrame>=curFrames){ glitching=true; glitchLeft=GLITCH_FRAMES; return; }
+    const slotMs = BRANDS[adIdx].ms || AD_MS;
+    const elapsed = Date.now() - slotStartTime;
+    if(elapsed >= slotMs){ glitching=true; glitchLeft=GLITCH_FRAMES; return; }
 
-    BRANDS[adIdx].draw(adFrame/curFrames);
+    BRANDS[adIdx].draw(Math.min(elapsed / slotMs, 1));
   }
 
   /* Init */
@@ -4267,8 +4271,26 @@ const OracleQuery = (() => {
   window.Billboard = { setAccentColor:function(){} };
 
   /* ── Live user ad injection ── */
-  window.__injectLeftAd = function(ad){
+  /* Restore persisted left billboard ad on page load */
+  (function(){
+    const saved = localStorage.getItem('__kb_live_ad');
+    if(!saved) return;
+    try {
+      const data = JSON.parse(saved);
+      /* Expire based on hours paid for (default 1hr) */
+      const totalMs = (data.hours||1) * 3600000;
+      const elapsed = data._ts ? Date.now() - data._ts : 0;
+      if(elapsed >= totalMs){ localStorage.removeItem('__kb_live_ad'); return; }
+      /* Pass remaining display time so slot doesn't restart from full duration */
+      const restored = Object.assign({}, data, { _remainMs: totalMs - elapsed });
+      setTimeout(()=>{ if(window.__injectLeftAd) window.__injectLeftAd(restored, true); }, 250);
+    } catch(e){ localStorage.removeItem('__kb_live_ad'); }
+  })();
+
+  window.__injectLeftAd = function(ad, _fromRestore){
     if(!ad || !ad.biz) return;
+    /* Save to localStorage so it survives refresh */
+    if(!_fromRestore) localStorage.setItem('__kb_live_ad', JSON.stringify(Object.assign({}, ad, { _ts: Date.now() })));
     const isPriority = !!ad.priority;
     const accent = isPriority ? '#FFD700' : '#FFD700';
     const rgb    = [255,215,0];
@@ -4329,10 +4351,10 @@ const OracleQuery = (() => {
     /* Priority = 2× longer on screen per slot (~22s vs ~11s) */
     const slot = { id:'user-ad', name:ad.biz.toUpperCase(), accent, rgb, bg:'#040300',
       url: ad.url||'#', draw:drawUserAd,
-      frames: isPriority ? AD_FRAMES * 2 : AD_FRAMES };
+      ms: ad._remainMs || (isPriority ? AD_MS * 2 : AD_MS) };
     BRANDS.unshift(slot);
 
-    adIdx = 0; adFrame = 0;
+    adIdx = 0; adFrame = 0; slotStartTime = Date.now();
     /* click handled by existing guarded listener above */
     tickerBrand.textContent = (isPriority ? '⚡ ' : '') + ad.biz.toUpperCase();
 
@@ -4415,10 +4437,10 @@ const OracleQuery = (() => {
       accent:col, rgb, bg:'#030200',
       url: data.link || 'https://kozmobob.com',
       draw: drawPersonal,
-      frames: AD_FRAMES  /* normal rotation slot, same as other brands */
+      ms: AD_MS
     };
     BRANDS.unshift(slot);
-    adIdx=0; adFrame=0;
+    adIdx=0; adFrame=0; slotStartTime=Date.now();
     tickerBrand.textContent = emoji + ' PERSONAL MESSAGE';
     syncBorder(rgb);
 
