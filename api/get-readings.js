@@ -3,8 +3,14 @@
    Env: KV_REST_API_URL, KV_REST_API_TOKEN
 */
 
+const ALLOWED_ORIGINS = [
+  'https://kozmobob.com',
+  'https://www.kozmobob.com',
+];
+
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', req.headers.origin?.includes('kozmobob.com') ? req.headers.origin : '');
+  const origin = req.headers.origin || '';
+  res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGINS.includes(origin) ? origin : '');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -17,10 +23,14 @@ module.exports = async function handler(req, res) {
   const deviceId = req.query.deviceId;
   if (!deviceId) return res.status(400).json({ error: 'Missing deviceId' });
 
-  const key = `readings:${deviceId}`;
+  /* Sanitize deviceId */
+  const cleanDeviceId = String(deviceId).replace(/[^a-zA-Z0-9\-_]/g, '').slice(0, 64);
+  if (!cleanDeviceId) return res.status(400).json({ error: 'Invalid deviceId' });
+
+  const key = `readings:${cleanDeviceId}`;
 
   try {
-    const res2 = await fetch(`${url}`, {
+    const res2 = await fetch(url, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(['GET', key]),
