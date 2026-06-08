@@ -1,15 +1,28 @@
 /* -- KozmoBob AI -- Vercel Serverless Function -- */
 
-const RATE_LIMIT_WINDOW = 60 * 1000;
-const RATE_LIMIT_MAX    = 10;
-const ipMap = new Map();
+const RATE_LIMIT_MAX = 10; /* max requests per IP per 60s — enforced in Redis across all instances */
 
-function isRateLimited(ip) {
-  const now = Date.now();
-  const entry = ipMap.get(ip) || { count: 0, start: now };
-  if (now - entry.start > RATE_LIMIT_WINDOW) { ipMap.set(ip, { count: 1, start: now }); return false; }
-  entry.count++; ipMap.set(ip, entry);
-  return entry.count > RATE_LIMIT_MAX;
+async function isRateLimited(ip) {
+  const url   = process.env.KV_REST_API_URL;
+  const token = process.env.KV_REST_API_TOKEN;
+  if (!url || !token) return false;
+  try {
+    const key = `ratelimit:bob:${ip}`;
+    const incrRes = await fetch(url, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(['INCR', key]),
+    });
+    const { result: count } = await incrRes.json();
+    if (count === 1) {
+      await fetch(url, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(['EXPIRE', key, 60]),
+      });
+    }
+    return count > RATE_LIMIT_MAX;
+  } catch(e) { return false; } /* fail open — don't block real users if Redis hiccups */
 }
 
 const ALLOWED_ORIGINS = [
@@ -105,7 +118,7 @@ module.exports = async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
-  if (isRateLimited(ip)) return res.status(429).json({ error: "Too many requests.", fallback: true });
+  if (await isRateLimited(ip)) return res.status(429).json({ error: "Too many requests.", fallback: true });
 
   const key = process.env.GROQ_API_KEY;
   if (!key) return res.status(500).json({ error: "GROQ_API_KEY not configured" });
