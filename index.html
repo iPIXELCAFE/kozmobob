@@ -4360,7 +4360,7 @@ const OracleQuery = (() => {
     const _bookingMs = ad._remainMs || (ad.hours||1) * 3600000;
     setTimeout(()=>{
       const i = BRANDS.findIndex(b=>b.id==='user-ad');
-      if(i > -1){ BRANDS.splice(i,1); localStorage.removeItem('__kb_live_ad'); if(adIdx >= BRANDS.length) adIdx=0; }
+      if(i > -1){ BRANDS.splice(i,1); localStorage.removeItem('__kb_live_ad'); if(i < adIdx) adIdx--; if(adIdx >= BRANDS.length) adIdx=0; }
     }, _bookingMs);
     /* click handled by existing guarded listener above */
     tickerBrand.textContent = (isPriority ? '⚡ ' : '') + ad.biz.toUpperCase();
@@ -5543,7 +5543,7 @@ const OracleQuery = (() => {
     /* Remove from rotation after 1 hour */
     setTimeout(()=>{
       const i = BRANDS.findIndex(b => b.id === '__personal_msg__');
-      if(i > -1){ BRANDS.splice(i,1); if(idx >= BRANDS.length) idx=0; }
+      if(i > -1){ BRANDS.splice(i,1); if(i < idx) idx--; if(idx >= BRANDS.length) idx=0; }
     }, 3600000);
     /* On mobile, show a direct full-screen portal */
     if(window.innerWidth <= 900 && msg.text) {
@@ -5593,7 +5593,7 @@ const OracleQuery = (() => {
     const ms = (ad.hours || 1) * 3600000;
     setTimeout(()=>{
       const i = BRANDS.findIndex(b => b.id === '__user_ad__');
-      if(i > -1){ BRANDS.splice(i,1); if(idx >= BRANDS.length) idx=0; }
+      if(i > -1){ BRANDS.splice(i,1); if(i < idx) idx--; if(idx >= BRANDS.length) idx=0; }
     }, ms);
   };
 
