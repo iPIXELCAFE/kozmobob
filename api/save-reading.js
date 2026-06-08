@@ -1,10 +1,16 @@
 /* ── KozmoBob — Save Reading to Vercel KV ──
    POST /api/save-reading
    Body: { deviceId, sign, mode, lines[], timestamp }
-   Env:  KV_REST_API_URL, KV_REST_API_TOKEN  (auto-added when you connect KV in Vercel dashboard)
+   Env:  KV_REST_API_URL, KV_REST_API_TOKEN
 */
 
-const MAX_READINGS = 50; /* max saved per device */
+const MAX_READINGS   = 50;
+const RATE_LIMIT_MAX = 20;  /* max saves per device per hour */
+
+const ALLOWED_ORIGINS = [
+  'https://kozmobob.com',
+  'https://www.kozmobob.com',
+];
 
 async function kv(url, token, ...args) {
   const res = await fetch(url, {
@@ -16,8 +22,18 @@ async function kv(url, token, ...args) {
   return data.result;
 }
 
+async function isRateLimited(url, token, deviceId) {
+  try {
+    const key   = `ratelimit:save:${deviceId}`;
+    const count = await kv(url, token, 'INCR', key);
+    if (count === 1) await kv(url, token, 'EXPIRE', key, 3600); /* 1hr window */
+    return count > RATE_LIMIT_MAX;
+  } catch(e) { return false; } /* fail open — don't block if Redis hiccups */
+}
+
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', req.headers.origin?.includes('kozmobob.com') ? req.headers.origin : '');
+  const origin = req.headers.origin || '';
+  res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGINS.includes(origin) ? origin : '');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -30,7 +46,14 @@ module.exports = async function handler(req, res) {
   const { deviceId, sign, mode, lines, timestamp } = req.body || {};
   if (!deviceId || !lines?.length) return res.status(400).json({ error: 'Missing fields' });
 
-  const key = `readings:${deviceId}`;
+  /* Sanitize deviceId — alphanumeric + hyphens only */
+  const cleanDeviceId = String(deviceId).replace(/[^a-zA-Z0-9\-_]/g, '').slice(0, 64);
+  if (!cleanDeviceId) return res.status(400).json({ error: 'Invalid deviceId' });
+
+  if (await isRateLimited(url, token, cleanDeviceId))
+    return res.status(429).json({ error: 'Too many requests' });
+
+  const key = `readings:${cleanDeviceId}`;
 
   /* Fetch existing readings */
   let readings = [];
