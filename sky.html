@@ -725,7 +725,7 @@ document.getElementById('star-close').addEventListener('click',closeStarPanel);
 document.getElementById('star-panel').addEventListener('click',e=>{if(e.target===document.getElementById('star-panel'))closeStarPanel();});
 document.getElementById('add-btn').addEventListener('click',()=>openStarPanel('','neutral'));
 
-const SKY_DEV_MODE=true; /* DEV MODE — set false before launch */
+const SKY_DEV_MODE=false; /* LIVE */
 document.getElementById('star-buy').addEventListener('click',async()=>{
   const name=(document.getElementById('star-name').value||'').trim();
   const dob=document.getElementById('star-dob').value||'';
@@ -796,7 +796,7 @@ document.getElementById('star-buy').addEventListener('click',async()=>{
 
   /* Rate limit */
   const LS_KEY='__kb_baby_ts';
-  const COOL_MS=0; /* DEV MODE — restore to: 3*60*60*1000 */
+  const COOL_MS=3*60*60*1000; /* 3 hours */
   function getCoolRemaining(){
     if(COOL_MS===0)return 0;
     return Math.max(0,COOL_MS-(Date.now()-parseInt(localStorage.getItem(LS_KEY)||'0',10)));
