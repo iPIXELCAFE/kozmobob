@@ -10,6 +10,8 @@ const RATE_LIMIT_MAX = 20;  /* max saves per device per hour */
 const ALLOWED_ORIGINS = [
   'https://kozmobob.com',
   'https://www.kozmobob.com',
+  'https://kosmobob.com',
+  'https://www.kosmobob.com',
 ];
 
 async function kv(url, token, ...args) {
@@ -55,26 +57,4 @@ module.exports = async function handler(req, res) {
 
   const key = `readings:${cleanDeviceId}`;
 
-  /* Fetch existing readings */
-  let readings = [];
-  try {
-    const raw = await kv(url, token, 'GET', key);
-    if (raw) readings = JSON.parse(raw);
-  } catch(e) { readings = []; }
-
-  /* Prepend new reading, cap at MAX */
-  const entry = {
-    id:        Date.now().toString(36),
-    timestamp: timestamp || Date.now(),
-    sign:      String(sign || 'unknown').slice(0, 30),
-    mode:      String(mode || 'oracle').slice(0, 20),
-    lines:     (lines || []).map(l => String(l).slice(0, 600)).slice(0, 60),
-  };
-  readings.unshift(entry);
-  if (readings.length > MAX_READINGS) readings = readings.slice(0, MAX_READINGS);
-
-  /* Save back — 90 day TTL */
-  await kv(url, token, 'SET', key, JSON.stringify(readings), 'EX', 60 * 60 * 24 * 90);
-
-  return res.status(200).json({ ok: true, id: entry.id });
-};
+  /
