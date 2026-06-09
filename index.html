@@ -6072,7 +6072,7 @@ function showReadingPicker(sign, r, g, b) {
   });
 }
 
-const DEV_BYPASS_PAYMENT = true; /* DEV MODE — set false before launch */
+const DEV_BYPASS_PAYMENT = false; /* LIVE */
 
 async function goToCheckout(product, metadata = {}) {
   if (DEV_BYPASS_PAYMENT) {
@@ -8149,7 +8149,7 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
 
   /* ── Rate limit: 1 per 3 hours ── */
   const LS_KEY = '__kb_baby_ts';
-  const COOL_MS = 0; /* DEV MODE — restore to: 3 * 60 * 60 * 1000 */
+  const COOL_MS = 3 * 60 * 60 * 1000; /* 3 hours */
 
   function getCoolRemaining(){
     if(COOL_MS === 0) return 0;
