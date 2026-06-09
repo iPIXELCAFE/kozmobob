@@ -15,7 +15,7 @@ const PRICES = {
   'baby-star':        { amount: 99,    name: 'Baby Star in the Sky' },
 };
 
-const ALLOWED_ORIGINS = ['https://kozmobob.com', 'https://www.kozmobob.com'];
+const ALLOWED_ORIGINS = ['https://kozmobob.com', 'https://www.kozmobob.com', 'https://kosmobob.com', 'https://www.kosmobob.com'];
 
 module.exports = async (req, res) => {
   const origin = req.headers.origin || '';
@@ -48,23 +48,4 @@ module.exports = async (req, res) => {
       line_items: [{
         price_data: {
           currency: 'usd',
-          unit_amount: unitAmount,
-          product_data: { name: productName },
-        },
-        quantity: 1,
-      }],
-      metadata: { product, ...metadata },
-      success_url: product === 'baby-star'
-        ? `https://kozmobob.com/sky?star=success&session_id={CHECKOUT_SESSION_ID}`
-        : `https://kozmobob.com/?payment=success&product=${product}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: product === 'baby-star'
-        ? `https://kozmobob.com/sky`
-        : `https://kozmobob.com/?payment=cancelled`,
-    });
-
-    res.status(200).json({ url: session.url });
-  } catch (err) {
-    console.error('Stripe error:', err);
-    res.status(500).json({ error: 'Failed to create checkout session' });
-  }
-};
+          unit_amount: u
