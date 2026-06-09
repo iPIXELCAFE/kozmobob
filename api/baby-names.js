@@ -16,6 +16,8 @@ function isRateLimited(ip) {
 const ALLOWED_ORIGINS = [
   'https://kozmobob.com',
   'https://www.kozmobob.com',
+  'https://kosmobob.com',
+  'https://www.kosmobob.com',
 ];
 
 function getPlanetaryPositions(dateStr, timeStr) {
