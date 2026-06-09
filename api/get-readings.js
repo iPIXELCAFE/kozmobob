@@ -6,6 +6,8 @@
 const ALLOWED_ORIGINS = [
   'https://kozmobob.com',
   'https://www.kozmobob.com',
+  'https://kosmobob.com',
+  'https://www.kosmobob.com',
 ];
 
 module.exports = async function handler(req, res) {
@@ -32,13 +34,4 @@ module.exports = async function handler(req, res) {
   try {
     const res2 = await fetch(url, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(['GET', key]),
-    });
-    const data = await res2.json();
-    const readings = data.result ? JSON.parse(data.result) : [];
-    return res.status(200).json({ readings });
-  } catch(e) {
-    return res.status(500).json({ error: 'KV error', readings: [] });
-  }
-};
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'applicatio
