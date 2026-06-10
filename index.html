@@ -8808,6 +8808,7 @@ window.__KBShareCard=function(card,lines){
   background:rgba(255,200,40,.1);border-color:rgba(255,200,40,.4);
   color:rgba(255,200,40,.7);cursor:default;
 }
+.kb-369-count{font-size:.5rem;opacity:.7;letter-spacing:1px;}
 #kb-369-upsell{
   width:100%;text-align:center;padding-top:12px;
   border-top:1px solid rgba(255,200,40,.08);margin-top:4px;
@@ -8871,16 +8872,16 @@ window.__KBShareCard=function(card,lines){
       <div id="kb-369-say">Say it out loud. Feel it. Make it real.</div>
       <div id="kb-369-slots">
         <div class="kb-369-slot" id="kb-369-slot-0">
-          <div class="kb-369-slot-label">☀ MORNING &nbsp;·&nbsp; 3×</div>
-          <button class="kb-369-transmit" data-slot="0">⚡ TRANSMIT</button>
+          <div class="kb-369-slot-label">☀ MORNING</div>
+          <button class="kb-369-transmit" data-slot="0" data-need="3" data-count="0">⚡ TRANSMIT &nbsp;<span class="kb-369-count">0 / 3</span></button>
         </div>
         <div class="kb-369-slot" id="kb-369-slot-1">
-          <div class="kb-369-slot-label">◈ AFTERNOON &nbsp;·&nbsp; 6×</div>
-          <button class="kb-369-transmit" data-slot="1">⚡ TRANSMIT</button>
+          <div class="kb-369-slot-label">◈ AFTERNOON</div>
+          <button class="kb-369-transmit" data-slot="1" data-need="6" data-count="0">⚡ TRANSMIT &nbsp;<span class="kb-369-count">0 / 6</span></button>
         </div>
         <div class="kb-369-slot" id="kb-369-slot-2">
-          <div class="kb-369-slot-label">☽ NIGHT &nbsp;·&nbsp; 9×</div>
-          <button class="kb-369-transmit" data-slot="2">⚡ TRANSMIT</button>
+          <div class="kb-369-slot-label">☽ NIGHT</div>
+          <button class="kb-369-transmit" data-slot="2" data-need="9" data-count="0">⚡ TRANSMIT &nbsp;<span class="kb-369-count">0 / 9</span></button>
         </div>
       </div>
       <div id="kb-369-upsell" style="display:none;">
@@ -8961,22 +8962,28 @@ window.__KBShareCard=function(card,lines){
     document.getElementById('kb-369-day-total').textContent=days;
     document.getElementById('kb-369-progress-fill').style.width=Math.round((dn/days)*100)+'%';
     document.getElementById('kb-369-intention-display').textContent=intention;
-    const slots=(donemap[today()])||[false,false,false];
-    const allDone=slots.every(Boolean);
+    const slots=(donemap[today()])||[0,0,0];
+    const needs=[3,6,9];
+    const allDone=slots.every((v,i)=>(v===true||v>=needs[i]));
     document.getElementById('kb-369-upsell').style.display=allDone?'block':'none';
+    const needs=[3,6,9];
     [0,1,2].forEach(i=>{
       const slotEl=document.getElementById('kb-369-slot-'+i);
       const btn=slotEl.querySelector('.kb-369-transmit');
-      if(slots[i]){
+      const need=needs[i];
+      const cnt=slots[i]===true ? need : (typeof slots[i]==='number' ? slots[i] : 0);
+      if(cnt>=need){
         slotEl.classList.add('done');
-        btn.textContent='✓ SENT';
+        btn.innerHTML='✓ SENT &nbsp;<span class="kb-369-count">'+need+' / '+need+'</span>';
         btn.classList.add('done-btn');
         btn.disabled=true;
       } else {
         slotEl.classList.remove('done');
-        btn.textContent='⚡ TRANSMIT';
+        btn.innerHTML='⚡ TRANSMIT &nbsp;<span class="kb-369-count">'+cnt+' / '+need+'</span>';
         btn.classList.remove('done-btn');
         btn.disabled=false;
+        btn.dataset.count=cnt;
+        btn.dataset.need=need;
       }
     });
   }
@@ -9053,19 +9060,30 @@ window.__KBShareCard=function(card,lines){
     btn.addEventListener('click',()=>{
       if(btn.disabled) return;
       const slot=parseInt(btn.dataset.slot);
+      const need=parseInt(btn.dataset.need)||[3,6,9][slot];
+      let cnt=(parseInt(btn.dataset.count)||0)+1;
       const {donemap,intention}=getState();
       const t=today();
-      if(!donemap[t]) donemap[t]=[false,false,false];
-      donemap[t][slot]=true;
+      if(!donemap[t]) donemap[t]=[0,0,0];
+      // migrate old boolean values
+      if(donemap[t][slot]===true) donemap[t][slot]=need;
+      donemap[t][slot]=cnt;
       localStorage.setItem(SK.m,JSON.stringify(donemap));
-      btn.textContent='✦ ✦ ✦';
-      btn.style.background='rgba(255,200,40,.3)';
-      btn.style.boxShadow='0 0 28px rgba(255,200,40,.6)';
-      btn.style.color='rgba(0,0,0,.85)';
-      btn.disabled=true;
       if(window.__KBSound) window.__KBSound.whoosh();
       transmitBurst(intention);
-      setTimeout(()=>render(),1500);
+      if(cnt>=need){
+        btn.innerHTML='✦ ✦ ✦';
+        btn.style.background='rgba(255,200,40,.3)';
+        btn.style.boxShadow='0 0 28px rgba(255,200,40,.6)';
+        btn.style.color='rgba(0,0,0,.85)';
+        btn.disabled=true;
+        setTimeout(()=>render(),1500);
+      } else {
+        btn.dataset.count=cnt;
+        btn.innerHTML='⚡ TRANSMIT &nbsp;<span class="kb-369-count">'+cnt+' / '+need+'</span>';
+        btn.style.boxShadow='0 0 14px rgba(255,200,40,.35)';
+        setTimeout(()=>{ btn.style.boxShadow=''; },600);
+      }
     });
   });
 
