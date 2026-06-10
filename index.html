@@ -4735,8 +4735,7 @@ const OracleQuery = (() => {
 
         /* After reading lines — show hook + sponsor (free only) */
         if (si === lines.length) {
-          /* Add "there is more" hook for free users */
-          if (!isPaid) {
+          /* Add "there is more" hook — always shown (deep read is a per-reading purchase, not an ad) */
             setTimeout(() => {
               const hook = document.createElement('span');
               hook.style.cssText = 'display:block;margin-top:14px;font-size:.72rem;letter-spacing:.18em;color:rgba(255,200,40,.45);text-align:center;font-style:italic;cursor:pointer;pointer-events:auto;';
@@ -4744,7 +4743,6 @@ const OracleQuery = (() => {
               hook.addEventListener('click', () => showTarotPicker(card.n, spreadCards.map(sc => sc.card.n)));
               teaser.appendChild(hook);
             }, 400);
-          }
           /* Share button — always shown */
           setTimeout(() => {
             const shareBtn = document.createElement('button');
