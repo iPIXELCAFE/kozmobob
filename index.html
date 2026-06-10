@@ -8805,8 +8805,8 @@ window.__KBShareCard=function(card,lines){
 }
 .kb-369-transmit:hover{background:rgba(255,200,40,.18);box-shadow:0 0 10px rgba(255,200,40,.25);}
 .kb-369-transmit.done-btn{
-  background:rgba(0,255,120,.07);border-color:rgba(0,255,120,.28);
-  color:rgba(0,255,120,.65);cursor:default;
+  background:rgba(255,200,40,.1);border-color:rgba(255,200,40,.4);
+  color:rgba(255,200,40,.7);cursor:default;
 }
 #kb-369-upsell{
   width:100%;text-align:center;padding-top:12px;
@@ -9017,20 +9017,55 @@ window.__KBShareCard=function(card,lines){
   });
 
   // Transmit
+  function transmitBurst(intention){
+    const flash=document.createElement('div');
+    flash.style.cssText='position:fixed;inset:0;z-index:99999;pointer-events:none;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0);transition:background .15s;';
+    document.body.appendChild(flash);
+    const txt=document.createElement('div');
+    txt.textContent=intention;
+    txt.style.cssText='font-family:Courier New,monospace;font-size:clamp(.9rem,3vw,1.3rem);letter-spacing:.1em;color:rgba(255,220,60,.95);text-align:center;max-width:80vw;text-shadow:0 0 40px rgba(255,200,40,.9),0 0 80px rgba(255,200,40,.5);opacity:0;transform:scale(.5);transition:all .4s cubic-bezier(.2,0,.1,1);padding:0 24px;line-height:1.6;';
+    flash.appendChild(txt);
+    const canvas=document.createElement('canvas');
+    canvas.style.cssText='position:fixed;inset:0;z-index:99998;pointer-events:none;';
+    canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+    document.body.appendChild(canvas);
+    const ctx=canvas.getContext('2d'),cx=canvas.width/2,cy=canvas.height/2;
+    const pts=[];
+    for(let i=0;i<70;i++){
+      const a=Math.random()*Math.PI*2,spd=4+Math.random()*9;
+      pts.push({x:cx,y:cy,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,r:1.5+Math.random()*3,life:1,hue:40+Math.floor(Math.random()*30)});
+    }
+    let fr=0;
+    (function draw(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      let alive=false;
+      pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vx*=.94;p.vy*=.94;p.life-=.022;
+        if(p.life>0){alive=true;ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fillStyle='rgba(255,'+(180+p.hue)+',20,'+p.life+')';ctx.fill();}
+      });
+      if(alive&&fr++<150)requestAnimationFrame(draw);else canvas.remove();
+    })();
+    requestAnimationFrame(()=>{flash.style.background='rgba(255,200,40,.06)';txt.style.opacity='1';txt.style.transform='scale(1)';});
+    setTimeout(()=>{txt.style.opacity='0';txt.style.transform='scale(1.7)';txt.style.transition='all .5s ease-in';flash.style.background='rgba(0,0,0,0)';},950);
+    setTimeout(()=>flash.remove(),1500);
+  }
+
   document.querySelectorAll('.kb-369-transmit').forEach(btn=>{
     btn.addEventListener('click',()=>{
       if(btn.disabled) return;
       const slot=parseInt(btn.dataset.slot);
-      const {donemap}=getState();
+      const {donemap,intention}=getState();
       const t=today();
       if(!donemap[t]) donemap[t]=[false,false,false];
       donemap[t][slot]=true;
       localStorage.setItem(SK.m,JSON.stringify(donemap));
       btn.textContent='✦ ✦ ✦';
-      btn.style.background='rgba(160,80,255,.4)';
-      btn.style.boxShadow='0 0 28px rgba(160,80,255,.7)';
+      btn.style.background='rgba(255,200,40,.3)';
+      btn.style.boxShadow='0 0 28px rgba(255,200,40,.6)';
+      btn.style.color='rgba(0,0,0,.85)';
+      btn.disabled=true;
       if(window.__KBSound) window.__KBSound.whoosh();
-      setTimeout(()=>render(),700);
+      transmitBurst(intention);
+      setTimeout(()=>render(),1500);
     });
   });
 
