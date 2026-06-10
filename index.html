@@ -9114,4 +9114,306 @@ window.__KBShareCard=function(card,lines){
 
   window.__KB369={open};
 })();
+
+/* ── /369 PAGE MODE — same shell, 369 ritual in center ── */
+(function(){
+  if(location.pathname !== '/369') return;
+
+  // Update page meta
+  document.title = '369 MANIFEST — KozmoBob';
+  var ms = document.querySelector('meta[name="description"]');
+  if(ms) ms.setAttribute('content','Tesla\'s 3-6-9 ritual. Write your intention 3× morning, 6× afternoon, 9× night. Speak it into existence.');
+
+  // Hide oracle-only elements
+  var hide = ['canvas-container','oracle-input-wrap','spread-area','card-teaser','mini-bob-wrap','mb-popup'];
+  hide.forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.style.display='none';
+  });
+
+  // Mark 369 menu item as current page
+  var m369 = document.getElementById('kb-menu-369');
+  if(m369){ m369.style.background='rgba(255,200,40,.06)'; m369.onclick=null; m369.style.cursor='default'; }
+
+  // Build the 369 center content
+  var SK = {i:'__kb369_int',d:'__kb369_days',s:'__kb369_start',m:'__kb369_done'};
+  var NEEDS = [3,6,9];
+  function today(){ return new Date().toISOString().slice(0,10); }
+  function getState(){
+    return {
+      intention: localStorage.getItem(SK.i)||'',
+      days:      parseInt(localStorage.getItem(SK.d))||9,
+      start:     localStorage.getItem(SK.s)||'',
+      donemap:   JSON.parse(localStorage.getItem(SK.m)||'{}')
+    };
+  }
+  function dayNum(start){
+    if(!start) return 1;
+    return Math.max(1, Math.floor((Date.now()-new Date(start+'T00:00:00').getTime())/86400000)+1);
+  }
+
+  // Inject CSS
+  var style = document.createElement('style');
+  style.textContent = [
+    '#kb369page{position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;overflow-x:hidden;padding:0 20px 80px;scrollbar-width:none;}',
+    '#kb369page::-webkit-scrollbar{display:none}',
+    '.p369-hero{text-align:center;padding:24px 0 20px;width:100%;max-width:520px;}',
+    '.p369-bolt{font-size:2.5rem;display:block;margin-bottom:8px;animation:bolt-pulse 2.4s ease-in-out infinite;}',
+    '.p369-title{font-size:clamp(1.8rem,8vw,2.8rem);letter-spacing:.22em;color:rgba(255,215,60,.97);text-shadow:0 0 40px rgba(255,200,40,.4);line-height:1.1;}',
+    '.p369-nums{display:flex;justify-content:center;gap:14px;margin:10px 0 8px;}',
+    '.p369-nums span{font-size:clamp(1.2rem,5vw,1.8rem);color:rgba(255,200,40,.7);animation:num-glow 3s ease-in-out infinite alternate;}',
+    '.p369-nums span:nth-child(1){animation-delay:0s}',
+    '.p369-nums span:nth-child(2){animation-delay:.4s;color:rgba(255,180,30,.7)}',
+    '.p369-nums span:nth-child(3){animation-delay:.8s}',
+    '.p369-dot{color:rgba(255,200,40,.25);font-size:1.1rem;}',
+    '.p369-quote{font-size:.65rem;color:rgba(255,200,40,.35);letter-spacing:.07em;font-style:italic;line-height:1.6;}',
+    '.p369-scr{display:none;width:100%;max-width:520px;}',
+    '.p369-scr.on{display:block;}',
+    '.p369-lbl{font-size:.65rem;letter-spacing:.15em;color:rgba(255,200,40,.4);text-align:center;margin-bottom:10px;}',
+    '.p369-ta{width:100%;background:rgba(255,200,40,.03);border:1px solid rgba(255,200,40,.2);border-radius:14px;color:rgba(255,220,60,.95);font-family:inherit;font-size:clamp(.85rem,3.5vw,1rem);letter-spacing:.06em;line-height:1.8;padding:16px;resize:none;text-align:center;text-transform:uppercase;outline:none;transition:border-color .2s;user-select:text;-webkit-user-select:text;}',
+    '.p369-ta::placeholder{color:rgba(255,200,40,.2);font-size:.8rem;}',
+    '.p369-ta:focus{border-color:rgba(255,200,40,.45);box-shadow:0 0 20px rgba(255,200,40,.07);}',
+    '.p369-hint{text-align:center;font-size:.58rem;color:rgba(255,200,40,.25);letter-spacing:.1em;margin-top:6px;margin-bottom:20px;}',
+    '.p369-dur-lbl{font-size:.63rem;letter-spacing:.18em;color:rgba(255,200,40,.4);text-align:center;margin-bottom:10px;}',
+    '.p369-dur-row{display:flex;gap:10px;justify-content:center;margin-bottom:26px;}',
+    '.p369-dur{flex:1;max-width:130px;background:rgba(255,200,40,.04);border:1px solid rgba(255,200,40,.2);border-radius:12px;color:rgba(255,200,40,.55);font-family:inherit;font-size:.75rem;letter-spacing:.1em;padding:13px 8px;cursor:pointer;text-align:center;transition:all .2s;}',
+    '.p369-dur:hover,.p369-dur.sel{background:rgba(255,200,40,.1);border-color:rgba(255,200,40,.65);color:rgba(255,220,60,1);box-shadow:0 0 20px rgba(255,200,40,.2);}',
+    '.p369-dur strong{display:block;font-size:1.5rem;line-height:1.2;}',
+    '.p369-dur em{display:block;font-style:normal;font-size:.57rem;color:rgba(255,200,40,.35);margin-top:2px;}',
+    '.p369-begin{width:100%;background:rgba(255,200,40,.06);border:1.5px solid rgba(255,200,40,.4);border-radius:14px;color:rgba(255,220,60,.95);font-family:inherit;font-size:.95rem;letter-spacing:.22em;padding:20px;cursor:pointer;text-transform:uppercase;transition:all .3s;}',
+    '.p369-begin:hover{background:rgba(255,200,40,.12);box-shadow:0 0 40px rgba(255,200,40,.3);transform:translateY(-1px);}',
+    '.p369-begin:active{transform:scale(.98);}',
+    '.p369-day{text-align:center;margin-bottom:10px;}',
+    '.p369-day-lbl{font-size:clamp(1rem,4.5vw,1.3rem);letter-spacing:.22em;color:rgba(255,210,60,.9);text-shadow:0 0 20px rgba(255,200,40,.3);}',
+    '.p369-prog{width:100%;height:2px;background:rgba(255,200,40,.08);border-radius:2px;margin:10px 0 18px;overflow:hidden;}',
+    '.p369-prog-f{height:100%;background:linear-gradient(90deg,rgba(255,150,20,.6),rgba(255,220,60,.9));border-radius:2px;transition:width .6s ease;box-shadow:0 0 8px rgba(255,200,40,.5);}',
+    '.p369-intent{border:1px solid rgba(255,200,40,.12);border-radius:12px;padding:16px 18px;text-align:center;font-size:clamp(.78rem,3.2vw,.92rem);letter-spacing:.07em;line-height:1.8;color:rgba(255,220,60,.8);text-transform:uppercase;margin-bottom:20px;position:relative;background:rgba(255,200,40,.02);}',
+    '.p369-intent::before{content:"✦ YOUR INTENTION ✦";position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:.53rem;letter-spacing:.18em;color:rgba(255,200,40,.4);background:#000;padding:0 10px;white-space:nowrap;}',
+    '.p369-slot{background:rgba(255,200,40,.02);border:1px solid rgba(255,200,40,.12);border-radius:14px;padding:18px 16px 16px;margin-bottom:12px;transition:all .4s;}',
+    '.p369-slot.done{border-color:rgba(255,200,40,.35);background:rgba(255,200,40,.05);box-shadow:0 0 20px rgba(255,200,40,.07);}',
+    '.p369-slot-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}',
+    '.p369-slot-name{font-size:.68rem;letter-spacing:.2em;color:rgba(255,200,40,.55);}',
+    '.p369-slot-st{font-size:.6rem;letter-spacing:.1em;color:rgba(255,200,40,.35);transition:color .3s;}',
+    '.p369-slot.done .p369-slot-st{color:rgba(255,200,40,.8);}',
+    '.p369-orbs{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;min-height:28px;}',
+    '.p369-orb{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(255,200,40,.2);background:rgba(255,200,40,.04);transition:all .25s;flex-shrink:0;}',
+    '.p369-orb.lit{background:radial-gradient(circle at 35% 35%,rgba(255,240,120,1),rgba(255,180,20,.9));border-color:rgba(255,220,60,1);box-shadow:0 0 8px rgba(255,200,40,.9),0 0 18px rgba(255,200,40,.4);animation:orb-pop .4s cubic-bezier(.2,0,.1,1.4);}',
+    '.p369-tx{width:100%;background:#000;border:1.5px solid rgba(255,200,40,.4);border-radius:12px;color:rgba(255,220,60,.9);font-family:inherit;font-size:clamp(.85rem,3.5vw,.95rem);letter-spacing:.18em;padding:15px;cursor:pointer;text-transform:uppercase;transition:all .2s;}',
+    '.p369-tx:not(:disabled):hover{border-color:rgba(255,220,60,.8);box-shadow:0 0 24px rgba(255,200,40,.35);transform:translateY(-1px);}',
+    '.p369-tx:not(:disabled):active{transform:scale(.97);}',
+    '.p369-tx:disabled{border-color:rgba(255,200,40,.45);background:rgba(255,200,40,.12);color:rgba(255,215,60,.9);cursor:default;box-shadow:0 0 18px rgba(255,200,40,.2);}',
+    '.p369-done-banner{display:none;background:rgba(255,200,40,.06);border:1px solid rgba(255,200,40,.35);border-radius:14px;padding:22px 18px;text-align:center;margin-top:8px;}',
+    '.p369-done-title{font-size:clamp(.9rem,4vw,1.1rem);letter-spacing:.2em;color:rgba(255,215,60,.95);margin-bottom:8px;text-shadow:0 0 20px rgba(255,200,40,.4);}',
+    '.p369-done-sub{font-size:.67rem;color:rgba(255,200,40,.45);letter-spacing:.08em;line-height:1.9;margin-bottom:16px;white-space:pre-line;}',
+    '.p369-cta{display:block;width:100%;background:rgba(255,200,40,.06);border:1px solid rgba(255,200,40,.35);border-radius:12px;color:rgba(255,215,60,.9);font-family:inherit;font-size:.8rem;letter-spacing:.18em;padding:15px;cursor:pointer;text-transform:uppercase;text-decoration:none;text-align:center;transition:all .2s;margin-top:8px;}',
+    '.p369-cta:hover{background:rgba(255,200,40,.12);box-shadow:0 0 22px rgba(255,200,40,.25);}',
+    '.p369-reset{display:block;text-align:center;margin-top:22px;font-size:.6rem;color:rgba(255,200,40,.25);letter-spacing:.12em;cursor:pointer;text-transform:uppercase;transition:color .2s;}',
+    '.p369-reset:hover{color:rgba(255,200,40,.55);}',
+    '.p369-comp-wrap{text-align:center;padding:20px 0;}',
+    '.p369-comp-icon{font-size:3.5rem;display:block;margin-bottom:16px;animation:float 3.5s ease-in-out infinite;filter:drop-shadow(0 0 20px rgba(255,200,40,.6));}',
+    '.p369-comp-title{font-size:clamp(1.2rem,5vw,1.6rem);letter-spacing:.2em;color:rgba(255,215,60,.95);text-shadow:0 0 30px rgba(255,200,40,.4);margin-bottom:12px;}',
+    '.p369-comp-sub{font-size:.7rem;color:rgba(255,200,40,.45);letter-spacing:.1em;line-height:1.9;margin-bottom:24px;white-space:pre-line;}',
+    '.p369-new{display:block;width:100%;margin-top:10px;background:rgba(0,0,0,.6);border:1px solid rgba(255,200,40,.25);border-radius:12px;color:rgba(255,200,40,.5);font-family:inherit;font-size:.75rem;letter-spacing:.15em;padding:13px;cursor:pointer;text-transform:uppercase;text-align:center;transition:all .2s;}',
+    '.p369-new:hover{border-color:rgba(255,200,40,.5);color:rgba(255,200,40,.8);}',
+    /* Transmit overlay for /369 page mode */
+    '#p369-tx-overlay{position:fixed;inset:0;z-index:9999;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0);transition:background .08s;}',
+    '#p369-tx-overlay.show{background:rgba(0,0,0,.97);}',
+    '#p369-tx-canvas{position:absolute;inset:0;width:100%;height:100%;}',
+    '#p369-tx-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:16px;opacity:0;transition:opacity .12s;}',
+    '#p369-tx-overlay.show #p369-tx-content{opacity:1;}',
+    '#p369-tx-num{font-size:clamp(8rem,38vw,16rem);line-height:1;color:rgba(255,220,60,.97);text-shadow:0 0 40px rgba(255,200,40,1),0 0 100px rgba(255,200,40,.7);}',
+    '#p369-tx-num.animate{animation:num-burst 1.4s cubic-bezier(.15,0,.1,1) forwards;}',
+    '#p369-tx-int{font-size:clamp(.75rem,3.5vw,.95rem);letter-spacing:.12em;color:rgba(255,220,60,.85);text-align:center;max-width:80vw;line-height:1.7;text-transform:uppercase;text-shadow:0 0 30px rgba(255,200,40,.8);opacity:0;}',
+    '#p369-tx-int.animate{animation:intent-rise 1.4s .2s ease-out forwards;}',
+    '#p369-tx-lbl{font-size:.65rem;letter-spacing:.28em;color:rgba(255,200,40,.7);text-transform:uppercase;opacity:0;}',
+    '#p369-tx-lbl.animate{animation:label-flash 1.4s .5s ease-out forwards;}'
+  ].join('\n');
+  document.head.appendChild(style);
+
+  // Build HTML
+  var wrap = document.createElement('div');
+  wrap.id = 'kb369page';
+  wrap.innerHTML = [
+    '<div style="height:58px;"></div>',
+    '<div class="p369-hero">',
+      '<span class="p369-bolt">⚡</span>',
+      '<div class="p369-title">369 MANIFEST</div>',
+      '<div class="p369-nums"><span>3</span><span class="p369-dot">·</span><span>6</span><span class="p369-dot">·</span><span>9</span></div>',
+      '<div class="p369-quote">"If you only knew the magnificence of 3, 6 and 9, you would have a key to the universe." — Nikola Tesla</div>',
+    '</div>',
+    // SETUP
+    '<div class="p369-scr" id="p369-setup">',
+      '<div class="p369-lbl">✦ YOUR INTENTION — WRITE IT AS IF IT\'S ALREADY TRUE ✦</div>',
+      '<textarea class="p369-ta" id="p369-ta" rows="4" placeholder="I AM SO HAPPY AND GRATEFUL FOR..."></textarea>',
+      '<div class="p369-hint">FEEL IT. BELIEVE IT. SPEAK IT INTO EXISTENCE.</div>',
+      '<div class="p369-dur-lbl">HOW MANY DAYS?</div>',
+      '<div class="p369-dur-row">',
+        '<button class="p369-dur sel" data-d="9"><strong>9</strong><em>DAYS</em></button>',
+        '<button class="p369-dur" data-d="21"><strong>21</strong><em>DAYS</em></button>',
+        '<button class="p369-dur" data-d="33"><strong>33</strong><em>DAYS</em></button>',
+      '</div>',
+      '<button class="p369-begin" id="p369-begin">⚡ BEGIN THE RITUAL ⚡</button>',
+    '</div>',
+    // RITUAL
+    '<div class="p369-scr" id="p369-ritual">',
+      '<div class="p369-day"><div class="p369-day-lbl" id="p369-day-lbl">DAY 1 OF 9</div></div>',
+      '<div class="p369-prog"><div class="p369-prog-f" id="p369-prog-f"></div></div>',
+      '<div class="p369-intent" id="p369-intent-txt"></div>',
+      '<div class="p369-slot" id="p369-slot-0"><div class="p369-slot-hdr"><div class="p369-slot-name">☀️ &nbsp;MORNING</div><div class="p369-slot-st" id="p369-st-0">0 / 3</div></div><div class="p369-orbs" id="p369-orbs-0"></div><button class="p369-tx" id="p369-btn-0">⚡ TRANSMIT</button></div>',
+      '<div class="p369-slot" id="p369-slot-1"><div class="p369-slot-hdr"><div class="p369-slot-name">🌅 &nbsp;AFTERNOON</div><div class="p369-slot-st" id="p369-st-1">0 / 6</div></div><div class="p369-orbs" id="p369-orbs-1"></div><button class="p369-tx" id="p369-btn-1">⚡ TRANSMIT</button></div>',
+      '<div class="p369-slot" id="p369-slot-2"><div class="p369-slot-hdr"><div class="p369-slot-name">🌙 &nbsp;NIGHT</div><div class="p369-slot-st" id="p369-st-2">0 / 9</div></div><div class="p369-orbs" id="p369-orbs-2"></div><button class="p369-tx" id="p369-btn-2">⚡ TRANSMIT</button></div>',
+      '<div class="p369-done-banner" id="p369-done-banner">',
+        '<div class="p369-done-title">✦ DAY COMPLETE ✦</div>',
+        '<div class="p369-done-sub" id="p369-done-sub"></div>',
+        '<a href="/" class="p369-cta">✦ ASK KOZMOBOB WHAT\'S COMING</a>',
+      '</div>',
+      '<div class="p369-reset" id="p369-reset">↺ start over</div>',
+    '</div>',
+    // COMPLETE
+    '<div class="p369-scr" id="p369-complete">',
+      '<div class="p369-comp-wrap">',
+        '<span class="p369-comp-icon">✨</span>',
+        '<div class="p369-comp-title" id="p369-comp-title">RITUAL COMPLETE</div>',
+        '<div class="p369-comp-sub" id="p369-comp-sub">You transmitted your intention.\nNow watch it unfold.</div>',
+        '<a href="/" class="p369-cta">✦ ASK KOZMOBOB WHAT\'S COMING</a>',
+        '<button class="p369-new" id="p369-new">↺ BEGIN A NEW RITUAL</button>',
+      '</div>',
+    '</div>',
+    // Transmit overlay
+    '<div id="p369-tx-overlay"><canvas id="p369-tx-canvas"></canvas><div id="p369-tx-content"><div id="p369-tx-num"></div><div id="p369-tx-int"></div><div id="p369-tx-lbl">✦ TRANSMITTED TO THE UNIVERSE ✦</div></div></div>'
+  ].join('');
+  document.body.appendChild(wrap);
+
+  // Orbs helper
+  function buildOrbs(id, total, filled){
+    var c=document.getElementById(id); c.innerHTML='';
+    for(var i=0;i<total;i++){var o=document.createElement('div');o.className='p369-orb'+(i<filled?' lit':'');c.appendChild(o);}
+  }
+
+  // Transmit burst
+  var txBusy=false;
+  function txBurst(number,intention,cb){
+    if(txBusy)return; txBusy=true;
+    var ov=document.getElementById('p369-tx-overlay');
+    var cv=document.getElementById('p369-tx-canvas');
+    var nEl=document.getElementById('p369-tx-num');
+    var iEl=document.getElementById('p369-tx-int');
+    var lEl=document.getElementById('p369-tx-lbl');
+    cv.width=innerWidth; cv.height=innerHeight;
+    var ctx=cv.getContext('2d'),cx=cv.width/2,cy=cv.height/2;
+    nEl.textContent=number; iEl.textContent=intention.toUpperCase();
+    function ra(el,cls){el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);}
+    ov.classList.add('show');
+    setTimeout(function(){ra(nEl,'animate');},60);
+    setTimeout(function(){ra(iEl,'animate');},80);
+    setTimeout(function(){ra(lEl,'animate');},100);
+    var pts=[];
+    for(var i=0;i<200;i++){var a=Math.random()*Math.PI*2,sp=2+Math.random()*16;pts.push({x:cx,y:cy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:1+Math.random()*4.5,life:.7+Math.random()*.3,decay:.012+Math.random()*.018,hue:Math.floor(Math.random()*40)});}
+    var ring2=[];
+    for(var i=0;i<80;i++){var a=(i/80)*Math.PI*2,sp=8+Math.random()*6;ring2.push({x:cx,y:cy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:.8+Math.random()*2.5,life:.5+Math.random()*.3,decay:.02+Math.random()*.015,hue:20+Math.floor(Math.random()*30)});}
+    var waves=[{r:0,speed:22,life:1},{r:0,speed:16,life:.8,delay:6},{r:0,speed:12,life:.6,delay:14}];
+    var fr=0;
+    (function draw(){
+      ctx.clearRect(0,0,cv.width,cv.height);
+      waves.forEach(function(w){
+        if(fr<(w.delay||0))return; w.r+=w.speed*(1-w.r/(Math.max(cv.width,cv.height)*1.2)); w.life-=.022;
+        if(w.life>0){ctx.beginPath();ctx.arc(cx,cy,w.r,0,Math.PI*2);ctx.strokeStyle='rgba(255,200,40,'+w.life*.5+')';ctx.lineWidth=3*w.life;ctx.stroke();}
+      });
+      var alive=false;
+      pts.forEach(function(p){
+        p.x+=p.vx;p.y+=p.vy;p.vx*=.93;p.vy*=.93;p.vy+=.06;p.life-=p.decay;
+        if(p.life>0){alive=true;ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fillStyle='rgba(255,'+(190+p.hue)+','+(10+p.hue)+','+p.life+')';ctx.fill();}
+      });
+      if(fr===8)ring2.forEach(function(p){pts.push(p);});
+      if(fr<20){var al=Math.max(0,.6-(fr/20));var gf=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(cv.width,cv.height)*.5);gf.addColorStop(0,'rgba(255,230,100,'+al+')');gf.addColorStop(1,'rgba(255,200,40,0)');ctx.beginPath();ctx.arc(cx,cy,Math.min(cv.width,cv.height)*.5,0,Math.PI*2);ctx.fillStyle=gf;ctx.fill();}
+      fr++;
+      if(fr<100||alive)requestAnimationFrame(draw);
+    })();
+    var shakes=[[4,-3],[-4,3],[3,-4],[-3,2],[2,-2],[0,0]];
+    shakes.forEach(function(s,i){setTimeout(function(){document.body.style.transform='translate('+s[0]+'px,'+s[1]+'px)';if(i===shakes.length-1)document.body.style.transform='';},i*55);});
+    setTimeout(function(){ov.classList.remove('show');txBusy=false;if(cb)cb();},1700);
+  }
+
+  // Render
+  function showSetup(){
+    document.getElementById('p369-setup').classList.add('on');
+    document.getElementById('p369-ritual').classList.remove('on');
+    document.getElementById('p369-complete').classList.remove('on');
+    var s=getState(); if(s.intention) document.getElementById('p369-ta').value=s.intention;
+  }
+  function showRitual(){
+    document.getElementById('p369-setup').classList.remove('on');
+    document.getElementById('p369-ritual').classList.add('on');
+    document.getElementById('p369-complete').classList.remove('on');
+    var s=getState(), dn=Math.min(dayNum(s.start),s.days), t=today();
+    var raw=s.donemap[t]||[0,0,0];
+    var slots=raw.map(function(v,i){return v===true?NEEDS[i]:(parseInt(v)||0);});
+    document.getElementById('p369-day-lbl').textContent='DAY '+dn+' OF '+s.days;
+    document.getElementById('p369-prog-f').style.width=((dn-1)/s.days*100)+'%';
+    document.getElementById('p369-intent-txt').textContent=s.intention.toUpperCase();
+    var allDone=[0,1,2].every(function(i){return slots[i]>=NEEDS[i];});
+    [0,1,2].forEach(function(i){
+      var need=NEEDS[i],cnt=Math.min(slots[i],need),done=cnt>=need;
+      buildOrbs('p369-orbs-'+i,need,cnt);
+      document.getElementById('p369-st-'+i).textContent=(done?'✓ SENT ':'')+cnt+' / '+need;
+      var sl=document.getElementById('p369-slot-'+i),btn=document.getElementById('p369-btn-'+i);
+      if(done){sl.classList.add('done');btn.textContent='✦ TRANSMITTED ✦';btn.disabled=true;}
+      else{sl.classList.remove('done');btn.innerHTML='⚡ TRANSMIT';btn.disabled=false;}
+    });
+    var banner=document.getElementById('p369-done-banner'),rl=document.getElementById('p369-reset');
+    if(allDone){
+      banner.style.display='block';rl.style.display='none';
+      var left=s.days-dn;
+      document.getElementById('p369-done-sub').textContent=dn>=s.days?'Your ritual is complete.\nThe universe received every single transmission.':'The universe received today\'s transmissions.\nCome back tomorrow — '+left+' day'+(left===1?'':'s')+' remaining.';
+    } else { banner.style.display='none';rl.style.display='block'; }
+  }
+  function showComplete(){
+    document.getElementById('p369-setup').classList.remove('on');
+    document.getElementById('p369-ritual').classList.remove('on');
+    document.getElementById('p369-complete').classList.add('on');
+    var s=getState();
+    document.getElementById('p369-comp-title').textContent=s.days+'-DAY RITUAL COMPLETE';
+    document.getElementById('p369-comp-sub').textContent='You sent your intention to the universe '+s.days+' days in a row.\nNow watch it unfold.';
+  }
+  function render(){
+    var s=getState();
+    if(!s.intention||!s.start){showSetup();return;}
+    if(dayNum(s.start)>s.days){showComplete();return;}
+    showRitual();
+  }
+
+  // Events
+  document.querySelectorAll('.p369-dur').forEach(function(btn){
+    btn.addEventListener('click',function(){document.querySelectorAll('.p369-dur').forEach(function(b){b.classList.remove('sel');});btn.classList.add('sel');});
+  });
+  document.getElementById('p369-begin').addEventListener('click',function(){
+    var intention=document.getElementById('p369-ta').value.trim();
+    if(!intention){document.getElementById('p369-ta').focus();return;}
+    var days=parseInt(document.querySelector('.p369-dur.sel').dataset.d)||9;
+    localStorage.setItem(SK.i,intention);localStorage.setItem(SK.d,days);localStorage.setItem(SK.s,today());localStorage.setItem(SK.m,'{}');
+    render();
+  });
+  [0,1,2].forEach(function(i){
+    document.getElementById('p369-btn-'+i).addEventListener('click',function(){
+      if(this.disabled||txBusy)return;
+      var need=NEEDS[i],s=getState(),t=today();
+      if(!s.donemap[t])s.donemap[t]=[0,0,0];
+      if(s.donemap[t][i]===true)s.donemap[t][i]=need;
+      var cnt=(parseInt(s.donemap[t][i])||0)+1;
+      s.donemap[t][i]=cnt;
+      localStorage.setItem(SK.m,JSON.stringify(s.donemap));
+      buildOrbs('p369-orbs-'+i,need,Math.min(cnt,need));
+      document.getElementById('p369-st-'+i).textContent=(cnt>=need?'✓ SENT ':'')+Math.min(cnt,need)+' / '+need;
+      txBurst(need,s.intention,function(){render();});
+    });
+  });
+  document.getElementById('p369-reset').addEventListener('click',function(){
+    if(confirm('Reset your ritual and start over?')){[SK.i,SK.d,SK.s,SK.m].forEach(function(k){localStorage.removeItem(k);});render();}
+  });
+  document.getElementById('p369-new').addEventListener('click',function(){
+    [SK.i,SK.d,SK.s,SK.m].forEach(function(k){localStorage.removeItem(k);});render();
+  });
+
+  render();
+})();
 </script>
