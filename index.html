@@ -8963,8 +8963,7 @@ window.__KBShareCard=function(card,lines){
     document.getElementById('kb-369-progress-fill').style.width=Math.round((dn/days)*100)+'%';
     document.getElementById('kb-369-intention-display').textContent=intention;
     const slots=(donemap[today()])||[0,0,0];
-    const needs=[3,6,9];
-    const allDone=slots.every((v,i)=>(v===true||v>=needs[i]));
+    const allDone=slots.every((v,i)=>(v===true||v>=[3,6,9][i]));
     document.getElementById('kb-369-upsell').style.display=allDone?'block':'none';
     const needs=[3,6,9];
     [0,1,2].forEach(i=>{
