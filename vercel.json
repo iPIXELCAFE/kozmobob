@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/message", "destination": "/message.html" },
-    { "source": "/sky", "destination": "/sky.html" }
+    { "source": "/sky", "destination": "/sky.html" },
+    { "source": "/369", "destination": "/369.html" }
   ]
 }
