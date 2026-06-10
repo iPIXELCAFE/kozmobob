@@ -3418,7 +3418,7 @@ const OracleQuery = (() => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ question, sign: isHoroscope ? qLow : (window.__KBSign || 'gemini'), mode }),
         }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000)),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 20000)),
       ]);
       if (!res.ok) return null;
       const data = await res.json();
