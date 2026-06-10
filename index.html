@@ -9226,7 +9226,9 @@ window.__KBShareCard=function(card,lines){
     '#p369-tx-int{font-size:clamp(.75rem,3.5vw,.95rem);letter-spacing:.12em;color:rgba(255,220,60,.85);text-align:center;max-width:80vw;line-height:1.7;text-transform:uppercase;text-shadow:0 0 30px rgba(255,200,40,.8);opacity:0;}',
     '#p369-tx-int.animate{animation:intent-rise 1.4s .2s ease-out forwards;}',
     '#p369-tx-lbl{font-size:.65rem;letter-spacing:.28em;color:rgba(255,200,40,.7);text-transform:uppercase;opacity:0;}',
-    '#p369-tx-lbl.animate{animation:label-flash 1.4s .5s ease-out forwards;}'
+    '#p369-tx-lbl.animate{animation:label-flash 1.4s .5s ease-out forwards;}',
+    '@keyframes kb369hue{0%{filter:hue-rotate(0deg) saturate(1.2) brightness(1.05)}20%{filter:hue-rotate(80deg) saturate(1.6) brightness(1.2)}40%{filter:hue-rotate(155deg) saturate(1.7) brightness(1.2)}60%{filter:hue-rotate(220deg) saturate(1.7) brightness(1.2)}80%{filter:hue-rotate(290deg) saturate(1.6) brightness(1.2)}100%{filter:hue-rotate(360deg) saturate(1.2) brightness(1.05)}}',
+    '@keyframes kb369glow{0%,100%{opacity:.82}50%{opacity:1}}'
   ].join('\n');
   document.head.appendChild(style);
 
@@ -9283,6 +9285,14 @@ window.__KBShareCard=function(card,lines){
     '<div id="p369-tx-overlay"><canvas id="p369-tx-canvas"></canvas><div id="p369-tx-content"><div id="p369-tx-num"></div><div id="p369-tx-int"></div><div id="p369-tx-lbl">✦ TRANSMITTED TO THE UNIVERSE ✦</div></div></div>'
   ].join('');
   document.body.appendChild(wrap);
+
+  // Color-cycle the ring canvas + 369 UI on /369 page
+  (function startColorCycle(){
+    var cc=document.getElementById('canvas-container');
+    if(cc){ cc.style.animation='kb369hue 9s linear infinite'; cc.style.willChange='filter'; }
+    wrap.style.animation='kb369hue 9s linear infinite';
+    wrap.style.willChange='filter';
+  })();
 
   // Orbs helper
   function buildOrbs(id, total, filled){
