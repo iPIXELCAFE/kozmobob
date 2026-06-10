@@ -1781,7 +1781,15 @@ select.adv-input option{background:#111;}
       <div class="kb-menu-sub">Every baby star — live forever</div>
     </div>
   </div>
-  <div class="kb-menu-divider"></div>
+    <div class="kb-menu-divider"></div>
+  <div class="kb-menu-item" id="kb-menu-369" onclick="if(window.__KB369)window.__KB369.open();document.getElementById('kb-menu-panel').classList.remove('visible');document.getElementById('kb-menu-btn').classList.remove('open');">
+    <span class="kb-menu-icon">⚡</span>
+    <div class="kb-menu-text">
+      <div class="kb-menu-label">369 MANIFEST</div>
+      <div class="kb-menu-sub">Tesla's ritual — speak it into existence</div>
+    </div>
+  </div>
+<div class="kb-menu-divider"></div>
   <div class="kb-menu-item" id="kb-menu-sound">
     <span class="kb-menu-icon" id="kb-menu-sound-icon">♪</span>
     <div class="kb-menu-text">
@@ -8621,436 +8629,437 @@ window.__KBShareCard=function(card,lines){
   if(sBtn) sBtn.addEventListener('click', ()=> setTimeout(updateSoundMenu, 100));
 })();
 
+/* 
+
 /* ── GENDER REVEAL ── */
 (function(){
   const overlay  = document.getElementById('kb-reveal-overlay');
   const form     = document.getElementById('kb-reveal-form');
   const closeBtn = document.getElementById('kb-reveal-close');
   const goBtn    = document.getElementById('kb-reveal-go');
-  const canvas   = document.getElementById('kb-reveal-canvas');
-  const textDiv  = document.getElementById('kb-reveal-text');
-  const p1Input  = document.getElementById('kb-reveal-p1');
-  const p2Input  = document.getElementById('kb-reveal-p2');
-  const dueInput = document.getElementById('kb-reveal-due');
   if(!overlay) return;
-  let selectedGender=null, animFrame=null;
+  let selectedGender = null;
 
   document.querySelectorAll('.kb-reveal-gender-btn').forEach(btn=>{
     btn.addEventListener('click',()=>{
       document.querySelectorAll('.kb-reveal-gender-btn').forEach(b=>b.classList.remove('selected'));
       btn.classList.add('selected');
-      selectedGender=btn.dataset.g;
+      selectedGender = btn.dataset.g;
     });
   });
 
   function open(){
     overlay.classList.add('visible');
     form.style.display='flex';
-    canvas.style.display='none';
-    textDiv.style.display='none';
-    textDiv.innerHTML='';
-    if(animFrame){cancelAnimationFrame(animFrame);animFrame=null;}
+    const old=document.getElementById('kb-reveal-choices');
+    if(old)old.remove();
+    goBtn.style.display='';
+    selectedGender=null;
+    document.querySelectorAll('.kb-reveal-gender-btn').forEach(b=>b.classList.remove('selected'));
+    document.querySelectorAll('#kb-reveal-p1,#kb-reveal-p2,#kb-reveal-due').forEach(el=>el.value='');
   }
-  function close(){
-    overlay.classList.remove('visible');
-    if(animFrame){cancelAnimationFrame(animFrame);animFrame=null;}
-  }
+  function close(){ overlay.classList.remove('visible'); }
   closeBtn.addEventListener('click',close);
   overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
 
   goBtn.addEventListener('click',()=>{
-    const p1=(p1Input.value||'').trim();
-    const p2=(p2Input.value||'').trim();
-    const due=(dueInput.value||'').trim();
+    const p1=(document.getElementById('kb-reveal-p1').value||'').trim();
+    const p2=(document.getElementById('kb-reveal-p2').value||'').trim();
+    const due=(document.getElementById('kb-reveal-due').value||'').trim();
     if(!p1||!p2||!selectedGender){
-      [p1Input,p2Input,dueInput].forEach(el=>{if(!el.value.trim()){el.style.borderColor='rgba(255,80,80,.6)';setTimeout(()=>el.style.borderColor='',1400);}});
+      ['kb-reveal-p1','kb-reveal-p2'].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el&&!el.value.trim()){el.style.borderColor='rgba(255,80,80,.6)';setTimeout(()=>el.style.borderColor='',1400);}
+      });
       if(!selectedGender) document.querySelectorAll('.kb-reveal-gender-btn').forEach(b=>{b.style.borderColor='rgba(255,80,80,.6)';setTimeout(()=>b.style.borderColor='',1400);});
       return;
     }
-    /* Build share URL */
-    const base = window.location.origin + '/message';
-    const url  = base+'?gender='+selectedGender
-               +'&p1='+encodeURIComponent(p1)
-               +'&p2='+encodeURIComponent(p2)
-               +(due?'&due='+encodeURIComponent(due):'');
-
-    /* Hide GO, show two choices */
+    const url = window.location.origin+'/message?gender='+selectedGender+'&p1='+encodeURIComponent(p1)+'&p2='+encodeURIComponent(p2)+(due?'&due='+encodeURIComponent(due):'');
     goBtn.style.display='none';
+    const old2=document.getElementById('kb-reveal-choices');if(old2)old2.remove();
     const choiceBox=document.createElement('div');
     choiceBox.id='kb-reveal-choices';
-    choiceBox.style.cssText='width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;';
+    choiceBox.style.cssText='width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:8px;';
     choiceBox.innerHTML=
       '<div style="font-family:Courier New,monospace;font-size:.52rem;letter-spacing:1.5px;color:rgba(255,200,40,.4);margin-bottom:2px;">✦ WHAT WOULD YOU LIKE TO DO?</div>'+
       '<div style="display:flex;gap:8px;width:100%;">'+
         '<button id="kb-reveal-now-btn" style="flex:1;background:rgba(255,200,40,.08);border:1px solid rgba(255,200,40,.55);border-radius:20px;padding:12px 0;font-family:Courier New,monospace;font-size:.58rem;letter-spacing:2px;color:rgba(255,200,40,.95);cursor:pointer;">✦ REVEAL NOW</button>'+
-        '<button id="kb-reveal-link-btn" style="flex:1;background:none;border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:12px 0;font-family:Courier New,monospace;font-size:.58rem;letter-spacing:2px;color:rgba(255,255,255,.5);cursor:pointer;">⇗ SHARE LINK</button>'+
-      '</div>'+
-      '<button id="kb-reveal-back-btn" style="background:none;border:none;font-family:Courier New,monospace;font-size:.52rem;letter-spacing:1px;color:rgba(255,255,255,.2);cursor:pointer;margin-top:2px;">← back</button>';
-    document.getElementById('kb-reveal-form').appendChild(choiceBox);
-
-    /* REVEAL NOW — open the full message.html experience */
-    document.getElementById('kb-reveal-now-btn').addEventListener('click',()=>{
-      window.location.href = url;
-    });
-
-    /* SHARE LINK */
+        '<button id="kb-reveal-link-btn" style="flex:1;background:none;border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:12px 0;font-family:Courier New,monospace;font-size:.58rem;letter-spacing:2px;color:rgba(255,255,255,.5);cursor:pointer;">⊕ COPY LINK</button>'+
+      '</div>';
+    form.appendChild(choiceBox);
+    document.getElementById('kb-reveal-now-btn').addEventListener('click',()=>{ window.location.href=url; });
     document.getElementById('kb-reveal-link-btn').addEventListener('click',()=>{
-      choiceBox.remove();
-      const linkBox=document.createElement('div');
-      linkBox.style.cssText='width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;';
-      linkBox.innerHTML=
-        '<div style="font-family:Courier New,monospace;font-size:.52rem;letter-spacing:1.5px;color:rgba(255,200,40,.5);margin-bottom:4px;">✦ YOUR REVEAL LINK IS READY</div>'+
-        '<input readonly style="width:100%;background:rgba(255,200,40,.06);border:1px solid rgba(255,200,40,.25);border-radius:8px;padding:10px 12px;font-family:Courier New,monospace;font-size:.55rem;color:rgba(255,200,40,.8);outline:none;text-align:center;" value="'+url+'" onclick="this.select()"/>'+
-        '<div style="display:flex;gap:8px;width:100%;">'+
-          '<button onclick="navigator.clipboard.writeText(\''+url+'\').then(()=>this.textContent=\'✓ COPIED\')" style="flex:1;background:none;border:1px solid rgba(255,200,40,.35);border-radius:20px;padding:10px 0;font-family:Courier New,monospace;font-size:.58rem;letter-spacing:2px;color:rgba(255,200,40,.8);cursor:pointer;">COPY LINK</button>'+
-          '<a href="https://wa.me/?text='+encodeURIComponent(url)+'" target="_blank" style="flex:1;background:none;border:1px solid rgba(37,211,102,.35);border-radius:20px;padding:10px 0;font-family:Courier New,monospace;font-size:.58rem;letter-spacing:2px;color:rgba(37,211,102,.8);text-decoration:none;display:flex;align-items:center;justify-content:center;">WHATSAPP</a>'+
-        '</div>'+
-        '<button onclick="this.closest(\'#kb-reveal-form,form\').querySelector(\'#kb-reveal-go\') && (document.getElementById(\'kb-reveal-go\').style.display=\'\');this.parentNode.remove();p1Input.value=\'\';p2Input.value=\'\';dueInput.value=\'\';selectedGender=null;document.querySelectorAll(\'.kb-reveal-gender-btn\').forEach(b=>b.classList.remove(\'selected\'));" style="background:none;border:none;font-family:Courier New,monospace;font-size:.52rem;letter-spacing:1px;color:rgba(255,255,255,.2);cursor:pointer;margin-top:4px;">make another →</button>';
-      document.getElementById('kb-reveal-form').appendChild(linkBox);
-    });
-
-    /* BACK */
-    document.getElementById('kb-reveal-back-btn').addEventListener('click',()=>{
-      choiceBox.remove();
-      goBtn.style.display='';
+      navigator.clipboard.writeText(url).then(()=>{
+        const btn=document.getElementById('kb-reveal-link-btn');
+        if(btn){btn.textContent='✓ COPIED';btn.style.color='rgba(0,255,120,.9)';btn.style.borderColor='rgba(0,255,120,.5)';}
+      }).catch(()=>{
+        prompt('Copy this link:',url);
+      });
     });
   });
 
-  function startReveal(p1,p2,due,gender){
-    const isGirl  = gender==='girl';
-    const PINK    = {r:255,g:100,b:200};
-    const BLUE    = {r:80,g:170,b:255};
-    const winCol  = isGirl?PINK:BLUE;
-    const loseCol = isGirl?BLUE:PINK;
-    const word    = isGirl?'GIRL':'BOY';
+  window.__KBGenderReveal = {open};
+})();
+</script>
 
-    form.style.display='none';
-    canvas.style.display='block';
-    textDiv.style.display='flex';
-    const W=canvas.width=window.innerWidth;
-    const H=canvas.height=window.innerHeight;
-    const ctx=canvas.getContext('2d');
-    const cx=W/2, cy=H/2;
+<style>
+/* ── 369 MANIFEST OVERLAY ── */
+#kb-369-overlay{
+  display:none;position:fixed;inset:0;z-index:9998;
+  background:rgba(0,0,0,.93);
+  align-items:center;justify-content:center;
+}
+#kb-369-overlay.visible{display:flex;}
+#kb-369-panel{
+  position:relative;width:min(420px,92vw);max-height:88vh;
+  overflow-y:auto;overflow-x:hidden;
+  background:rgba(8,0,18,.97);
+  border:1px solid rgba(160,80,255,.3);
+  border-radius:16px;padding:28px 22px 32px;
+  display:flex;flex-direction:column;align-items:center;
+  font-family:'Courier New',monospace;scrollbar-width:none;
+}
+#kb-369-panel::-webkit-scrollbar{display:none;}
+#kb-369-close{
+  position:absolute;top:12px;right:14px;
+  background:none;border:1px solid rgba(160,80,255,.35);
+  border-radius:20px;color:rgba(160,80,255,.8);
+  font-family:'Courier New',monospace;font-size:.58rem;letter-spacing:2px;
+  cursor:pointer;padding:5px 12px;transition:all .2s;
+}
+#kb-369-title{
+  font-size:1.4rem;letter-spacing:.2em;color:rgba(190,120,255,.95);
+  text-shadow:0 0 24px rgba(160,80,255,.7);margin-bottom:6px;text-align:center;
+}
+#kb-369-sub{
+  font-size:.55rem;letter-spacing:1px;color:rgba(255,255,255,.35);
+  text-align:center;line-height:1.9;margin-bottom:18px;
+}
+#kb-369-setup,#kb-369-active,#kb-369-complete{
+  width:100%;display:flex;flex-direction:column;align-items:center;
+}
+#kb-369-intention{
+  width:100%;min-height:90px;background:rgba(160,80,255,.06);
+  border:1px solid rgba(160,80,255,.22);border-radius:10px;
+  padding:12px;color:rgba(255,255,255,.88);
+  font-family:'Courier New',monospace;font-size:.75rem;letter-spacing:.5px;
+  resize:none;margin-bottom:16px;outline:none;
+}
+#kb-369-intention:focus{border-color:rgba(160,80,255,.5);}
+#kb-369-dur-label{font-size:.48rem;letter-spacing:3px;color:rgba(255,255,255,.25);margin-bottom:8px;}
+#kb-369-dur-row{display:flex;gap:7px;width:100%;margin-bottom:20px;}
+.kb-369-dur{
+  flex:1;padding:11px 4px;text-align:center;cursor:pointer;
+  background:rgba(160,80,255,.06);border:1px solid rgba(160,80,255,.18);
+  border-radius:10px;color:rgba(160,80,255,.65);
+  font-size:.68rem;letter-spacing:1px;line-height:1.6;transition:all .2s;
+}
+.kb-369-dur span{display:block;font-size:.48rem;color:rgba(255,255,255,.3);letter-spacing:2px;}
+.kb-369-dur:hover,.kb-369-dur.selected{
+  background:rgba(160,80,255,.15);border-color:rgba(160,80,255,.55);
+  color:rgba(200,140,255,.95);box-shadow:0 0 12px rgba(160,80,255,.2);
+}
+#kb-369-begin{
+  width:100%;padding:14px;background:rgba(160,80,255,.1);
+  border:1px solid rgba(160,80,255,.5);border-radius:24px;
+  color:rgba(190,130,255,.95);font-family:'Courier New',monospace;
+  font-size:.68rem;letter-spacing:3px;cursor:pointer;transition:all .2s;
+}
+#kb-369-begin:hover{background:rgba(160,80,255,.22);box-shadow:0 0 20px rgba(160,80,255,.3);}
+#kb-369-day-label{
+  font-size:1rem;letter-spacing:.15em;color:rgba(190,120,255,.9);margin-bottom:10px;
+}
+#kb-369-progress-bar{
+  width:100%;height:4px;background:rgba(160,80,255,.1);
+  border-radius:4px;margin-bottom:14px;overflow:hidden;
+}
+#kb-369-progress-fill{
+  height:100%;background:linear-gradient(90deg,rgba(160,80,255,.6),rgba(220,130,255,.9));
+  border-radius:4px;transition:width .6s;
+}
+#kb-369-intention-display{
+  width:100%;padding:11px 14px;
+  background:rgba(160,80,255,.07);border:1px solid rgba(160,80,255,.18);
+  border-radius:10px;color:rgba(255,255,255,.82);
+  font-size:.76rem;letter-spacing:.5px;line-height:1.6;
+  text-align:center;margin-bottom:8px;
+}
+#kb-369-say{
+  font-size:.5rem;letter-spacing:2px;color:rgba(160,80,255,.45);
+  text-align:center;margin-bottom:16px;text-transform:uppercase;
+}
+#kb-369-slots{width:100%;display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.kb-369-slot{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;background:rgba(160,80,255,.05);
+  border:1px solid rgba(160,80,255,.13);border-radius:10px;transition:all .3s;
+}
+.kb-369-slot.done{background:rgba(0,255,120,.05);border-color:rgba(0,255,120,.22);}
+.kb-369-slot-label{font-size:.58rem;letter-spacing:1.5px;color:rgba(255,255,255,.5);}
+.kb-369-slot.done .kb-369-slot-label{color:rgba(0,255,120,.65);}
+.kb-369-transmit{
+  padding:7px 14px;background:rgba(160,80,255,.1);
+  border:1px solid rgba(160,80,255,.38);border-radius:16px;
+  color:rgba(190,130,255,.88);font-family:'Courier New',monospace;
+  font-size:.56rem;letter-spacing:2px;cursor:pointer;transition:all .2s;
+}
+.kb-369-transmit:hover{background:rgba(160,80,255,.22);box-shadow:0 0 10px rgba(160,80,255,.3);}
+.kb-369-transmit.done-btn{
+  background:rgba(0,255,120,.07);border-color:rgba(0,255,120,.28);
+  color:rgba(0,255,120,.65);cursor:default;
+}
+#kb-369-upsell{
+  width:100%;text-align:center;padding-top:12px;
+  border-top:1px solid rgba(160,80,255,.1);margin-top:4px;
+}
+#kb-369-upsell-msg{
+  font-size:.52rem;letter-spacing:2px;color:rgba(255,255,255,.28);margin-bottom:8px;
+}
+#kb-369-ask-bob,#kb-369-ask-bob-2{
+  width:100%;padding:12px;background:rgba(255,200,40,.07);
+  border:1px solid rgba(255,200,40,.38);border-radius:20px;
+  color:rgba(255,200,40,.88);font-family:'Courier New',monospace;
+  font-size:.6rem;letter-spacing:2px;cursor:pointer;transition:all .2s;margin-top:6px;
+}
+#kb-369-ask-bob:hover,#kb-369-ask-bob-2:hover{background:rgba(255,200,40,.15);}
+#kb-369-reset{
+  margin-top:14px;background:none;border:none;
+  color:rgba(255,255,255,.18);font-family:'Courier New',monospace;
+  font-size:.48rem;letter-spacing:2px;cursor:pointer;
+}
+#kb-369-reset:hover{color:rgba(255,255,255,.38);}
+#kb-369-complete-title{
+  font-size:1.25rem;letter-spacing:.18em;color:rgba(190,120,255,.95);
+  margin-bottom:10px;text-shadow:0 0 20px rgba(160,80,255,.6);text-align:center;
+}
+#kb-369-complete-sub{
+  font-size:.58rem;letter-spacing:1px;color:rgba(255,255,255,.45);
+  text-align:center;line-height:1.9;margin-bottom:20px;
+}
+#kb-369-new{
+  width:100%;padding:13px;background:rgba(160,80,255,.1);
+  border:1px solid rgba(160,80,255,.5);border-radius:24px;
+  color:rgba(190,130,255,.95);font-family:'Courier New',monospace;
+  font-size:.62rem;letter-spacing:3px;cursor:pointer;margin-bottom:8px;
+}
+</style>
 
-    /* ── Letter glyphs ── */
-    const GLYPHS={
-      G:[[0,1,1,1],[1,0,0,0],[1,0,1,1],[1,0,0,1],[0,1,1,1]],
-      I:[[1,1,1],[0,1,0],[0,1,0],[0,1,0],[1,1,1]],
-      R:[[1,1,0],[1,0,1],[1,1,0],[1,0,1],[1,0,1]],
-      L:[[1,0,0],[1,0,0],[1,0,0],[1,0,0],[1,1,1]],
-      B:[[1,1,0],[1,0,1],[1,1,0],[1,0,1],[1,1,0]],
-      O:[[0,1,1,0],[1,0,0,1],[1,0,0,1],[1,0,0,1],[0,1,1,0]],
-      Y:[[1,0,1],[1,0,1],[0,1,0],[0,1,0],[0,1,0]],
-    };
-    const DOT=Math.min(W,H)*0.072;
-    const letters=word.split('');
-    let totalW=0;
-    letters.forEach(ch=>{totalW+=(GLYPHS[ch][0].length*DOT)+DOT;});
-    totalW-=DOT;
-    let lx=cx-totalW/2;
-    const ly=cy-DOT*2;
-    const targets=[], letterGroups=[];
-    letters.forEach(ch=>{
-      const g=GLYPHS[ch],pts=[];
-      for(let r=0;r<g.length;r++) for(let c=0;c<g[r].length;c++)
-        if(g[r][c]){const pt={x:lx+c*DOT,y:ly+r*DOT};targets.push(pt);pts.push(pt);}
-      letterGroups.push(pts);
-      lx+=(GLYPHS[ch][0].length*DOT)+DOT;
-    });
+<!-- ── 369 MANIFEST OVERLAY ── -->
+<div id="kb-369-overlay">
+  <div id="kb-369-panel">
+    <button id="kb-369-close">✕</button>
+    <div id="kb-369-title">⚡ 369 MANIFEST</div>
+    <div id="kb-369-sub">Tesla's frequency.<br>3× morning &nbsp;·&nbsp; 6× afternoon &nbsp;·&nbsp; 9× night</div>
 
-    /* ── Background stars (static field) ── */
-    const bgStars=[];
-    for(let i=0;i<300;i++){
-      const isW=Math.random()<0.5;
-      bgStars.push({x:Math.random()*W,y:Math.random()*H,
-        size:0.6+Math.random()*2,alpha:0.4+Math.random()*0.5,
-        twinkle:Math.random()*Math.PI*2,tspd:0.02+Math.random()*0.02,
-        col:isW?winCol:loseCol,isWin:isW,
-        vx:(Math.random()-.5)*0.12,vy:(Math.random()-.5)*0.12});
-    }
+    <!-- Setup Screen -->
+    <div id="kb-369-setup">
+      <textarea id="kb-369-intention" placeholder="Write your intention here...&#10;e.g. I attract 15k a month · My body is strong · Love finds me"></textarea>
+      <div id="kb-369-dur-label">HOW MANY DAYS?</div>
+      <div id="kb-369-dur-row">
+        <div class="kb-369-dur" data-d="9">9 DAYS<br><span>SPARK</span></div>
+        <div class="kb-369-dur" data-d="21">21 DAYS<br><span>ALIGN</span></div>
+        <div class="kb-369-dur" data-d="33">33 DAYS<br><span>MASTER</span></div>
+      </div>
+      <button id="kb-369-begin">⚡ BEGIN RITUAL</button>
+    </div>
 
-    /* ── Word stars ── */
-    const wordStars=targets.map(t=>({
-      x:cx+(Math.random()-.5)*30,y:cy+(Math.random()-.5)*30,
-      tx:t.x,ty:t.y,size:3+Math.random()*1.2,
-      twinkle:Math.random()*Math.PI*2,tspd:0.03+Math.random()*0.02,
-      alpha:0,col:winCol
-    }));
+    <!-- Active Ritual Screen -->
+    <div id="kb-369-active" style="display:none;">
+      <div id="kb-369-day-label">DAY <span id="kb-369-day-num">1</span> OF <span id="kb-369-day-total">9</span></div>
+      <div id="kb-369-progress-bar"><div id="kb-369-progress-fill"></div></div>
+      <div id="kb-369-intention-display"></div>
+      <div id="kb-369-say">Say it out loud. Feel it. Make it real.</div>
+      <div id="kb-369-slots">
+        <div class="kb-369-slot" id="kb-369-slot-0">
+          <div class="kb-369-slot-label">☀ MORNING &nbsp;·&nbsp; 3×</div>
+          <button class="kb-369-transmit" data-slot="0">⚡ TRANSMIT</button>
+        </div>
+        <div class="kb-369-slot" id="kb-369-slot-1">
+          <div class="kb-369-slot-label">◈ AFTERNOON &nbsp;·&nbsp; 6×</div>
+          <button class="kb-369-transmit" data-slot="1">⚡ TRANSMIT</button>
+        </div>
+        <div class="kb-369-slot" id="kb-369-slot-2">
+          <div class="kb-369-slot-label">☽ NIGHT &nbsp;·&nbsp; 9×</div>
+          <button class="kb-369-transmit" data-slot="2">⚡ TRANSMIT</button>
+        </div>
+      </div>
+      <div id="kb-369-upsell" style="display:none;">
+        <div id="kb-369-upsell-msg">The universe is listening.</div>
+        <button id="kb-369-ask-bob">✦ ASK KOZMOBOB WHAT'S COMING</button>
+      </div>
+      <button id="kb-369-reset">↺ start over</button>
+    </div>
 
-    /* ── Tension text ── */
-    textDiv.innerHTML='';
-    [{t:p1+' and '+p2+'…',d:700},{t:due?'A soul arriving '+due+'.':'A soul is arriving.',d:2700},
-     {t:'The stars have always known.',d:4700}].forEach(({t,d})=>{
-      const el=document.createElement('div');
-      el.className='kb-reveal-line';el.textContent=t;textDiv.appendChild(el);
-      setTimeout(()=>el.classList.add('show'),d);
-    });
+    <!-- Complete Screen -->
+    <div id="kb-369-complete" style="display:none;">
+      <div id="kb-369-complete-title">⚡ RITUAL COMPLETE</div>
+      <div id="kb-369-complete-sub">You transmitted for <span id="kb-369-complete-days"></span> days.<br>The universe received every word.</div>
+      <button id="kb-369-new">⚡ NEW RITUAL</button>
+      <button id="kb-369-ask-bob-2">✦ ASK KOZMOBOB</button>
+    </div>
+  </div>
+</div>
 
-    /* ── Reveal button ── */
-    const revBtn=document.createElement('button');
-    revBtn.textContent='✦ REVEAL';
-    revBtn.style.cssText='position:absolute;left:50%;transform:translateX(-50%);bottom:18%;'+
-      'background:none;border:1px solid rgba(255,200,40,.6);border-radius:30px;'+
-      'padding:14px 40px;font-family:Courier New,monospace;font-size:.75rem;letter-spacing:3px;'+
-      'color:rgba(255,200,40,.9);cursor:pointer;opacity:0;transition:opacity 1s;pointer-events:none;z-index:10;';
-    overlay.appendChild(revBtn);
-    setTimeout(()=>{revBtn.style.opacity='1';revBtn.style.pointerEvents='all';},6200);
+<script>
+/* ── 369 MANIFEST ── */
+(function(){
+  const overlay    = document.getElementById('kb-369-overlay');
+  if(!overlay) return;
+  const closeBtn   = document.getElementById('kb-369-close');
+  const setupEl    = document.getElementById('kb-369-setup');
+  const activeEl   = document.getElementById('kb-369-active');
+  const completeEl = document.getElementById('kb-369-complete');
+  const SK = {
+    i:'__kb369_int', d:'__kb369_days',
+    s:'__kb369_start', m:'__kb369_done'
+  };
 
-    /* ── Phases ── */
-    let phase=1,phaseT=0,bobR=0,bobAngle=0,warT=0,flashA=0;
-    let explodeParticles=[];
-    let triggered=false;
-
-    function trigger(){
-      if(triggered) return; triggered=true;
-      revBtn.style.opacity='0';revBtn.style.pointerEvents='none';
-      setTimeout(()=>revBtn.remove(),1000);
-      textDiv.querySelectorAll('.kb-reveal-line').forEach(el=>{el.style.transition='opacity 1.2s';el.style.opacity='0';});
-      phase=2; phaseT=0;
-    }
-    revBtn.addEventListener('click',trigger);
-
-    /* ── Draw helpers ── */
-    function drawStar(x,y,size,col,alpha,glow){
-      if(alpha<=0.01) return;
-      ctx.save(); ctx.globalAlpha=Math.min(1,alpha);
-      if(glow){ctx.shadowColor=`rgb(${col.r},${col.g},${col.b})`;ctx.shadowBlur=size*2;}
-      ctx.fillStyle=`rgb(${col.r},${col.g},${col.b})`;
-      ctx.beginPath();ctx.arc(x,y,size,0,Math.PI*2);ctx.fill();
-      ctx.shadowBlur=0;ctx.fillStyle='rgba(255,255,255,0.85)';
-      ctx.beginPath();ctx.arc(x,y,size*0.28,0,Math.PI*2);ctx.fill();
-      ctx.restore();
-    }
-
-    function blobPath(radius, angle, lobes){
-      /* Organic blob like the real Bob — lobed pulsing shape */
-      ctx.beginPath();
-      const pts=12;
-      for(let i=0;i<=pts;i++){
-        const a=(i/pts)*Math.PI*2;
-        const lobe=1+lobes*(
-          0.18*Math.sin(2*a+angle*0.7)+
-          0.12*Math.sin(3*a-angle*0.5)+
-          0.08*Math.sin(5*a+angle*0.9)
-        );
-        const r=radius*lobe;
-        const x=cx+Math.cos(a)*r, y=cy+Math.sin(a)*r;
-        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-      }
-      ctx.closePath();
-    }
-
-    function drawBob(radius,mixT,intensity){
-      const lobe=0.6+0.4*Math.sin(bobAngle*0.4); /* breathing */
-      const winC=mixT>0.5?winCol:loseCol;
-      const loseC=mixT>0.5?loseCol:winCol;
-      const colorA=Math.abs(mixT*2-1); /* 0=balanced, 1=one color winning */
-
-      /* ── Outer atmospheric blob glow ── */
-      const og=ctx.createRadialGradient(cx,cy,radius*0.6,cx,cy,radius*3);
-      og.addColorStop(0,`rgba(${winC.r},${winC.g},${winC.b},${0.18*intensity*colorA})`);
-      og.addColorStop(0.4,`rgba(${loseC.r},${loseC.g},${loseC.b},${0.08*intensity*(1-colorA)})`);
-      og.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=og;ctx.fillRect(0,0,W,H);
-
-      /* ── Main organic blob body ── */
-      ctx.save();
-      blobPath(radius, bobAngle, lobe*0.4);
-      const bg=ctx.createRadialGradient(cx-radius*0.25,cy-radius*0.25,0,cx,cy,radius*1.1);
-      bg.addColorStop(0,`rgba(255,220,100,${0.9*intensity})`);   /* golden center */
-      bg.addColorStop(0.3,`rgba(${winC.r},${winC.g},${winC.b},${0.75*intensity*colorA})`);
-      bg.addColorStop(0.3,`rgba(${loseC.r},${loseC.g},${loseC.b},${0.55*intensity*(1-colorA)})`);
-      bg.addColorStop(0.75,`rgba(${winC.r/2|0},${winC.g/2|0},${winC.b/2|0},${0.4*intensity})`);
-      bg.addColorStop(1,`rgba(0,0,0,0.7)`);
-      ctx.fillStyle=bg;ctx.fill();
-      ctx.restore();
-
-      /* ── Inner dark orbit ring (like real Bob) ── */
-      ctx.save();
-      ctx.globalAlpha=0.55*intensity;
-      const ringR=radius*0.55;
-      const rg=ctx.createRadialGradient(cx,cy,ringR*0.5,cx,cy,ringR*1.1);
-      rg.addColorStop(0,'rgba(0,0,0,0)');
-      rg.addColorStop(0.5,'rgba(0,0,0,0.6)');
-      rg.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.beginPath();ctx.arc(cx,cy,ringR*1.15,0,Math.PI*2);
-      ctx.fillStyle=rg;ctx.fill();
-      ctx.restore();
-
-      /* ── Inner color war swirl ── */
-      if(colorA<0.92){
-        ctx.save();
-        const nSegs=10;
-        for(let i=0;i<nSegs;i++){
-          const a1=(i/nSegs)*Math.PI*2+bobAngle*1.4;
-          const a2=((i+0.45)/nSegs)*Math.PI*2+bobAngle*1.4;
-          const c=i%2===0?PINK:BLUE;
-          const sA=(i%2===0?mixT:(1-mixT))*(1-colorA)*0.5*intensity;
-          ctx.globalAlpha=sA;
-          ctx.beginPath();ctx.moveTo(cx,cy);
-          ctx.arc(cx,cy,radius*0.5,a1,a2);ctx.closePath();
-          ctx.fillStyle=`rgb(${c.r},${c.g},${c.b})`;ctx.fill();
-        }
-        ctx.restore();
-      }
-
-      /* ── Inner core sphere (tiny like real Bob) ── */
-      ctx.save();
-      const cg=ctx.createRadialGradient(cx-radius*.08,cy-radius*.08,0,cx,cy,radius*0.22);
-      cg.addColorStop(0,'rgba(220,230,255,0.95)');
-      cg.addColorStop(0.5,`rgba(${winC.r},${winC.g},${winC.b},0.7)`);
-      cg.addColorStop(1,'rgba(20,20,40,0.9)');
-      ctx.globalAlpha=intensity;
-      ctx.beginPath();ctx.arc(cx,cy,radius*0.22,0,Math.PI*2);
-      ctx.fillStyle=cg;ctx.fill();
-      ctx.restore();
-
-      /* ── Pulse ring ── */
-      ctx.save();
-      ctx.globalAlpha=0.3*intensity*Math.abs(Math.sin(bobAngle*0.8));
-      ctx.strokeStyle=`rgba(${winC.r},${winC.g},${winC.b},0.8)`;
-      ctx.lineWidth=2.5;
-      blobPath(radius*1.08, bobAngle*0.6, lobe*0.25);
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    function easeOut(t){return 1-(1-Math.min(1,t))*(1-Math.min(1,t));}
-
-    function tick(){
-      animFrame=requestAnimationFrame(tick);phaseT++;
-      bobAngle+=0.018;
-      ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fillRect(0,0,W,H);
-
-      /* Always draw bg stars */
-      bgStars.forEach(s=>{
-        s.twinkle+=s.tspd;
-        const tw=0.6+0.4*Math.sin(s.twinkle);
-        if(phase<=2){s.x=(s.x+s.vx+W)%W;s.y=(s.y+s.vy+H)%H;}
-        let a=s.alpha*tw;
-        if(phase>=4) a*=(s.isWin?0.25:0); /* lose stars gone after explosion */
-        if(phase>=5) a*=0.4;
-        drawStar(s.x,s.y,s.size,s.col,a,false);
-      });
-
-      if(phase===1){
-        /* Drift + small central pulse hinting at Bob */
-        const pulse=0.5+0.5*Math.sin(phaseT*0.04);
-        const hg=ctx.createRadialGradient(cx,cy,0,cx,cy,60*pulse);
-        hg.addColorStop(0,'rgba(255,200,40,0.06)');hg.addColorStop(1,'rgba(0,0,0,0)');
-        ctx.fillStyle=hg;ctx.fillRect(0,0,W,H);
-
-      } else if(phase===2){
-        /* Bob grows from nothing */
-        bobR=Math.min(Math.min(W,H)*0.28, bobR+2.5);
-        const prog=Math.min(1,phaseT/50);
-        drawBob(bobR,0.3,easeOut(prog));
-        if(prog>=1){phase=3;phaseT=0;warT=0;}
-
-      } else if(phase===3){
-        /* Color war inside Bob */
-        warT++;
-        const shake=warT>60?(Math.random()-0.5)*4:0;
-        ctx.save();ctx.translate(shake,shake*0.5);
-        const mixProg=Math.min(1,Math.max(0,(warT-30)/90));
-        const intensity=1+Math.sin(warT*0.15)*0.1;
-        drawBob(bobR+(Math.sin(warT*0.2)*3),mixProg,intensity);
-        ctx.restore();
-        if(warT>=150){phase=4;phaseT=0;}
-
-      } else if(phase===4){
-        /* Winner floods Bob — he pulses bright */
-        const prog=Math.min(1,phaseT/40);
-        const bobPulse=bobR*(1+prog*0.15);
-        drawBob(bobPulse,0.999,1+prog*0.5);
-        if(prog>=1){
-          /* EXPLODE — spawn particles */
-          for(let i=0;i<250;i++){
-            const a=Math.random()*Math.PI*2,sp=4+Math.random()*18;
-            explodeParticles.push({x:cx,y:cy,
-              vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,
-              size:1.5+Math.random()*3.5,alpha:1,
-              decay:0.014+Math.random()*0.012,col:winCol});
-          }
-          phase=5;phaseT=0;flashA=1;
-        }
-
-      } else if(phase===5){
-        /* Flash + particles burst */
-        flashA=Math.max(0,flashA-0.055);
-        ctx.fillStyle=`rgba(255,255,255,${flashA})`;ctx.fillRect(0,0,W,H);
-        explodeParticles.forEach(p=>{
-          if(p.alpha<=0) return;
-          p.x+=p.vx;p.y+=p.vy;p.vx*=0.96;p.vy*=0.96;p.alpha-=p.decay;
-          drawStar(p.x,p.y,p.size,p.col,Math.max(0,p.alpha),true);
-        });
-        /* Word stars begin flying */
-        wordStars.forEach(s=>{
-          s.alpha=Math.min(0.8,s.alpha+0.04);
-          s.x+=(s.tx-s.x)*0.06;s.y+=(s.ty-s.y)*0.06;
-          drawStar(s.x,s.y,s.size,s.col,s.alpha,true);
-        });
-        if(phaseT>=35){phase=6;phaseT=0;}
-
-      } else if(phase===6){
-        /* Word settles, constellation lines, congratulations */
-        const prog=Math.min(1,phaseT/80);
-        explodeParticles.forEach(p=>{
-          if(p.alpha<=0) return;
-          p.x+=p.vx*0.5;p.y+=p.vy*0.5;p.alpha-=p.decay*0.5;
-          drawStar(p.x,p.y,p.size*0.7,p.col,Math.max(0,p.alpha),false);
-        });
-        wordStars.forEach(s=>{
-          s.twinkle+=s.tspd;
-          const tw=0.8+0.2*Math.sin(s.twinkle);
-          s.x+=(s.tx-s.x)*0.04;s.y+=(s.ty-s.y)*0.04;
-          s.alpha=Math.min(1,s.alpha+0.01);
-          drawStar(s.x,s.y,s.size,s.col,s.alpha*tw,true);
-        });
-        /* Constellation lines */
-        if(prog>0.3){
-          const la=easeOut((prog-0.3)/0.7)*0.18;
-          ctx.strokeStyle=`rgba(${winCol.r},${winCol.g},${winCol.b},${la})`;
-          ctx.lineWidth=0.9;
-          letterGroups.forEach(pts=>{
-            for(let i=0;i<pts.length-1;i++){
-              const a=pts[i],b=pts[i+1];
-              if(Math.abs(a.x-b.x)<=DOT*1.1&&Math.abs(a.y-b.y)<=DOT*1.1){
-                ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
-              }
-            }
-          });
-        }
-        /* Congratulations — flies from behind (scale 0→1 in star color) */
-        if(prog>0.55){
-          const cp=Math.min(1,(prog-0.55)/0.45);
-          const scale=0.05+cp*0.95;
-          const alpha=cp*cp;
-          const txt='Congratulations  '+p1.toUpperCase()+' & '+p2.toUpperCase();
-          const fSize=Math.round(Math.min(W,H)*0.038*scale);
-          ctx.save();
-          ctx.globalAlpha=alpha;
-          ctx.font='500 '+fSize+'px Courier New,monospace';
-          ctx.textAlign='center';
-          ctx.shadowColor=`rgb(${winCol.r},${winCol.g},${winCol.b})`;
-          ctx.shadowBlur=fSize*0.8*cp;
-          ctx.fillStyle=`rgb(${winCol.r},${winCol.g},${winCol.b})`;
-          ctx.fillText(txt, cx, cy+DOT*3.8);
-          /* White letter cores */
-          ctx.shadowBlur=0;
-          ctx.fillStyle=`rgba(255,255,255,${0.7*cp})`;
-          ctx.font='500 '+fSize+'px Courier New,monospace';
-          ctx.fillText(txt, cx, cy+DOT*3.8);
-          ctx.restore();
-        }
-      }
-    }
-    tick();
+  function today(){
+    const d=new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   }
 
-  window.__KBGenderReveal={open};
-})();
+  function getState(){
+    let donemap={};
+    try{donemap=JSON.parse(localStorage.getItem(SK.m)||'{}');}catch(e){}
+    return {
+      intention: localStorage.getItem(SK.i)||'',
+      days:      parseInt(localStorage.getItem(SK.d)||'0'),
+      start:     localStorage.getItem(SK.s)||'',
+      donemap
+    };
+  }
 
+  function dayNum(start){
+    if(!start) return 1;
+    const diff = Date.now() - new Date(start+'T00:00:00').getTime();
+    return Math.max(1, Math.floor(diff/(864e5))+1);
+  }
+
+  function open(){ overlay.classList.add('visible'); render(); }
+  function close(){ overlay.classList.remove('visible'); }
+
+  function render(){
+    const {intention,days,start,donemap}=getState();
+    if(!intention||!days||!start){ showSetup(); return; }
+    const dn=dayNum(start);
+    if(dn>days){ showComplete(days); return; }
+    showActive(intention,days,dn,donemap);
+  }
+
+  function showSetup(){
+    setupEl.style.display='flex';
+    activeEl.style.display='none';
+    completeEl.style.display='none';
+  }
+
+  function showActive(intention,days,dn,donemap){
+    setupEl.style.display='none';
+    activeEl.style.display='flex';
+    completeEl.style.display='none';
+    document.getElementById('kb-369-day-num').textContent=dn;
+    document.getElementById('kb-369-day-total').textContent=days;
+    document.getElementById('kb-369-progress-fill').style.width=Math.round((dn/days)*100)+'%';
+    document.getElementById('kb-369-intention-display').textContent=intention;
+    const slots=(donemap[today()])||[false,false,false];
+    const allDone=slots.every(Boolean);
+    document.getElementById('kb-369-upsell').style.display=allDone?'block':'none';
+    [0,1,2].forEach(i=>{
+      const slotEl=document.getElementById('kb-369-slot-'+i);
+      const btn=slotEl.querySelector('.kb-369-transmit');
+      if(slots[i]){
+        slotEl.classList.add('done');
+        btn.textContent='✓ SENT';
+        btn.classList.add('done-btn');
+        btn.disabled=true;
+      } else {
+        slotEl.classList.remove('done');
+        btn.textContent='⚡ TRANSMIT';
+        btn.classList.remove('done-btn');
+        btn.disabled=false;
+      }
+    });
+  }
+
+  function showComplete(days){
+    setupEl.style.display='none';
+    activeEl.style.display='none';
+    completeEl.style.display='flex';
+    document.getElementById('kb-369-complete-days').textContent=days;
+  }
+
+  // Duration picker
+  let selDays=9;
+  document.querySelectorAll('.kb-369-dur').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.kb-369-dur').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selDays=parseInt(btn.dataset.d);
+    });
+  });
+  const firstDur=document.querySelector('.kb-369-dur');
+  if(firstDur) firstDur.classList.add('selected');
+
+  // Begin
+  document.getElementById('kb-369-begin').addEventListener('click',()=>{
+    const intent=(document.getElementById('kb-369-intention').value||'').trim();
+    if(!intent){
+      const ta=document.getElementById('kb-369-intention');
+      ta.style.borderColor='rgba(255,80,80,.6)';
+      setTimeout(()=>ta.style.borderColor='',1500);
+      return;
+    }
+    localStorage.setItem(SK.i,intent);
+    localStorage.setItem(SK.d,selDays);
+    localStorage.setItem(SK.s,today());
+    localStorage.setItem(SK.m,'{}');
+    render();
+  });
+
+  // Transmit
+  document.querySelectorAll('.kb-369-transmit').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      if(btn.disabled) return;
+      const slot=parseInt(btn.dataset.slot);
+      const {donemap}=getState();
+      const t=today();
+      if(!donemap[t]) donemap[t]=[false,false,false];
+      donemap[t][slot]=true;
+      localStorage.setItem(SK.m,JSON.stringify(donemap));
+      btn.textContent='✦ ✦ ✦';
+      btn.style.background='rgba(160,80,255,.4)';
+      btn.style.boxShadow='0 0 28px rgba(160,80,255,.7)';
+      if(window.__KBSound) window.__KBSound.whoosh();
+      setTimeout(()=>render(),700);
+    });
+  });
+
+  // Reset
+  document.getElementById('kb-369-reset').addEventListener('click',()=>{
+    if(confirm('Reset your 369 ritual and start over?')){
+      [SK.i,SK.d,SK.s,SK.m].forEach(k=>localStorage.removeItem(k));
+      render();
+    }
+  });
+
+  // Ask Bob
+  function askBob(){
+    close();
+    const wheelBtn=document.querySelector('#input-send-btn,#send-btn,.send-btn,[data-action="ask"]');
+    if(wheelBtn) wheelBtn.click();
+  }
+  document.getElementById('kb-369-ask-bob').addEventListener('click',askBob);
+  document.getElementById('kb-369-ask-bob-2').addEventListener('click',askBob);
+
+  // New ritual
+  document.getElementById('kb-369-new').addEventListener('click',()=>{
+    [SK.i,SK.d,SK.s,SK.m].forEach(k=>localStorage.removeItem(k));
+    render();
+  });
+
+  closeBtn.addEventListener('click',close);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
+
+  window.__KB369={open};
+})();
 </script>
-</body>
-</html>
