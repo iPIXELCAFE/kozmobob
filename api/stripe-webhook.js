@@ -84,11 +84,13 @@ async function handlePurchase(product, meta, session) {
 
     case 'billboard-community':
     case 'billboard-premium': {
-      const { message, emoji, deviceId, url, hours = 1 } = meta;
+      const { message, emoji, deviceId, url, hours = 1, page = 'oracle' } = meta;
       const type = product === 'billboard-premium' ? 'premium' : 'community';
-      const msgData = { message, emoji, deviceId, url, type, paidAt: now, sessionId };
+      /* Separate Redis keys for oracle vs 369 — completely isolated ad inventories */
+      const pageTag = page === '369' ? ':369' : '';
+      const msgData = { message, emoji, deviceId, url, type, page, paidAt: now, sessionId };
 
-      await redis.set(`billboard:${type}:live`, JSON.stringify(msgData), { ex: parseInt(hours) * 3600 });
+      await redis.set(`billboard:${type}:live${pageTag}`, JSON.stringify(msgData), { ex: parseInt(hours) * 3600 });
 
       /* Also log to stars */
       await redis.lpush('stars:messages', JSON.stringify({ ...msgData }));
