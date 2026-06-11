@@ -8884,15 +8884,13 @@ window.__KBShareCard=function(card,lines){
 /* ── Hide ASK KOZMOBOB from hamburger menu everywhere ── */
 #kb-menu-ask{display:none!important;}
 
-/* ── ASK KOZMOBOB float button (mobile only, above bottom bar) ── */
-#kb-ask-float-btn{
-  display:none; /* hidden by default; shown via mobile media query */
-}
+/* ── ASK KOZMOBOB float button (mobile only) ── */
+#kb-ask-float-btn{display:none;}
 @media(max-width:900px){
   #kb-ask-float-btn{
     display:block;
     position:fixed;
-    bottom:80px; /* sits just above the 72px bottom bar */
+    bottom:120px; /* above MY CARDS/STAR MAP row */
     left:50%;transform:translateX(-50%);
     width:56%;max-width:220px;
     padding:9px 0;
@@ -8912,43 +8910,12 @@ window.__KBShareCard=function(card,lines){
     color:rgba(255,200,40,.98);
     box-shadow:0 0 28px rgba(255,185,20,.28);
   }
-  /* MY CARDS — move to same row as bottom banner */
-  #album-btn{
-    bottom:0!important;
-    height:72px;
-    padding:0!important;
-    width:104px!important;
-    border-radius:0!important;
-    border:none!important;
-    border-right:1px solid rgba(255,200,40,.15)!important;
-    background:rgba(4,2,12,.98)!important;
-    font-size:.52rem!important;
-    z-index:31;
-  }
-  /* STAR MAP — move to same row as bottom banner (injected via JS, override via global rule below) */
+  /* MY CARDS — touch the top of the bottom banner */
+  #album-btn{bottom:72px!important;}
 }
-/* STAR MAP mobile override — outside the existing starmap injection block */
+/* STAR MAP — touch the top of the bottom banner */
 @media(max-width:900px){
-  #starmap-btn{
-    bottom:0!important;
-    height:72px!important;
-    width:104px!important;
-    padding:0!important;
-    border-radius:0!important;
-    border:none!important;
-    border-left:1px solid rgba(0,255,255,.15)!important;
-    background:rgba(4,2,12,.98)!important;
-    font-size:.52rem!important;
-    right:0!important;left:auto!important;
-    z-index:31;
-  }
-  /* Shrink bottom banner to center between the two buttons */
-  #mob-bot-banner{
-    left:104px!important;
-    right:104px!important;
-    border-left:none!important;
-    border-right:none!important;
-  }
+  #starmap-btn{bottom:72px!important;}
 }
 
 /* ── Tesla quote — BIGGER ── */
