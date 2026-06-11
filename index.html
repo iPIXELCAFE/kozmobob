@@ -2012,6 +2012,8 @@ select.adv-input option{background:#111;}
 <!-- ADVERTISE HERE chips — positioned in billboard HTML via JS -->
 
 <script>
+/* ── /369 page mode — tag body so CSS can hide nav on mobile ── */
+if(window.location.pathname==='/369')document.body.classList.add('kb-page-369');
 /* ══════════════════════════════════════════════════════════════
    ADVERT OVERLAY — open, close, billboard select, multi-emoji,
    hours selector, priority jump, queue status
@@ -8853,6 +8855,25 @@ window.__KBShareCard=function(card,lines){
   border:1px solid rgba(255,200,40,.5);border-radius:24px;
   color:rgba(255,210,60,.95);font-family:'Courier New',monospace;
   font-size:.62rem;letter-spacing:3px;cursor:pointer;margin-bottom:8px;
+}
+
+/* ── Tesla quote — BIGGER ── */
+.p369-quote,.tesla-quote{
+  font-size:clamp(1rem,3.8vw,1.45rem)!important;
+  color:rgba(255,210,60,.72)!important;
+  letter-spacing:.06em!important;
+  line-height:1.65!important;
+}
+
+/* ── /369 page mode — hide all mobile nav so BACK TO ORACLE is visible ── */
+@media(max-width:900px){
+  body.kb-page-369 #readings-btn,
+  body.kb-page-369 #album-btn,
+  body.kb-page-369 #kb-menu-btn,
+  body.kb-page-369 #kb-369-topbtn,
+  body.kb-page-369 #kb-compat-btn,
+  body.kb-page-369 #kb-sound-btn,
+  body.kb-page-369 #kb-weekly-btn{display:none!important;}
 }
 </style>
 
