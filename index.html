@@ -2189,10 +2189,10 @@ if(window.location.pathname==='/369')document.body.classList.add('kb-page-369');
       sessionStorage.setItem('__kb_personal_msg', JSON.stringify({ text: message, emoji, from: fromVal, link: url }));
     } else if (currentBill === 'right') {
       product  = 'billboard-premium';
-      metadata = { message: bizVal, url, deviceId, hours: selectedHours, priority: priorityOn ? 1 : 0 };
+      metadata = { message: bizVal, url, deviceId, hours: selectedHours, priority: priorityOn ? 1 : 0, page: document.body.classList.contains('kb-page-369') ? '369' : 'oracle' };
     } else {
       product  = 'billboard-community';
-      metadata = { message: bizVal, url, deviceId, hours: selectedHours, priority: priorityOn ? 1 : 0 };
+      metadata = { message: bizVal, url, deviceId, hours: selectedHours, priority: priorityOn ? 1 : 0, page: document.body.classList.contains('kb-page-369') ? '369' : 'oracle' };
     }
 
     /* Save ad data so success handler can inject it live */
@@ -2203,7 +2203,8 @@ if(window.location.pathname==='/369')document.body.classList.add('kb-page-369');
         url:      url,
         hours:    selectedHours,
         priority: priorityOn ? 1 : 0,
-        type:     currentBill  /* 'left' (community) or 'right' (premium) */
+        type:     currentBill,  /* 'left' (community) or 'right' (premium) */
+        page:     document.body.classList.contains('kb-page-369') ? '369' : 'oracle'
       }));
     }
 
@@ -4316,26 +4317,26 @@ const OracleQuery = (() => {
   window.Billboard = { setAccentColor:function(){} };
 
   /* ── Live user ad injection ── */
-  /* Restore persisted left billboard ad on page load */
+  /* Restore persisted left billboard ad on page load — use page-specific key */
   (function(){
-    const saved = localStorage.getItem('__kb_live_ad');
+    const _key = document.body.classList.contains('kb-page-369') ? '__kb_live_ad_369' : '__kb_live_ad';
+    const saved = localStorage.getItem(_key);
     if(!saved) return;
     try {
       const data = JSON.parse(saved);
-      /* Expire based on hours paid for (default 1hr) */
       const totalMs = (data.hours||1) * 3600000;
       const elapsed = data._ts ? Date.now() - data._ts : 0;
-      if(elapsed >= totalMs){ localStorage.removeItem('__kb_live_ad'); return; }
-      /* Pass remaining display time so slot doesn't restart from full duration */
+      if(elapsed >= totalMs){ localStorage.removeItem(_key); return; }
       const restored = Object.assign({}, data, { _remainMs: totalMs - elapsed });
       setTimeout(()=>{ if(window.__injectLeftAd) window.__injectLeftAd(restored, true); }, 250);
-    } catch(e){ localStorage.removeItem('__kb_live_ad'); }
+    } catch(e){ localStorage.removeItem(_key); }
   })();
 
   window.__injectLeftAd = function(ad, _fromRestore){
     if(!ad || !ad.biz) return;
-    /* Save to localStorage so it survives refresh */
-    if(!_fromRestore) localStorage.setItem('__kb_live_ad', JSON.stringify(Object.assign({}, ad, { _ts: Date.now() })));
+    /* Save to localStorage so it survives refresh — use page-specific key */
+    const _liveAdKey = (ad.page==='369'||document.body.classList.contains('kb-page-369')) ? '__kb_live_ad_369' : '__kb_live_ad';
+    if(!_fromRestore) localStorage.setItem(_liveAdKey, JSON.stringify(Object.assign({}, ad, { _ts: Date.now() })));
     const isPriority = !!ad.priority;
     const accent = isPriority ? '#FFD700' : '#FFD700';
     const rgb    = [255,215,0];
@@ -4405,7 +4406,7 @@ const OracleQuery = (() => {
     const _bookingMs = ad._remainMs || (ad.hours||1) * 3600000;
     setTimeout(()=>{
       const i = BRANDS.findIndex(b=>b.id==='user-ad');
-      if(i > -1){ BRANDS.splice(i,1); localStorage.removeItem('__kb_live_ad'); if(i < adIdx) adIdx--; if(adIdx >= BRANDS.length) adIdx=0; }
+      if(i > -1){ BRANDS.splice(i,1); localStorage.removeItem(document.body.classList.contains('kb-page-369')?'__kb_live_ad_369':'__kb_live_ad'); if(i < adIdx) adIdx--; if(adIdx >= BRANDS.length) adIdx=0; }
     }, _bookingMs);
     /* click handled by existing guarded listener above */
     tickerBrand.textContent = (isPriority ? '⚡ ' : '') + ad.biz.toUpperCase();
@@ -8869,11 +8870,14 @@ window.__KBShareCard=function(card,lines){
 @media(max-width:900px){
   body.kb-page-369 #readings-btn,
   body.kb-page-369 #album-btn,
+  body.kb-page-369 #starmap-btn,
   body.kb-page-369 #kb-menu-btn,
   body.kb-page-369 #kb-369-topbtn,
   body.kb-page-369 #kb-compat-btn,
   body.kb-page-369 #kb-sound-btn,
   body.kb-page-369 #kb-weekly-btn{display:none!important;}
+  /* Push BACK TO ORACLE below top ad banner */
+  #c369-home{margin-top:56px!important;}
 }
 </style>
 
