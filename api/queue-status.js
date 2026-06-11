@@ -22,8 +22,12 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ count: 0, wait_hours: 0 });
     }
 
+    /* Page-specific queue: ?page=369 for 369 inventory, default = oracle */
+    const page     = (req.query?.page === '369') ? '369' : 'oracle';
+    const queueKey = page === '369' ? 'billboard:queue:369' : 'billboard:queue';
+
     /* Fetch the queue list from Redis */
-    const r = await fetch(`${KV_URL}/get/billboard:queue`, {
+    const r = await fetch(`${KV_URL}/get/${queueKey}`, {
       headers: { Authorization: `Bearer ${KV_TOKEN}` },
     });
     const data = await r.json();
