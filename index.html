@@ -1760,6 +1760,8 @@ select.adv-input option{background:#111;}
 <!-- ── COLLECTION ALBUM BUTTON ── -->
 <button id="album-btn">✦ MY CARDS <span id="album-count"></span></button>
 <button id="readings-btn" style="display:none;">✦ MY READINGS</button>
+<!-- ── ASK KOZMOBOB FLOAT BUTTON (mobile) ── -->
+<button id="kb-ask-float-btn">✦ ASK KOZMOBOB</button>
 <!-- ── COMPATIBILITY READING BUTTON ── -->
 <button id="kb-compat-btn" title="Compatibility reading">♡</button>
 <!-- ── 369 MANIFEST BUTTON ── -->
@@ -8619,6 +8621,27 @@ window.__KBShareCard=function(card,lines){
     inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ const v=inp.value.trim(); if(!v) return; ov.remove(); if(window.OracleQuery) window.OracleQuery.submit(v); }});
   });
 
+  /* Wire up float ASK button → same overlay as menu ask */
+  const askFloat = document.getElementById('kb-ask-float-btn');
+  if(askFloat) askFloat.addEventListener('click', ()=>{
+    if(askItem) askItem.click();
+    else {
+      const existing = document.getElementById('__kb_ask_overlay');
+      if(existing){ existing.remove(); return; }
+      const ov = document.createElement('div');
+      ov.id = '__kb_ask_overlay';
+      ov.style.cssText = 'position:fixed;bottom:160px;left:0;right:0;z-index:9990;padding:0 16px;';
+      ov.innerHTML = `<div style="background:rgba(4,2,12,.97);border:1px solid rgba(255,180,40,.25);border-radius:16px;padding:16px;display:flex;gap:10px;align-items:center;">
+        <input id="__kb_ask_inp" placeholder="ASK KOZMOBOB..." style="flex:1;background:transparent;border:none;outline:none;color:rgba(255,215,100,.9);font-family:'Georgia',serif;font-size:.88rem;letter-spacing:.12em;" autocomplete="off" spellcheck="false"/>
+        <button id="__kb_ask_go" style="background:none;border:1px solid rgba(255,180,40,.35);border-radius:20px;padding:8px 16px;color:rgba(255,200,40,.8);font-family:'Courier New',monospace;font-size:.6rem;letter-spacing:2px;cursor:pointer;">✦</button>
+      </div>`;
+      document.body.appendChild(ov);
+      const inp = ov.querySelector('#__kb_ask_inp'); inp.focus();
+      ov.querySelector('#__kb_ask_go').addEventListener('click', ()=>{ const v=inp.value.trim(); if(!v) return; ov.remove(); if(window.OracleQuery) window.OracleQuery.submit(v); });
+      inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ const v=inp.value.trim(); if(!v) return; ov.remove(); if(window.OracleQuery) window.OracleQuery.submit(v); }});
+    }
+  });
+
   const revealItem = document.getElementById('kb-menu-reveal');
   if(revealItem) revealItem.addEventListener('click', ()=>{
     panel.classList.remove('visible'); btn.classList.remove('open');
@@ -8858,6 +8881,76 @@ window.__KBShareCard=function(card,lines){
   font-size:.62rem;letter-spacing:3px;cursor:pointer;margin-bottom:8px;
 }
 
+/* ── Hide ASK KOZMOBOB from hamburger menu everywhere ── */
+#kb-menu-ask{display:none!important;}
+
+/* ── ASK KOZMOBOB float button (mobile only, above bottom bar) ── */
+#kb-ask-float-btn{
+  display:none; /* hidden by default; shown via mobile media query */
+}
+@media(max-width:900px){
+  #kb-ask-float-btn{
+    display:block;
+    position:fixed;
+    bottom:80px; /* sits just above the 72px bottom bar */
+    left:50%;transform:translateX(-50%);
+    width:56%;max-width:220px;
+    padding:9px 0;
+    background:rgba(0,0,0,.88);
+    border:1px solid rgba(255,200,40,.35);
+    border-radius:24px;
+    font-family:'Courier New',monospace;
+    font-size:.58rem;letter-spacing:2.5px;
+    color:rgba(255,200,40,.80);text-align:center;
+    cursor:pointer;text-transform:uppercase;
+    z-index:32;pointer-events:all;
+    box-shadow:0 0 18px rgba(255,185,20,.12);
+    transition:border-color .25s,color .25s,box-shadow .25s;
+  }
+  #kb-ask-float-btn:hover{
+    border-color:rgba(255,200,40,.70);
+    color:rgba(255,200,40,.98);
+    box-shadow:0 0 28px rgba(255,185,20,.28);
+  }
+  /* MY CARDS — move to same row as bottom banner */
+  #album-btn{
+    bottom:0!important;
+    height:72px;
+    padding:0!important;
+    width:104px!important;
+    border-radius:0!important;
+    border:none!important;
+    border-right:1px solid rgba(255,200,40,.15)!important;
+    background:rgba(4,2,12,.98)!important;
+    font-size:.52rem!important;
+    z-index:31;
+  }
+  /* STAR MAP — move to same row as bottom banner (injected via JS, override via global rule below) */
+}
+/* STAR MAP mobile override — outside the existing starmap injection block */
+@media(max-width:900px){
+  #starmap-btn{
+    bottom:0!important;
+    height:72px!important;
+    width:104px!important;
+    padding:0!important;
+    border-radius:0!important;
+    border:none!important;
+    border-left:1px solid rgba(0,255,255,.15)!important;
+    background:rgba(4,2,12,.98)!important;
+    font-size:.52rem!important;
+    right:0!important;left:auto!important;
+    z-index:31;
+  }
+  /* Shrink bottom banner to center between the two buttons */
+  #mob-bot-banner{
+    left:104px!important;
+    right:104px!important;
+    border-left:none!important;
+    border-right:none!important;
+  }
+}
+
 /* ── Tesla quote — BIGGER ── */
 .p369-quote,.tesla-quote{
   font-size:clamp(1rem,3.8vw,1.45rem)!important;
@@ -8875,7 +8968,8 @@ window.__KBShareCard=function(card,lines){
   body.kb-page-369 #kb-369-topbtn,
   body.kb-page-369 #kb-compat-btn,
   body.kb-page-369 #kb-sound-btn,
-  body.kb-page-369 #kb-weekly-btn{display:none!important;}
+  body.kb-page-369 #kb-weekly-btn,
+  body.kb-page-369 #kb-ask-float-btn{display:none!important;}
   /* Push BACK TO ORACLE below top ad banner */
   #c369-home{margin-top:56px!important;}
 }
