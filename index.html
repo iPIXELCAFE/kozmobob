@@ -9133,7 +9133,7 @@ window.__KBShareCard=function(card,lines){
 
   // Mark 369 menu item as current page
   var m369 = document.getElementById('kb-menu-369');
-  if(m369){ m369.style.background='rgba(255,200,40,.06)'; m369.onclick=null; m369.style.cursor='default'; }
+  if(m369){ m369.style.background='rgba(255,200,40,.06)'; m369.onclick=function(){window.location.href='/';} ; m369.style.cursor='pointer'; }
 
   // Build the 369 center content
   var SK = {i:'__kb369_int',d:'__kb369_days',s:'__kb369_start',m:'__kb369_done'};
