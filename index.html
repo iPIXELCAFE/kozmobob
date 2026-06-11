@@ -894,6 +894,23 @@ html,body{
   display:flex;align-items:center;justify-content:center;
 }
 #kb-compat-btn:hover{color:rgba(255,160,200,.95);border-color:rgba(255,120,180,.7);}
+#kb-369-topbtn{
+  position:fixed;top:14px;right:106px;
+  z-index:35;width:40px;height:40px;border-radius:50%;
+  background:rgba(0,0,0,.88);
+  border:1px solid rgba(255,200,40,.35);
+  color:rgba(255,200,40,.7);
+  font-family:'Courier New',monospace;
+  font-size:.46rem;letter-spacing:.5px;
+  cursor:pointer;pointer-events:all;touch-action:manipulation;
+  transition:color .2s,border-color .2s,box-shadow .2s;
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;line-height:1;
+}
+#kb-369-topbtn:hover{color:rgba(255,200,40,.98);border-color:rgba(255,200,40,.7);box-shadow:0 0 16px rgba(255,185,20,.28);}
+@media(max-width:900px){
+  #kb-369-topbtn{top:80px;right:96px;}
+}
 /* ── GENDER REVEAL OVERLAY ── */
 #kb-reveal-overlay{
   position:fixed;inset:0;z-index:99998;
@@ -1745,6 +1762,8 @@ select.adv-input option{background:#111;}
 <button id="readings-btn" style="display:none;">✦ MY READINGS</button>
 <!-- ── COMPATIBILITY READING BUTTON ── -->
 <button id="kb-compat-btn" title="Compatibility reading">♡</button>
+<!-- ── 369 MANIFEST BUTTON ── -->
+<button id="kb-369-topbtn" onclick="window.location.href='/369'" title="369 Manifest">3·6·9</button>
 <!-- ── SOUND TOGGLE ── -->
 <button id="kb-sound-btn" title="Toggle sound">♪</button>
 <!-- ── HAMBURGER MENU ── -->
@@ -1779,14 +1798,6 @@ select.adv-input option{background:#111;}
     <div class="kb-menu-text">
       <div class="kb-menu-label">SKY OF STARS</div>
       <div class="kb-menu-sub">Every baby star — live forever</div>
-    </div>
-  </div>
-    <div class="kb-menu-divider"></div>
-  <div class="kb-menu-item" id="kb-menu-369" onclick="window.location.href='/369';">
-    <span class="kb-menu-icon">⚡</span>
-    <div class="kb-menu-text">
-      <div class="kb-menu-label">369 MANIFEST</div>
-      <div class="kb-menu-sub">Tesla's ritual — speak it into existence</div>
     </div>
   </div>
 <div class="kb-menu-divider"></div>
@@ -9132,8 +9143,9 @@ window.__KBShareCard=function(card,lines){
   });
 
   // Mark 369 menu item as current page
-  var m369 = document.getElementById('kb-menu-369');
-  if(m369){ m369.style.background='rgba(255,200,40,.06)'; m369.onclick=function(){window.location.href='/';} ; m369.style.cursor='pointer'; }
+  // 369 top button: on /369 page, clicking it goes back to oracle
+  var t369 = document.getElementById('kb-369-topbtn');
+  if(t369){ t369.style.borderColor='rgba(255,200,40,.7)'; t369.style.color='rgba(255,200,40,.98)'; t369.onclick=function(){window.location.href='/';} ; }
 
   // Build the 369 center content
   var SK = {i:'__kb369_int',d:'__kb369_days',s:'__kb369_start',m:'__kb369_done'};
