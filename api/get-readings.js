@@ -32,6 +32,24 @@ module.exports = async function handler(req, res) {
   const key = `readings:${cleanDeviceId}`;
 
   try {
-    const res2 = await fetch(url, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'applicatio
+    const r = await fetch(`${url}/lrange/${key}/0/-1`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!r.ok) {
+      const text = await r.text();
+      console.error('KV error:', r.status, text);
+      return res.status(500).json({ error: 'KV fetch failed' });
+    }
+
+    const data = await r.json();
+    const items = (data.result || []).map(item => {
+      try { return JSON.parse(item); } catch(e) { return null; }
+    }).filter(Boolean);
+
+    return res.status(200).json({ readings: items });
+  } catch (err) {
+    console.error('get-readings error:', err);
+    return res.status(500).json({ error: 'Internal error', detail: err.message });
+  }
+};
