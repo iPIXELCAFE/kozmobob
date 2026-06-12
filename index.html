@@ -9637,7 +9637,7 @@ window.__KBShareCard=function(card,lines){
     '.c369-quote{font-size:clamp(.78rem,2.8vw,1.08rem);color:rgba(255,200,40,.72);letter-spacing:.045em;font-style:italic;margin-top:6px;line-height:1.65;}',
     '@media(min-width:901px){.c369-title{display:none;}.c369-top{top:8px;}}',
     '@media(max-width:900px){.c369-top{top:64px;}}',
-    '#c369-home{position:absolute;left:50%;transform:translateX(-50%);bottom:22px;white-space:nowrap;pointer-events:all;background:rgba(0,0,0,.6);border:1px solid rgba(255,200,40,.3);border-radius:20px;color:rgba(255,210,60,.75);font-family:inherit;font-size:.55rem;letter-spacing:.18em;padding:7px 16px;cursor:pointer;text-transform:uppercase;transition:all .2s;z-index:10;}',
+    '#c369-home{position:absolute;left:50%;transform:translateX(-50%);top:60%;white-space:nowrap;pointer-events:all;background:rgba(0,0,0,.6);border:1px solid rgba(255,200,40,.3);border-radius:20px;color:rgba(255,210,60,.75);font-family:inherit;font-size:.55rem;letter-spacing:.18em;padding:7px 16px;cursor:pointer;text-transform:uppercase;transition:all .2s;z-index:10;}',
     '#c369-home:hover{border-color:rgba(255,215,60,.7);color:rgba(255,225,80,1);box-shadow:0 0 16px rgba(255,200,40,.3);}',
     '@media(max-width:900px){#c369-home{bottom:82px;}}',
     '.c369-node{position:absolute;transform:translate(-50%,-50%);width:clamp(58px,15vw,76px);height:clamp(58px,15vw,76px);border-radius:50%;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;z-index:7;transition:left .55s cubic-bezier(.3,0,.2,1),top .55s cubic-bezier(.3,0,.2,1),opacity .3s,border-color .3s,box-shadow .3s;cursor:pointer;}',
@@ -9826,6 +9826,15 @@ window.__KBShareCard=function(card,lines){
     center.style.left=g.cx+'px';
     center.style.top=g.cy+'px';
     center.style.width=Math.min(g.R*1.38,innerWidth*.8)+'px';
+    /* on desktop: position home button just below center content */
+    if(innerWidth>900){
+      var homeBtn=document.getElementById('c369-home');
+      if(homeBtn){
+        var ch=center.offsetHeight||160;
+        homeBtn.style.top=(g.cy+ch/2+18)+'px';
+        homeBtn.style.bottom='auto';
+      }
+    }
     drawOrbit();
   }
   window.addEventListener('resize',positionAll);
