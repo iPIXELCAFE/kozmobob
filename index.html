@@ -3721,20 +3721,8 @@ const OracleQuery = (() => {
     'tarot-deep':      'tarot-deep',
   };
 
-  /* ── Personal message — inject into billboard ── */
-  if (product === 'personal-message') {
-    const raw = sessionStorage.getItem('__kb_personal_msg');
-    sessionStorage.removeItem('__kb_personal_msg');
-    if (raw) {
-      const data = JSON.parse(raw);
-      function tryInject(n) {
-        if (window.__injectPersonalMsg) { window.__injectPersonalMsg(data); return; }
-        if (n > 0) setTimeout(() => tryInject(n - 1), 300);
-      }
-      tryInject(20);
-    }
-    return;
-  }
+  /* personal-message billboard injection disabled */
+  if (product === 'personal-message') { return; }
 
   /* ── Billboard booking confirmed ── */
   if (product === 'billboard-community' || product === 'billboard-premium') {
@@ -3805,9 +3793,6 @@ const OracleQuery = (() => {
   const AUTO_CLOSE = 9000; /* 9 seconds */
 
   function getIdleMsg() {
-    /* Personal message takes priority */
-    const personal = window.__getCurrentPersonalMsg && window.__getCurrentPersonalMsg();
-    if (personal) return { type:'personal', msg: personal };
     /* Find any brand with a personal-style msg */
     const allBrands = window.__getAllBrands && window.__getAllBrands();
     if (!allBrands) return null;
@@ -4447,83 +4432,7 @@ const OracleQuery = (() => {
     }
   };
 
-  /* ── Inject personal message into left billboard rotation ── */
-  /* Restore persisted personal message on page load */
-  (function(){
-    const saved = localStorage.getItem('__kb_live_msg');
-    if(!saved) return;
-    try {
-      const data = JSON.parse(saved);
-      /* Only restore if within 1 hour */
-      if(data._ts && Date.now() - data._ts > 3600000){ localStorage.removeItem('__kb_live_msg'); return; }
-      setTimeout(()=>{ if(window.__injectPersonalMsg) window.__injectPersonalMsg(data); }, 200);
-    } catch(e){ localStorage.removeItem('__kb_live_msg'); }
-  })();
-
-  window.__injectPersonalMsg = function(data){
-    /* Save to localStorage so it survives refresh (up to 1 hour) */
-    localStorage.setItem('__kb_live_msg', JSON.stringify(Object.assign({}, data, { _ts: Date.now() })));
-    /* data: { emoji, text, from, link, color } */
-    const emoji  = data.emoji || '✨';
-    const text   = data.text  || '';
-    const from   = data.from  || '';
-    const col    = data.color || '#FFD700';
-    const rgb    = [255,215,0];
-
-    function drawPersonal(t){
-      ctx.fillStyle='#030200'; ctx.fillRect(0,0,W,H);
-      const cx=W/2;
-      /* glow */
-      const pulse=Math.sin(t*Math.PI*3)*0.08;
-      const grd=ctx.createRadialGradient(cx,H*0.35,0,cx,H*0.35,100);
-      grd.addColorStop(0,`rgba(255,215,0,${0.18+pulse})`);
-      grd.addColorStop(1,'transparent');
-      ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
-      /* big emoji */
-      ctx.textAlign='center';
-      ctx.font=`${60+Math.sin(t*Math.PI*2)*4}px serif`;
-      ctx.globalAlpha=0.90+Math.sin(t*Math.PI*4)*0.10;
-      ctx.fillText(emoji, cx, H*0.38);
-      ctx.globalAlpha=1;
-      /* message text — word wrap */
-      const words=text.split(' '), maxW=W-20;
-      ctx.fillStyle=col;
-      ctx.font=`bold 16px 'Georgia',serif`;
-      let line='',lines=[],y=H*0.52;
-      for(const w of words){
-        const test=line?line+' '+w:w;
-        if(ctx.measureText(test).width>maxW&&line){lines.push(line);line=w;}
-        else line=test;
-      }
-      if(line) lines.push(line);
-      lines.forEach((l,i)=>ctx.fillText(l,cx,y+i*22));
-      /* from */
-      if(from){
-        ctx.fillStyle=`rgba(255,215,0,.50)`;
-        ctx.font=`12px 'Courier New',monospace`;
-        ctx.fillText(from, cx, y+lines.length*22+16);
-      }
-      /* border */
-      ctx.strokeStyle=`rgba(255,215,0,${0.30+Math.sin(t*Math.PI*2)*0.12})`;
-      ctx.lineWidth=1.5; ctx.strokeRect(4,4,W-8,H-8);
-      drawHUD(t,col,rgb);
-    }
-
-    const slot = {
-      id:'personal-msg', name: emoji+' MESSAGE',
-      accent:col, rgb, bg:'#030200',
-      url: data.link || 'https://kozmobob.com',
-      draw: drawPersonal,
-      ms: AD_MS
-    };
-    BRANDS.unshift(slot);
-    adIdx=0; adFrame=0; slotStartTime=Date.now();
-    tickerBrand.textContent = emoji + ' PERSONAL MESSAGE';
-    syncBorder(rgb);
-
-    /* Also inject into mobile banner */
-    if(window.__injectMobileMsgBanner) window.__injectMobileMsgBanner(data);
-  };
+  /* personal message billboard injection disabled */
 })();
 
 
@@ -5491,12 +5400,8 @@ const OracleQuery = (() => {
   const msgFrom    = document.getElementById('mob-msg-from');
   let takeoverTimer = null;
 
-  /* Expose current personal message so reading can check it */
-  window.__getCurrentPersonalMsg = function() {
-    const b = BRANDS[idx];
-    if (b && b.msg && b.msg.sym !== '✦') return b.msg;
-    return null;
-  };
+  /* personal message disabled */
+  window.__getCurrentPersonalMsg = function() { return null; };
   window.__getCurrentBrand = function() { return BRANDS[idx] || null; };
   window.__getAllBrands    = function() { return BRANDS; };
 
@@ -5591,48 +5496,8 @@ const OracleQuery = (() => {
     }
   }
 
-  /* Inject personal message into mobile banner */
-  window.__injectMobileMsgBanner = function(data){
-    const msg = { sym:data.emoji||'✨', text:data.text||'', from:data.from||'', color:'#FFD700', href:data.link||'' };
-    const entry = {
-      id: '__personal_msg__',
-      name: (data.emoji||'✨')+' MESSAGE',
-      url: data.link || 'kozmobob.com',
-      href: data.link || 'https://kozmobob.com',
-      color:'rgba(255,215,0,.95)', border:'rgba(255,215,0,.40)',
-      msg
-    };
-    /* Remove any existing personal message slot first */
-    const _existing = BRANDS.findIndex(b => b.id === '__personal_msg__');
-    if(_existing > -1) BRANDS.splice(_existing, 1);
-    BRANDS.unshift(entry);
-    idx=0;
-    show(BRANDS[0]);
-    /* Remove from rotation after 1 hour */
-    setTimeout(()=>{
-      const i = BRANDS.findIndex(b => b.id === '__personal_msg__');
-      if(i > -1){ BRANDS.splice(i,1); if(i < idx) idx--; if(idx >= BRANDS.length) idx=0; }
-    }, 3600000);
-    /* On mobile, show a direct full-screen portal */
-    if(window.innerWidth <= 900 && msg.text) {
-      const col = msg.color || '#FFD700';
-      const ov = document.createElement('div');
-      ov.style.cssText = 'position:fixed;inset:0;z-index:99995;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;background:rgba(0,0,0,.96);text-align:center;opacity:0;transition:opacity .6s ease;';
-      ov.innerHTML = `
-        <div style="max-width:340px;width:100%;">
-          <div style="font-size:4rem;margin-bottom:18px;">${msg.sym||'✨'}</div>
-          <div style="font-family:'Georgia',serif;font-size:clamp(1.3rem,5vw,1.8rem);line-height:1.5;color:${col};text-shadow:0 0 28px ${col}80;margin-bottom:14px;">${msg.text}</div>
-          <div style="font-family:'Courier New',monospace;font-size:.8rem;letter-spacing:.18em;color:rgba(255,255,255,.8);margin-bottom:32px;">${msg.from||''}</div>
-          <div id="__mob_pmsg_close" style="font-family:'Courier New',monospace;font-size:.65rem;letter-spacing:3px;color:rgba(255,200,40,.95);cursor:pointer;background:rgba(0,0,0,.6);border:1px solid rgba(255,200,40,.60);padding:8px 24px;border-radius:20px;display:inline-block;">✕ &nbsp; CLOSE</div>
-        </div>`;
-      document.body.appendChild(ov);
-      setTimeout(()=>{ ov.style.opacity='1'; }, 60);
-      const close = ()=>{ ov.style.opacity='0'; setTimeout(()=>ov.remove(), 600); };
-      ov.querySelector('#__mob_pmsg_close').addEventListener('click', close);
-      ov.addEventListener('click', e=>{ if(e.target===ov) close(); });
-      setTimeout(close, 10000);
-    }
-  };
+  /* personal message mobile banner injection disabled */
+  window.__injectMobileMsgBanner = function(data){};
 
   /* ── Inject community/premium billboard ad into mobile banner ── */
   window.__injectMobileAdBanner = function(ad){
