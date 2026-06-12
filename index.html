@@ -4027,16 +4027,6 @@ const OracleQuery = (() => {
     { id:'ipixel2',  name:'iPIXEL CAFE',   accent:'#00CFFF', rgb:[0,207,255],   bg:'#000408', url:'https://ipixelcafe.com',        draw:drawIPIXEL   },
     { id:'novella2', name:'NOVELLA LV',     accent:'#FF4422', rgb:[255,68,34],   bg:'#080100', url:'https://novellalv.com',         draw:drawNovella  },
     { id:'yourad',   name:'YOUR BRAND',     accent:'#AA88FF', rgb:[170,136,255], bg:'#020008', url:'https://kozmobob.com',          draw:drawYourAd   },
-    { id:'bday1',    name:'HAPPY BIRTHDAY', accent:'#FFD700', rgb:[255,215,0],   bg:'#040200', url:'https://kozmobob.com',
-      draw:(t)=>drawMsg(t,{sym:'🎂✨',symSize:80,text:'Happy 30th Mike!',from:'From your crew at Table 5 — we see you, legend.',accent:'#FFD700',rgb:[255,215,0],bg:'#040200',textSize:24}) },
-    { id:'marry1',   name:'SHE SAID YES', accent:'#FF69B4', rgb:[255,105,180], bg:'#04000a', url:'https://kozmobob.com',
-      draw:(t)=>drawMsg(t,{sym:'💍',symSize:80,text:'She said YES.',from:'Sarah & Marco — June 2026 forever.',accent:'#FF88CC',rgb:[255,105,180],bg:'#04000a',textSize:24}) },
-    { id:'love1',    name:'MOM WE LOVE YOU', accent:'#FF3366', rgb:[255,51,102],  bg:'#050001', url:'https://kozmobob.com',
-      draw:(t)=>drawMsg(t,{sym:'❤️',symSize:80,text:'Mom — 20 years of showing up.',from:'We love you more than words. — Tia & Rafi',accent:'#FF5577',rgb:[255,51,102],bg:'#050001',textSize:22}) },
-    { id:'cats1',    name:'VALERIA & CATS',  accent:'#CC88FF', rgb:[180,100,255],  bg:'#04000a', url:'https://kozmobob.com',
-      draw:(t)=>drawMsg(t,{sym:'😸',symSize:80,text:'Valeria & her cats send their regards.',from:'Mostly the cats.',accent:'#CC88FF',rgb:[180,100,255],bg:'#04000a',textSize:22}) },
-    { id:'liz1',     name:'LIZ SAY YES',    accent:'#88CCFF', rgb:[100,180,255],  bg:'#00020a', url:'https://kozmobob.com',
-      draw:(t)=>drawMsg(t,{sym:'🌙',symSize:80,text:'Liz — you said yes, the universe heard it.',from:'The wedding is just a formality. — Tu Bebecito Precioso',accent:'#88CCFF',rgb:[100,180,255],bg:'#00020a',textSize:19}) },
     { id:'ipixel',   name:'iPIXEL CAFE',   accent:'#FFD700', rgb:[255,215,0],   bg:'#040300', url:'https://ipixelcafe.com',        draw:drawIPIXEL   },
     { id:'novella',  name:'NOVELLA',       accent:'#FF4422', rgb:[255,68,34],   bg:'#080100', url:'https://novellalv.com',         draw:drawNovella  },
   ];
@@ -5381,11 +5371,6 @@ const OracleQuery = (() => {
     { name:'iPIXEL CAFE',    url:'ipixelcafe.com',  href:'https://www.ipixelcafe.com', color:'rgba(0,207,255,.95)',  border:'rgba(0,207,255,.30)',  msg:{sym:'⚡',text:'1st Digital Monument · Leave Your Message Forever · Lock Your Legacy',from:'ipixelcafe.com',color:'#00CFFF'} },
     { name:'NOVELLA LV',     url:'novellalv.com',   href:'https://www.novellalv.com',  color:'rgba(255,80,40,.95)', border:'rgba(255,80,40,.30)',   msg:{sym:'🍷',text:'Authentic Italian Kitchen · Pizza & Pasta Perfection · Las Vegas',from:'novellalv.com',color:'#FF5533'} },
     { name:'YOUR BRAND',     url:'kozmobob.com',    href:'https://kozmobob.com',        color:'rgba(170,136,255,.95)',border:'rgba(170,136,255,.30)', msg:{sym:'✦',text:'Advertise Here',from:'kozmobob.com',color:'#AA88FF'} },
-    { name:'HAPPY 30TH MIKE', url:'kozmobob.com', href:'https://kozmobob.com', color:'rgba(255,215,0,.95)',  border:'rgba(255,215,0,.40)',   msg:{sym:'🎂✨',text:'Happy 30th Mike! From your crew at Table 5 — we see you, legend.', from:'', color:'#FFD700'} },
-    { name:'SHE SAID YES',   url:'kozmobob.com', href:'https://kozmobob.com', color:'rgba(255,105,180,.95)',border:'rgba(255,105,180,.40)',msg:{sym:'💍',text:'She said YES. Sarah & Marco — June 2026 forever.', from:'', color:'#FF88CC'} },
-    { name:'MOM WE LOVE YOU',url:'kozmobob.com', href:'https://kozmobob.com', color:'rgba(255,80,80,.95)', border:'rgba(255,80,80,.40)',   msg:{sym:'❤️',text:'Mom — 20 years of showing up. We love you more than words.', from:'— Tia & Rafi', color:'#FF5577'} },
-    { name:'VALERIA & CATS', url:'kozmobob.com', href:'https://kozmobob.com', color:'rgba(200,130,255,.95)',border:'rgba(180,100,255,.40)', msg:{sym:'😸',text:'Valeria & her cats send their regards. Mostly the cats.', from:'', color:'#CC88FF'} },
-    { name:'LIZ SAY YES',    url:'kozmobob.com', href:'https://kozmobob.com', color:'rgba(100,180,255,.95)',border:'rgba(100,180,255,.40)', msg:{sym:'🌙',text:'Liz — you said yes, the universe heard it. The wedding is just a formality.', from:'— Tu Bebecito Precioso', color:'#88CCFF'} },
   ];
   let idx = 0;
   let currentHref = BRANDS[0].href;
