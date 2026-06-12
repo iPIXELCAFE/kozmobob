@@ -1910,12 +1910,12 @@ select.adv-input option{background:#111;}
       <div id="advert-bill-cards">
         <div class="ab-card selected" data-bill="left" onclick="selectBillboard('left')">
           <div class="ab-card-name">COMMUNITY</div>
-          <div class="ab-card-price">$55/HR</div>
+          <div class="ab-card-price">$25/HR</div>
           <div class="ab-card-desc">Left billboard · rotating with others</div>
         </div>
         <div class="ab-card" data-bill="right" onclick="selectBillboard('right')">
           <div class="ab-card-name">PREMIUM</div>
-          <div class="ab-card-price">$250/HR</div>
+          <div class="ab-card-price">$99/HR</div>
           <div class="ab-card-desc">Right billboard · yours alone, full screen</div>
         </div>
         <div class="ab-card" data-bill="message" onclick="selectBillboard('message')">
@@ -2010,10 +2010,10 @@ select.adv-input option{background:#111;}
 
       <!-- Price -->
       <div id="advert-price-wrap">
-        <div id="advert-price-amount">$55</div>
+        <div id="advert-price-amount">$25</div>
         <div id="advert-price-desc">1 hour · Community billboard · first come first served</div>
       </div>
-      <button id="advert-pay-btn">❆ BOOK NOW — $55</button>
+      <button id="advert-pay-btn">❆ BOOK NOW — $25</button>
     </div>
 
     <!-- Success state -->
@@ -2035,8 +2035,8 @@ if(window.location.pathname==='/369')document.body.classList.add('kb-page-369');
    ══════════════════════════════════════════════════════════════ */
 (function(){
   const MAX_EMOJI   = 5;
-  const RATE_COMM   = 55;   /* $55/hr community — no discounts */
-  const RATE_PREM   = 250;  /* $250/hr premium  — no discounts */
+  const RATE_COMM   = 25;   /* $25/hr community — no discounts */
+  const RATE_PREM   = 99;   /* $99/hr premium   — no discounts */
   const PRIORITY_FEE= 9.99; /* flat +$9.99 priority jump       */
 
   let selectedEmojis = [];
@@ -7585,20 +7585,20 @@ document.addEventListener('keydown',     boot, { once: true });
   let selPremDate  = null;
   let selPremHours = 1;
 
-  /* ── Community pricing per hour (flat $55) ── */
+  /* ── Community pricing per hour (flat $25) ── */
   const COMM_SLOTS = [
-    {label:'Midnight — 4 AM', start:0,  end:4,  wd:55, we:55},
-    {label:'4 AM — 9 AM',     start:4,  end:9,  wd:55, we:55},
-    {label:'9 AM — 3 PM',     start:9,  end:15, wd:55, we:55},
-    {label:'3 PM — Midnight', start:15, end:24, wd:55, we:55},
+    {label:'Midnight — 4 AM', start:0,  end:4,  wd:25, we:25},
+    {label:'4 AM — 9 AM',     start:4,  end:9,  wd:25, we:25},
+    {label:'9 AM — 3 PM',     start:9,  end:15, wd:25, we:25},
+    {label:'3 PM — Midnight', start:15, end:24, wd:25, we:25},
   ];
 
-  /* ── Premium pricing per hour (flat $250) ── */
+  /* ── Premium pricing per hour (flat $99) ── */
   const PREM_SLOTS = [
-    {label:'Midnight — 4 AM', start:0,  end:4,  wd:250, we:250},
-    {label:'4 AM — 9 AM',     start:4,  end:9,  wd:250, we:250},
-    {label:'9 AM — 3 PM',     start:9,  end:15, wd:250, we:250},
-    {label:'3 PM — Midnight', start:15, end:24, wd:250, we:250},
+    {label:'Midnight — 4 AM', start:0,  end:4,  wd:99, we:99},
+    {label:'4 AM — 9 AM',     start:4,  end:9,  wd:99, we:99},
+    {label:'9 AM — 3 PM',     start:9,  end:15, wd:99, we:99},
+    {label:'3 PM — Midnight', start:15, end:24, wd:99, we:99},
   ];
 
   /* ──────────────────────────────────────────────
