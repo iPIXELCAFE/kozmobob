@@ -895,19 +895,32 @@ html,body{
 }
 #kb-compat-btn:hover{color:rgba(255,160,200,.95);border-color:rgba(255,120,180,.7);}
 #kb-369-topbtn{
-  position:fixed;top:14px;right:106px;
-  z-index:35;width:40px;height:40px;border-radius:50%;
+  position:fixed;top:10px;right:106px;
+  z-index:35;width:44px;height:44px;border-radius:50%;
   background:rgba(0,0,0,.88);
-  border:1px solid rgba(255,200,40,.35);
-  color:rgba(255,200,40,.7);
+  border:1.5px solid rgba(255,200,40,.6);
+  color:rgba(255,210,60,.97);
   font-family:'Courier New',monospace;
-  font-size:.46rem;letter-spacing:.5px;
   cursor:pointer;pointer-events:all;touch-action:manipulation;
-  transition:color .2s,border-color .2s,box-shadow .2s;
+  transition:box-shadow .2s;
   display:flex;align-items:center;justify-content:center;
   text-align:center;line-height:1;
+  box-shadow:0 0 10px rgba(255,185,20,.22);
+  animation:kb369btnHue 6s linear infinite;
 }
-#kb-369-topbtn:hover{color:rgba(255,200,40,.98);border-color:rgba(255,200,40,.7);box-shadow:0 0 16px rgba(255,185,20,.28);}
+@keyframes kb369btnHue{
+  0%{border-color:rgba(255,200,40,.7);color:rgba(255,210,60,.97);box-shadow:0 0 10px rgba(255,185,20,.3);}
+  25%{border-color:rgba(200,100,255,.7);color:rgba(210,130,255,.97);box-shadow:0 0 10px rgba(180,80,255,.3);}
+  50%{border-color:rgba(40,200,255,.7);color:rgba(80,220,255,.97);box-shadow:0 0 10px rgba(40,180,255,.3);}
+  75%{border-color:rgba(60,255,160,.7);color:rgba(80,255,180,.97);box-shadow:0 0 10px rgba(40,220,140,.3);}
+  100%{border-color:rgba(255,200,40,.7);color:rgba(255,210,60,.97);box-shadow:0 0 10px rgba(255,185,20,.3);}
+}
+#kb-369-topbtn:hover{box-shadow:0 0 22px rgba(255,200,40,.55);transform:scale(1.08);}
+#kb-369-topbtn .btn369-inner{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;align-items:center;justify-items:center;width:34px;height:22px;}
+#kb-369-topbtn .btn369-inner span{font-size:.65rem;font-weight:bold;line-height:1;letter-spacing:0;}
+#kb-369-topbtn .btn369-inner .b9{grid-column:1;grid-row:1;}
+#kb-369-topbtn .btn369-inner .b3{grid-column:3;grid-row:1;}
+#kb-369-topbtn .btn369-inner .b6{grid-column:2;grid-row:2;}
 @media(max-width:900px){
   #kb-369-topbtn{top:80px;right:96px;}
 }
@@ -1765,7 +1778,7 @@ select.adv-input option{background:#111;}
 <!-- ── COMPATIBILITY READING BUTTON ── -->
 <button id="kb-compat-btn" title="Compatibility reading">♡</button>
 <!-- ── 369 MANIFEST BUTTON ── -->
-<button id="kb-369-topbtn" onclick="window.location.href='/369'" title="369 Manifest">3·6·9</button>
+<button id="kb-369-topbtn" onclick="window.location.href='/369'" title="369 Manifest"><div class="btn369-inner"><span class="b9">9</span><span></span><span class="b3">3</span><span></span><span class="b6">6</span><span></span></div></button>
 <!-- ── SOUND TOGGLE ── -->
 <button id="kb-sound-btn" title="Toggle sound">♪</button>
 <!-- ── HAMBURGER MENU ── -->
