@@ -48,4 +48,19 @@ module.exports = async (req, res) => {
       line_items: [{
         price_data: {
           currency: 'usd',
-          unit_amount: u
+          unit_amount: unitAmount,
+          product_data: { name: productName },
+        },
+        quantity: 1,
+      }],
+      success_url: `https://kozmobob.com/?checkout=success&product=${product}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:  `https://kozmobob.com/?checkout=cancelled`,
+      metadata:    { product, ...metadata },
+    });
+
+    return res.status(200).json({ url: session.url });
+  } catch (err) {
+    console.error('create-checkout error:', err);
+    return res.status(500).json({ error: 'Checkout failed', detail: err.message });
+  }
+};
