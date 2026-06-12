@@ -3,6 +3,7 @@
     { "source": "/message", "destination": "/message.html" },
     { "source": "/sky", "destination": "/sky.html" },
     { "source": "/369", "destination": "/index.html" },
-    { "source": "/wall", "destination": "/wall.html" }
+    { "source": "/wall", "destination": "/wall.html" },
+    { "source": "/advertise", "destination": "/advertise.html" }
   ]
 }
