@@ -8,33 +8,114 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="theme-color" content="#000000"/>
-<title>KozmoBob — Ask the Oracle. Get Your Cosmic Answer.</title>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "KozmoBob",
-  "url": "https://kozmobob.com",
-  "description": "KozmoBob is your cosmic oracle. Ask any question and receive a mystical answer from the universe. Powered by ancient wisdom and modern vibes.",
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": "https://kozmobob.com/?q={search_term_string}",
-    "query-input": "required name=search_term_string"
-  }
-}
-</script>
+
+<!-- ═══════════════════════════════════════════════
+     PRIMARY SEO — KOZMOBOB BRAND IDENTITY
+     Niche: Horoscopes · Tarot · Digital Collectibles · Creature Collection
+     Brand is DISTINCT from any game-dev, bot, or tutorial site.
+════════════════════════════════════════════════ -->
+<title>KozmoBob — Daily Horoscopes, Tarot Readings & Digital Collectibles</title>
+<meta name="description" content="KozmoBob is the cosmic oracle for daily horoscopes, tarot card readings, and unique digital collectibles. Pull your tarot cards, read your stars, and collect 50 rare Kozmobob creatures. Free daily readings." />
+<meta name="keywords" content="KozmoBob, Kozmobob.com, horoscopes, daily horoscope, tarot, tarot card reading, tarot cards, digital collectibles, creature collection, unique characters, cosmic oracle, astrology, zodiac, mystical oracle, collectible creatures, digital tarot" />
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+<meta name="author" content="KozmoBob" />
+<link rel="canonical" href="https://kozmobob.com/" />
+
+<!-- Open Graph (Facebook, Discord, iMessage previews) -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="KozmoBob" />
+<meta property="og:title" content="KozmoBob — Daily Horoscopes, Tarot Readings & Digital Collectibles" />
+<meta property="og:description" content="Pull tarot cards, read your daily horoscope, and collect 50 rare Kozmobob creatures. Your cosmic oracle awaits at Kozmobob.com." />
+<meta property="og:url" content="https://kozmobob.com/" />
+<meta property="og:image" content="https://kozmobob.com/GEMINI.jpg" />
+<meta property="og:image:alt" content="KozmoBob — Cosmic Tarot Oracle and Digital Collectibles" />
+<meta property="og:locale" content="en_US" />
+
+<!-- Twitter / X Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="KozmoBob — Daily Horoscopes, Tarot & Digital Collectibles" />
+<meta name="twitter:description" content="Pull tarot cards, get your horoscope, collect rare Kozmobob creatures. Free daily readings at Kozmobob.com." />
+<meta name="twitter:image" content="https://kozmobob.com/GEMINI.jpg" />
+<meta name="twitter:image:alt" content="KozmoBob Cosmic Oracle" />
+
+<!-- JSON-LD: Organization — establishes KozmoBob as a distinct brand entity -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": "https://kozmobob.com/#organization",
   "name": "KozmoBob",
+  "alternateName": "Kozmobob",
   "url": "https://kozmobob.com",
-  "logo": "https://kozmobob.com/GEMINI.jpg",
+  "logo": {
+    "@type": "ImageObject",
+    "url": "https://kozmobob.com/GEMINI.jpg",
+    "width": 512,
+    "height": 512
+  },
+  "description": "KozmoBob is a tarot, horoscope, and digital collectible platform. We offer daily horoscope readings, tarot card pulls, and a collection of 50 unique digital creature collectibles.",
+  "foundingDate": "2025",
+  "knowsAbout": ["tarot", "horoscopes", "astrology", "digital collectibles", "zodiac readings", "cosmic oracle", "creature collection"],
   "sameAs": []
 }
 </script>
-<meta name="description" content="KozmoBob is your cosmic oracle. Ask any question and receive a mystical answer from the universe. Powered by ancient wisdom and modern vibes." />
-<meta name="robots" content="index, follow" />
+
+<!-- JSON-LD: WebSite — enables Sitelinks search box and brand SERP ownership -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://kozmobob.com/#website",
+  "name": "KozmoBob",
+  "alternateName": "Kozmobob.com",
+  "url": "https://kozmobob.com",
+  "description": "Daily horoscopes, tarot card readings, and digital collectibles. KozmoBob is your cosmic oracle for astrology, tarot, and unique creature collectibles.",
+  "publisher": {
+    "@id": "https://kozmobob.com/#organization"
+  },
+  "inLanguage": "en-US",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://kozmobob.com/?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<!-- JSON-LD: WebApplication — classifies the oracle as an interactive mystical/entertainment app -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "@id": "https://kozmobob.com/#app",
+  "name": "KozmoBob Oracle",
+  "url": "https://kozmobob.com",
+  "applicationCategory": "EntertainmentApplication",
+  "applicationSubCategory": "Horoscope & Tarot Oracle",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "description": "An interactive cosmic oracle offering daily horoscope readings, tarot card pulls, and a collection of 50 unique digital creature collectibles.",
+  "featureList": [
+    "Daily horoscope readings",
+    "Tarot card pulls",
+    "Digital collectible creature collection",
+    "Personal cosmic oracle questions",
+    "Zodiac astrology readings"
+  ],
+  "screenshot": "https://kozmobob.com/GEMINI.jpg",
+  "publisher": {
+    "@id": "https://kozmobob.com/#organization"
+  }
+}
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -1759,8 +1840,12 @@ select.adv-input option{background:#111;}
   </div>
 </div>
 
-<!-- Hidden H1 for SEO -->
-<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">KozmoBob — Your Cosmic Oracle</h1>
+<!-- SEO Landmark Copy — visually hidden but fully crawlable
+     Establishes KozmoBob semantic distance from any bot/tutorial competitor.
+     Niche signals: horoscopes, tarot, digital collectibles, creature collection. -->
+<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">KozmoBob — Daily Horoscopes, Tarot Card Readings &amp; Digital Collectibles</h1>
+<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">Free Tarot Pulls, Your Daily Horoscope &amp; 50 Unique Collectible Creatures</h2>
+<h3 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">KozmoBob is your cosmic oracle for astrology, tarot readings, zodiac horoscopes, and rare digital creature collectibles</h3>
 
 <!-- Input bar -->
 <div id="oracle-input-wrap">
