@@ -1,0 +1,25 @@
+# robots.txt — KozmoBob (kozmobob.com)
+# Allow all crawlers full access to all public pages.
+# Sitemap is submitted to Bing Webmaster Tools and Google Search Console.
+
+User-agent: *
+Allow: /
+
+# Explicitly allow major search engine bots (redundant but signals intent)
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+# Block API internals from indexation (not public content)
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://kozmobob.com/sitemap.xml
