@@ -7346,26 +7346,75 @@ function showPaywall(mode, sign, col) {
   }
 
  
-  /* ── Planet positions via orbital mechanics (no API needed) ── */
+  /* ── Planet positions: proper geocentric 3D Keplerian orbital mechanics ──
+     Fixes the heliocentric-as-geocentric bug: computes Earth's position in
+     3D ecliptic space, subtracts it from each planet, then rotates by
+     obliquity to equatorial RA/Dec.  Accuracy ~0.5–2° (good enough to sell).
+     No external library needed.                                              */
   function getPlanets(jd){
-    const T=(jd-2451545.0)/36525;
-    const d2r=Math.PI/180,r2d=180/Math.PI;
-    function m360(x){return((x%360)+360)%360;}
-    const eps=(23.4392911-0.013004*T)*d2r;
-    const P=[
-      ['Mercury',252.2509+149474.0722*T,77.4561+0.1588*T,0.20563-0.000020*T,'rgba(200,180,160,1)'],
-      ['Venus',  181.9798+58519.2130*T, 131.5637+0.0125*T,0.00677-0.000005*T,'rgba(255,240,180,1)'],
-      ['Mars',   355.4333+19141.6964*T, 336.0602+0.4438*T,0.09340+0.000090*T,'rgba(255,110,70,1)'],
-      ['Jupiter',34.3515+3036.3027*T,   14.3312+0.2125*T,0.04849-0.000163*T,'rgba(255,210,160,1)'],
-      ['Saturn', 50.0774+1223.5109*T,   93.0572+0.5665*T,0.05551-0.000346*T,'rgba(220,210,150,1)'],
+    const d    = jd - 2451545.0;   // Days from J2000.0
+    const T    = d / 36525;
+    const d2r  = Math.PI/180, r2d = 180/Math.PI;
+    const m360 = x => ((x%360)+360)%360;
+    const eps  = (23.439291 - 0.013004*T) * d2r;  // Obliquity of ecliptic
+
+    /* Solve Kepler's equation M = E - e*sin(E) iteratively */
+    function kepler(M, e){
+      let E = M;
+      for(let k=0; k<50; k++){
+        const dE = (M - E + e*Math.sin(E)) / (1 - e*Math.cos(E));
+        E += dE;
+        if(Math.abs(dE) < 1e-10) break;
+      }
+      return E;
+    }
+
+    /* Heliocentric ecliptic rectangular XYZ (AU)
+       a=semi-major axis, e=eccentricity, iDeg=inclination,
+       OmDeg=ascending node, wLDeg=longitude of perihelion,
+       L0=mean longitude at J2000, n=mean motion °/day              */
+    function helioXYZ(a, e, iDeg, OmDeg, wLDeg, L0, n){
+      const L   = m360(L0 + n*d);
+      const wL  = m360(wLDeg);
+      const M   = m360(L - wL) * d2r;          // Mean anomaly
+      const E   = kepler(M, e);                 // Eccentric anomaly
+      const nu  = 2*Math.atan2(Math.sqrt(1+e)*Math.sin(E/2), Math.sqrt(1-e)*Math.cos(E/2));
+      const r   = a*(1 - e*Math.cos(E));        // Heliocentric distance
+      const om  = (wL - OmDeg) * d2r;          // Argument of perihelion
+      const Om  = OmDeg * d2r;
+      const inc = iDeg  * d2r;
+      const u   = nu + om;                      // Argument of latitude
+      return {
+        X: r*(Math.cos(Om)*Math.cos(u) - Math.sin(Om)*Math.sin(u)*Math.cos(inc)),
+        Y: r*(Math.sin(Om)*Math.cos(u) + Math.cos(Om)*Math.sin(u)*Math.cos(inc)),
+        Z: r*(Math.sin(u)*Math.sin(inc))
+      };
+    }
+
+    /* J2000 mean orbital elements (Meeus "Astronomical Algorithms", App. II)
+       [a, e, i°, Ω°, ω_long°, L0°, n°/day]                              */
+    const EARTH   = [1.00000, 0.01671, 0.0000, 174.873, 102.937, 100.466, 0.985608];
+    const PLANETS = [
+      ['Mercury', 0.38710, 0.20563,  7.005,  48.331,  77.456, 252.251, 4.092335, 'rgba(200,180,160,1)'],
+      ['Venus',   0.72333, 0.00677,  3.395,  76.680, 131.564, 181.980, 1.602130, 'rgba(255,240,180,1)'],
+      ['Mars',    1.52368, 0.09340,  1.850,  49.558, 336.060, 355.433, 0.524048, 'rgba(255,110,70,1)'],
+      ['Jupiter', 5.20260, 0.04849,  1.303, 100.464,  14.331,  34.352, 0.083092, 'rgba(255,210,160,1)'],
+      ['Saturn',  9.55490, 0.05551,  2.489, 113.666,  93.057,  50.077, 0.033460, 'rgba(220,210,150,1)'],
     ];
-    return P.map(([name,L,w,e,color])=>{
-      const Lr=m360(L)*d2r,wr=m360(w)*d2r,M=Lr-wr;
-      const v=M+(2*e-e*e*e/4)*Math.sin(M)+(5*e*e/4)*Math.sin(2*M);
-      const lon=m360((v+wr)*r2d)*d2r;
-      const ra=((Math.atan2(Math.sin(lon)*Math.cos(eps),Math.cos(lon))*r2d)+360)%360;
-      const dec=Math.asin(Math.sin(eps)*Math.sin(lon))*r2d;
-      return{name,ra,dec,color};
+
+    const E = helioXYZ(...EARTH);   // Earth's heliocentric ecliptic XYZ
+
+    return PLANETS.map(([name, a, e, i, Om, wL, L0, n, color]) => {
+      const P  = helioXYZ(a, e, i, Om, wL, L0, n);
+      /* Geocentric ecliptic vector (planet minus Earth) */
+      const gX = P.X - E.X, gY = P.Y - E.Y, gZ = P.Z - E.Z;
+      /* Rotate ecliptic Z-tilt by obliquity → equatorial rectangular */
+      const eY = gY*Math.cos(eps) - gZ*Math.sin(eps);
+      const eZ = gY*Math.sin(eps) + gZ*Math.cos(eps);
+      /* → RA (0–360°) and Dec (±90°) */
+      const ra  = ((Math.atan2(eY, gX)*r2d)+360)%360;
+      const dec = Math.atan2(eZ, Math.sqrt(gX*gX + eY*eY))*r2d;
+      return { name, ra, dec, color };
     });
   }
 
