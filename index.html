@@ -7183,8 +7183,8 @@ function showPaywall(mode, sign, col) {
     const [yr,mo,dy] = dateStr.split('-').map(Number);
     const [hr,mn]    = timeStr.split(':').map(Number);
 
-    /* Julian Date & sidereal time */
-    const jd  = julianDate(yr, mo, dy, hr, mn);
+    /* Julian Date & sidereal time — LMT→UT via longitude (same as doRenderMap) */
+    const jd  = julianDate(yr, mo, dy, hr, mn) - (lng / 15) / 24;
     const gst = greenwichSiderealTime(jd);
     const lst = ((gst + lng) % 360 + 360) % 360; // Local Sidereal Time in degrees
 
