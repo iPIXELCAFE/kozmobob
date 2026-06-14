@@ -4762,6 +4762,8 @@ const OracleQuery = (() => {
 
         /* After reading lines — show hook + sponsor (free only) */
         if (si === lines.length) {
+          /* Save tarot card reading */
+          if (window.__saveReading) window.__saveReading(card.n, 'tarot', lines);
           /* Add "there is more" hook — always shown (deep read is a per-reading purchase, not an ad) */
             setTimeout(() => {
               const hook = document.createElement('span');
