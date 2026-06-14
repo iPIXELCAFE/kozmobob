@@ -1,11 +1,11 @@
 /* ── KozmoBob — Save Reading to Vercel KV ──
-POST /api/save-reading
-Body: { deviceId, sign, mode, lines[], timestamp }
-Env: KV_REST_API_URL, KV_REST_API_TOKEN
+   POST /api/save-reading
+   Body: { deviceId, sign, mode, lines[], timestamp }
+   Env:  KV_REST_API_URL, KV_REST_API_TOKEN
 */
 
-const MAX_READINGS = 50;
-const RATE_LIMIT_MAX = 20; /* max saves per device per hour */
+const MAX_READINGS   = 50;
+const RATE_LIMIT_MAX = 20;  /* max saves per device per hour */
 
 const ALLOWED_ORIGINS = [
   'https://kozmobob.com',
@@ -26,7 +26,7 @@ async function kv(url, token, ...args) {
 
 async function isRateLimited(url, token, deviceId) {
   try {
-    const key = `ratelimit:save:${deviceId}`;
+    const key   = `ratelimit:save:${deviceId}`;
     const count = await kv(url, token, 'INCR', key);
     if (count === 1) await kv(url, token, 'EXPIRE', key, 3600); /* 1hr window */
     return count > RATE_LIMIT_MAX;
@@ -41,7 +41,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const url = process.env.KV_REST_API_URL;
+  const url   = process.env.KV_REST_API_URL;
   const token = process.env.KV_REST_API_TOKEN;
   if (!url || !token) return res.status(500).json({ error: 'KV not configured' });
 
@@ -57,26 +57,17 @@ module.exports = async function handler(req, res) {
 
   const key = `readings:${cleanDeviceId}`;
 
-  /* Fetch existing readings */
-  let readings = [];
   try {
-    const raw = await kv(url, token, 'GET', key);
-    if (raw) readings = JSON.parse(raw);
-  } catch(e) { readings = []; }
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+    const entry = JSON.stringify({ id, sign, mode, lines, timestamp: timestamp || Date.now() });
 
-  /* Prepend new reading, cap at MAX */
-  const entry = {
-    id: Date.now().toString(36),
-    timestamp: timestamp || Date.now(),
-    sign: String(sign || 'unknown').slice(0, 30),
-    mode: String(mode || 'oracle').slice(0, 20),
-    lines: (lines || []).map(l => String(l).slice(0, 600)).slice(0, 60),
-  };
-  readings.unshift(entry);
-  if (readings.length > MAX_READINGS) readings = readings.slice(0, MAX_READINGS);
+    /* Prepend so newest is first; trim to MAX_READINGS */
+    await kv(url, token, 'LPUSH', key, entry);
+    await kv(url, token, 'LTRIM', key, 0, MAX_READINGS - 1);
 
-  /* Save back — 90 day TTL */
-  await kv(url, token, 'SET', key, JSON.stringify(readings), 'EX', 60 * 60 * 24 * 90);
-
-  return res.status(200).json({ ok: true, id: entry.id });
+    return res.status(200).json({ ok: true });
+  } catch(err) {
+    console.error('save-reading error:', err);
+    return res.status(500).json({ error: 'Internal error', detail: err.message });
+  }
 };
