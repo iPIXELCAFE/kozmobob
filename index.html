@@ -7431,12 +7431,12 @@ function showPaywall(mode, sign, col) {
     if(!date){ alert('Please enter a date.'); return false; }
     const [yr,mo,dy]=date.split('-').map(Number);
     const [hr,mn]=(time).split(':').map(Number);
-    /* Convert user's LOCAL time to UTC before computing Julian Date.
-       new Date(yr,mo-1,dy,hr,mn) interprets args in browser local timezone;
-       getUTC* reads back the true UTC — so the JD is correct regardless of
-       whether the user is in Vegas, Tokyo, or Paris.                       */
-    const _ld = new Date(yr, mo-1, dy, hr, mn);
-    const jd=julianDate(_ld.getUTCFullYear(),_ld.getUTCMonth()+1,_ld.getUTCDate(),_ld.getUTCHours(),_ld.getUTCMinutes());
+    /* Convert Local Mean Time → Universal Time using longitude.
+       LMT offset = longitude/15 hours (no timezone DB needed).
+       This is the standard astronomers' approach: user enters the time
+       they see on their watch in that location, we shift by the meridian. */
+    const jdLMT = julianDate(yr, mo, dy, hr, mn);
+    const jd    = jdLMT - (lng / 15) / 24;   // LMT → UT
     const planets=getPlanets(jd);
     renderMap(lat, lng, date, time, city, l1, l2, planets);
     return true;
