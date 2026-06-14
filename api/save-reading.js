@@ -14,8 +14,8 @@ const ALLOWED_ORIGINS = [
   'https://www.kosmobob.com',
 ];
 
-async function kv(url, token, ...args) {
-  const res = await fetch(url, {
+async function kv(url, token, command, ...args) {
+  const res = await fetch(`${url}/${command}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(args),
