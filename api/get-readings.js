@@ -29,7 +29,7 @@ module.exports = async function handler(req, res) {
   const cleanDeviceId = String(deviceId).replace(/[^a-zA-Z0-9\-_]/g, '').slice(0, 64);
   if (!cleanDeviceId) return res.status(400).json({ error: 'Invalid deviceId' });
 
-  const key = `readings:${cleanDeviceId}`;
+  const key = `rdg:${cleanDeviceId}`;
 
   try {
     const r = await fetch(`${url}/lrange/${key}/0/-1`, {
