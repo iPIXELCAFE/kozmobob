@@ -6656,7 +6656,7 @@ function showPaywall(mode, sign, col) {
       document.body.appendChild(panel);
 
       try {
-        const res = await fetch(`/api/get-readings?deviceId=${encodeURIComponent(__deviceId)}`);
+        const res = await fetch(`/api/get-readings?deviceId=${encodeURIComponent(__deviceId)}&_=${Date.now()}`);
         const { readings } = await res.json();
         if (!readings || !readings.length) {
           panel.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div style="letter-spacing:3px;color:rgba(255,200,40,.9);">MY READINGS</div><div id="__readings_close2" style="color:rgba(0,220,255,1);font-size:.7rem;cursor:pointer;text-shadow:0 0 10px rgba(0,220,255,.7);border:1px solid rgba(0,220,255,.4);padding:3px 10px;border-radius:10px;">✕</div></div><div style="color:rgba(255,255,255,.6);font-size:.55rem;text-align:center;line-height:1.7;">No readings yet.<br>Ask Bob something.</div>';
@@ -9904,119 +9904,4 @@ window.__KBShareCard=function(card,lines){
       var cd=document.getElementById('c369-countdown');
       if(!btn)return;
       if(txc>=TX_PER_DAY){btn.disabled=true;btn.textContent='✦ ALL 6 SENT';cd.textContent='COME BACK TOMORROW';return;}
-      var mins=minsLeft();
-      if(mins>0){btn.disabled=true;btn.textContent='⏳ TRANSMITTING...';cd.textContent='NEXT TRANSMIT IN '+mins+' MIN'+(mins===1?'':'S');}
-      else{btn.disabled=false;btn.textContent='⚡ TRANSMIT';cd.textContent=txc>0?(TX_PER_DAY-txc)+' MORE TO SEND TODAY':'';}
-    }
-    tick();
-    cdTimer=setInterval(tick,30000);
-  }
-
-  /* ── SCREENS ── */
-  var SCREENS=['c369-warn','c369-setup','c369-active','c369-miss','c369-comp'];
-  function showScreen(id){
-    SCREENS.forEach(function(sc){var el=document.getElementById(sc);if(el)el.classList.toggle('on',sc===id);});
-    wrap.classList.toggle('dark',id==='c369-miss');
-  }
-
-  /* ── CHECK DAY COMPLETE ── */
-  function checkDay(){
-    var s=gs(),txc=todayTxs().length;
-    var banner=document.getElementById('c369-banner');
-    if(txc>=TX_PER_DAY){
-      var dn=Math.min(dayNum(s.start),s.days),left=s.days-dn;
-      document.getElementById('c369-ban-s').textContent=dn>=s.days
-        ?'Your ritual is complete.\nThe universe received every single transmission.'
-        :'The universe received today\'s transmissions.\nCome back tomorrow — '+left+' day'+(left===1?'':'s')+' remaining.';
-      banner.classList.add('on');
-    } else {
-      banner.classList.remove('on');
-    }
-  }
-
-  /* ── RENDER ── */
-  function render(){
-    var s=gs();
-    document.getElementById('c369-banner').classList.remove('on');
-    document.getElementById('c369-reset').style.display='none';
-    updateNodeStates();
-
-    if(!s.warned){showScreen('c369-warn');positionAll();return;}
-    if(!s.start){showScreen('c369-setup');selectTier(selTierIdx);positionAll();return;}
-    if(missedDay(s)){showScreen('c369-miss');positionAll();return;}
-    if(dayNum(s.start)>s.days){
-      if(s.days>s.badge)localStorage.setItem(SK.badge,s.days);
-      showScreen('c369-comp');
-      document.getElementById('c369-comp-title').textContent=s.days+'-DAY RITUAL COMPLETE';
-      var nextTier=null;
-      for(var i=0;i<TIERS.length;i++){if(TIERS[i][0]>s.days){nextTier=TIERS[i];break;}}
-      document.getElementById('c369-comp-sub').textContent=
-        'You sent your intention to the universe '+s.days+' days in a row.\nNow watch it unfold.'
-        +(nextTier?'\n\n⚡ '+nextTier[0]+'-DAY '+nextTier[1]+' TIER NOW UNLOCKED ⚡':'');
-      positionAll();return;
-    }
-    showScreen('c369-active');
-    var dn=Math.min(dayNum(s.start),s.days);
-    document.getElementById('c369-day-lbl').textContent='DAY '+dn+' OF '+s.days;
-    var disp=document.getElementById('c369-ints-disp');
-    disp.innerHTML='<div class="c369-int-line g">'+s.i1.toUpperCase()+'</div>'
-      +'<div class="c369-int-line p">'+s.i2.toUpperCase()+'</div>'
-      +'<div class="c369-int-line c">'+s.i3.toUpperCase()+'</div>';
-    updateDots();startCountdown();
-    document.getElementById('c369-reset').style.display='block';
-    checkDay();positionAll();
-  }
-
-  /* ── EVENTS ── */
-  document.getElementById('c369-home').addEventListener('click',function(){window.location.href='/';});
-
-  document.getElementById('c369-warn-ready').addEventListener('click',function(){
-    localStorage.setItem(SK.warn,'1');render();
-  });
-
-  document.getElementById('c369-begin').addEventListener('click',function(){
-    var i1=document.getElementById('c369-i1').value.trim();
-    var i2=document.getElementById('c369-i2').value.trim();
-    var i3=document.getElementById('c369-i3').value.trim();
-    if(!i1){document.getElementById('c369-i1').focus();return;}
-    if(!i2){document.getElementById('c369-i2').focus();return;}
-    if(!i3){document.getElementById('c369-i3').focus();return;}
-    localStorage.setItem(SK.i1,i1);localStorage.setItem(SK.i2,i2);localStorage.setItem(SK.i3,i3);
-    localStorage.setItem(SK.d,TIERS[selTierIdx][0]);
-    localStorage.setItem(SK.s,today());
-    localStorage.setItem(SK.tx,'{}');
-    render();
-  });
-
-  document.getElementById('c369-tx-btn').addEventListener('click',function(){
-    if(this.disabled||txBusy)return;
-    var s=gs(),t=today(),txlog=s.txlog;
-    if(!txlog[t])txlog[t]=[];
-    if(txlog[t].length>=TX_PER_DAY)return;
-    txlog[t].push(Date.now());
-    localStorage.setItem(SK.tx,JSON.stringify(txlog));
-    updateDots();
-    txBurst(s.i1,s.i2,s.i3,function(){
-      startCountdown();
-      if(todayTxs().length>=TX_PER_DAY)checkDay();
-      drawOrbit();
-    });
-  });
-
-  document.getElementById('c369-miss-reset').addEventListener('click',function(){
-    [SK.i1,SK.i2,SK.i3,SK.d,SK.s,SK.tx].forEach(function(k){localStorage.removeItem(k);});render();
-  });
-
-  document.getElementById('c369-reset').addEventListener('click',function(){
-    if(confirm('Reset your ritual? This cannot be undone.')){
-      [SK.i1,SK.i2,SK.i3,SK.d,SK.s,SK.tx].forEach(function(k){localStorage.removeItem(k);});render();
-    }
-  });
-
-  document.getElementById('c369-new').addEventListener('click',function(){
-    [SK.i1,SK.i2,SK.i3,SK.d,SK.s,SK.tx].forEach(function(k){localStorage.removeItem(k);});render();
-  });
-
-  render();
-})();
-</script>
+      var mins=m
