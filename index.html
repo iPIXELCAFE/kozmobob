@@ -10023,8 +10023,9 @@ window.__KBShareCard=function(card,lines){
       if(dn>s.days){
         var nb=Math.max(s.badge||0,s.days);localStorage.setItem(SK.badge,nb);
         document.getElementById('c369-comp').classList.add('on');
-        var ct=document.getElementById('c369-comp-title');if(ct)ct.textContent='✨ '+s.days+'-DAY RITUAL COMPLETE ✨';
-        var cs=document.getElementById('c369-comp-sub');if(cs){var nt=TIERS.filter(function(t){return t[0]>s.days;})[0];cs.textContent=nt?'YOU HAVE UNLOCKED THE '+nt[0]+'-DAY RITUAL\n❆ YOUR FREQUENCY IS RISING ❆':'❆ YOU HAVE MASTERED ALL TIERS ❆\n THE UNIVERSE HAS HEARD YOU';}
+        var ct=document.getElementById('c369-comp-title');if(ct)ct.textContent='✦ '+s.days+'-DAY RITUAL COMPLETE ✦';
+        var cs=document.getElementById('c369-comp-sub');if(cs){var nt=TIERS.filter(function(t){return t[0]>s.days;})[0];var msgs={9:'THE SPARK IS LIT\n54 transmissions sent into the field.\nYou showed up. Now watch it move.',33:'THE MIND SURRENDERED\n33 days. 198 transmissions.\nThe doubt is gone. The frequency holds.',66:'YOU BECAME IT\n66 days. Not a wish anymore.\nAn identity. The universe knows your name.',99:'THE MASTER FREQUENCY\n99 days. 594 transmissions.\nTesla said it. You just proved it.'};
+            cs.textContent=(msgs[s.days]||(nt?'YOU HAVE UNLOCKED THE '+nt[0]+'-DAY RITUAL\n❆ YOUR FREQUENCY IS RISING ❆':'THE UNIVERSE HAS HEARD YOU\n❆ ALL TIERS COMPLETE ❆'))+(nt?'\n\nREADY TO GO DEEPER?':'');}
         updateNodeStates();setTimeout(positionAll,0);return;
       }
       document.getElementById('c369-active').classList.add('on');
@@ -10034,8 +10035,8 @@ window.__KBShareCard=function(card,lines){
       var de=document.getElementById('c369-tx-dots');if(de){var dh='';for(var d2=0;d2<TX_PER_DAY;d2++)dh+='<div class="c369-tx-dot'+(d2<ttxs?' lit':'')+'"></div>';de.innerHTML=dh;}
       var txBtn=document.getElementById('c369-tx-btn'),cd=document.getElementById('c369-countdown');
       var txDone=ttxs>=TX_PER_DAY,ml=minsLeft();
-      if(txBtn){txBtn.disabled=txDone||ml>0;txBtn.textContent=txDone?'❆ TRANSMITTED TODAY ❆':ml>0?'⚡ NEXT IN '+ml+'m':'⚡ TRANSMIT NOW';}
-      if(cd)cd.textContent=txDone?'ALL '+TX_PER_DAY+' TRANSMISSIONS COMPLETE · COME BACK TOMORROW':ml>0?'NEXT TRANSMISSION AVAILABLE IN '+ml+' MINUTES':'';
+      if(txBtn){txBtn.disabled=txDone||ml>0;txBtn.textContent=txDone?'✦ THE UNIVERSE RECEIVED YOU ✦':ml>0?'⚡ NEXT IN '+ml+'m':'⚡ TRANSMIT NOW';}
+      if(cd)cd.textContent=txDone?'THE FIELD IS SET · RETURN TOMORROW':ml>0?'NEXT TRANSMISSION IN '+ml+' MINUTES':'';
       updateNodeStates();setTimeout(positionAll,0);return;
     }
     document.getElementById('c369-setup').classList.add('on');
