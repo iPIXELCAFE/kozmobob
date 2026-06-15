@@ -9636,7 +9636,7 @@ window.__KBShareCard=function(card,lines){
     '@media(max-width:900px){.c369-top{top:64px;}}',
     '#c369-home{position:absolute;left:50%;transform:translateX(-50%);top:60%;white-space:nowrap;pointer-events:all;background:rgba(0,0,0,.6);border:1px solid rgba(255,200,40,.3);border-radius:20px;color:rgba(255,210,60,.75);font-family:inherit;font-size:.55rem;letter-spacing:.18em;padding:7px 16px;cursor:pointer;text-transform:uppercase;transition:all .2s;z-index:10;}',
     '#c369-home:hover{border-color:rgba(255,215,60,.7);color:rgba(255,225,80,1);box-shadow:0 0 16px rgba(255,200,40,.3);}',
-    '@media(max-width:900px){#c369-home{top:auto;bottom:48px;}}',
+    '@media(max-width:900px){#c369-home{top:auto;bottom:92px;}}',
     '.c369-node{position:absolute;transform:translate(-50%,-50%);width:clamp(58px,15vw,76px);height:clamp(58px,15vw,76px);border-radius:50%;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;z-index:7;transition:left .55s cubic-bezier(.3,0,.2,1),top .55s cubic-bezier(.3,0,.2,1),opacity .3s,border-color .3s,box-shadow .3s;cursor:pointer;}',
     '.c369-node .cn-days{font-size:clamp(1.2rem,4.5vw,1.65rem);line-height:1.1;color:rgba(255,215,70,.97);text-shadow:0 0 14px rgba(255,160,20,.7);}',
     '.c369-node .cn-name{font-size:.38rem;letter-spacing:.14em;color:rgba(220,185,255,.85);}',
@@ -9828,7 +9828,7 @@ window.__KBShareCard=function(card,lines){
       var homeBtn=document.getElementById('c369-home');
       if(homeBtn){
         var ch=center.offsetHeight||160;
-        homeBtn.style.top=(g.cy+ch/2+18)+'px';
+        homeBtn.style.top=(g.cy+ch/2+32)+'px';
         homeBtn.style.bottom='auto';
       }
     }
@@ -9944,10 +9944,10 @@ window.__KBShareCard=function(card,lines){
     var s=gs();
     ['c369-warn','c369-setup','c369-active','c369-miss','c369-comp'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('on');});
     updateNodeStates();
-    if(!s.warned){document.getElementById('c369-warn').classList.add('on');return;}
+    if(!s.warned){document.getElementById('c369-warn').classList.add('on');setTimeout(positionAll,0);return;}
     if(s.start&&missedDay(s)){
       [SK.d,SK.s,SK.tx].forEach(function(k){localStorage.removeItem(k);});
-      document.getElementById('c369-miss').classList.add('on');return;
+      document.getElementById('c369-miss').classList.add('on');setTimeout(positionAll,0);return;
     }
     if(s.start){
       var dn=dayNum(s.start);
@@ -9956,7 +9956,7 @@ window.__KBShareCard=function(card,lines){
         document.getElementById('c369-comp').classList.add('on');
         var ct=document.getElementById('c369-comp-title');if(ct)ct.textContent='✨ '+s.days+'-DAY RITUAL COMPLETE ✨';
         var cs=document.getElementById('c369-comp-sub');if(cs){var nt=TIERS.filter(function(t){return t[0]>s.days;})[0];cs.textContent=nt?'YOU HAVE UNLOCKED THE '+nt[0]+'-DAY RITUAL\n❆ YOUR FREQUENCY IS RISING ❆':'❆ YOU HAVE MASTERED ALL TIERS ❆\n THE UNIVERSE HAS HEARD YOU';}
-        updateNodeStates();return;
+        updateNodeStates();setTimeout(positionAll,0);return;
       }
       document.getElementById('c369-active').classList.add('on');
       var dl=document.getElementById('c369-day-lbl');if(dl)dl.textContent='DAY '+dn+' OF '+s.days;
@@ -9967,9 +9967,10 @@ window.__KBShareCard=function(card,lines){
       var txDone=ttxs>=TX_PER_DAY,ml=minsLeft();
       if(txBtn){txBtn.disabled=txDone||ml>0;txBtn.textContent=txDone?'❆ TRANSMITTED TODAY ❆':ml>0?'⚡ NEXT IN '+ml+'m':'⚡ TRANSMIT NOW';}
       if(cd)cd.textContent=txDone?'ALL '+TX_PER_DAY+' TRANSMISSIONS COMPLETE · COME BACK TOMORROW':ml>0?'NEXT TRANSMISSION AVAILABLE IN '+ml+' MINUTES':'';
-      updateNodeStates();return;
+      updateNodeStates();setTimeout(positionAll,0);return;
     }
     document.getElementById('c369-setup').classList.add('on');
+    setTimeout(positionAll,0);
   }
 
   /* ── EVENTS ── */
