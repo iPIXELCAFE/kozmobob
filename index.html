@@ -9797,7 +9797,7 @@ window.__KBShareCard=function(card,lines){
   (function(){
     var sc=document.createElement('canvas');
     sc.id='kb369-stars';
-    sc.style.cssText='position:fixed;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;background:#000;';
+    sc.style.cssText='position:fixed;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;';
     document.body.insertBefore(sc,document.body.firstChild);
     var sctx=sc.getContext('2d');
     var SW,SH,sstars=[],sshoots=[],sframe=0;
@@ -9815,7 +9815,7 @@ window.__KBShareCard=function(card,lines){
     function saddShoot(){sshoots.push({x:Math.random()*SW*0.6,y:Math.random()*SH*0.4,len:90+Math.random()*150,spd:10+Math.random()*15,life:1,ang:0.32+Math.random()*0.28});}
     function sdraw(){
       sframe++;
-      sctx.fillStyle='#000';sctx.fillRect(0,0,SW,SH);
+      sctx.clearRect(0,0,SW,SH);
       var sec=sframe/60;
       for(var i=0;i<sstars.length;i++){
         var s=sstars[i];
