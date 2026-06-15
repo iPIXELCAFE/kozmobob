@@ -2569,15 +2569,24 @@ const AudioManager = (() => {
     })();
   }
 
-  function setVolume(v, t = 0.4) {
+  let mutedFlag = false;
+  function mute(m) {
+    mutedFlag = m;
     if (!masterGain) return;
+    const n = ctx.currentTime;
+    masterGain.gain.cancelScheduledValues(n);
+    masterGain.gain.setValueAtTime(masterGain.gain.value, n);
+    masterGain.gain.linearRampToValueAtTime(m ? 0 : 0.15, n + 0.3);
+  }
+  function setVolume(v, t = 0.4) {
+    if (!masterGain || mutedFlag) return;
     const n = ctx.currentTime;
     masterGain.gain.cancelScheduledValues(n);
     masterGain.gain.setValueAtTime(masterGain.gain.value, n);
     masterGain.gain.linearRampToValueAtTime(Math.max(0, Math.min(1, v)), n + t);
   }
 
-  return { init, setVolume };
+  return { init, setVolume, mute };
 })();
 window.AudioManager = AudioManager;
 
@@ -7519,6 +7528,9 @@ function showPaywall(mode, sign, col) {
 /* ── 10. FIRST-INTERACTION GATE (unlocks AudioContext) ── */
 const boot = () => {
   AudioManager.init();
+  /* sync mute state: default is muted unless user explicitly enabled */
+  const soundOn = localStorage.getItem('__kb_sound') === '1';
+  if (!soundOn) AudioManager.mute(true);
   document.removeEventListener('pointerdown', boot);
   document.removeEventListener('keydown', boot);
 };
@@ -8381,7 +8393,7 @@ window.CARD_BACK_TEXT_EXT = window.CARD_BACK_TEXT_EXT || {};
     btn.classList.toggle('muted',m);
     btn.textContent=m?'\u25A0':'\u266a'; /* ■ = muted, ♪ = on */
     if(masterGain) masterGain.gain.setTargetAtTime(m?0:0.18,ctx.currentTime,0.3);
-    if(window.AudioManager) window.AudioManager.setVolume(m?0:0.15,0.3);
+    if(window.AudioManager) window.AudioManager.mute(m);
   }
   window.__KBSound={
     flip:function(){
