@@ -10037,7 +10037,7 @@ window.__KBShareCard=function(card,lines){
       var txDone=ttxs>=TX_PER_DAY,ml=minsLeft();
       if(txBtn){txBtn.disabled=txDone||ml>0;txBtn.textContent=txDone?'✦ THE UNIVERSE RECEIVED YOU ✦':ml>0?'⚡ NEXT IN '+ml+'m':'⚡ TRANSMIT NOW';}
       var now=new Date(),mn=new Date(now);mn.setHours(24,0,0,0);var ms=mn-now,rh=Math.floor(ms/3600000),rm=Math.floor((ms%3600000)/60000),resetStr='RESETS IN '+rh+'H '+rm+'M';
-      if(cd)cd.textContent=txDone?'THE FIELD IS SET · RETURN TOMORROW':ml>0?resetStr:'';
+      if(cd)cd.textContent=txDone?resetStr:ml>0?resetStr:'';
       updateNodeStates();setTimeout(positionAll,0);return;
     }
     document.getElementById('c369-setup').classList.add('on');
