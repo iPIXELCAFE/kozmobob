@@ -9610,8 +9610,8 @@ window.__KBShareCard=function(card,lines){
   var ANG=[-Math.PI/2,0,Math.PI/2,Math.PI];
   var TX_PER_DAY=6, TX_LOCK=15*60*1000;
 
-  function today(){return new Date().toISOString().slice(0,10);}
-  function yesterday(){var d=new Date();d.setDate(d.getDate()-1);return d.toISOString().slice(0,10);}
+  function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  function yesterday(){var d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
   function gs(){
     return {
       i1:localStorage.getItem(SK.i1)||'',
@@ -10014,7 +10014,7 @@ window.__KBShareCard=function(card,lines){
     ['c369-warn','c369-setup','c369-active','c369-miss','c369-comp'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('on');});
     updateNodeStates();
     if(!s.warned){document.getElementById('c369-warn').classList.add('on');setTimeout(positionAll,0);return;}
-    if(s.start&&missedDay(s)){
+    if(s.start&&missedDay(s)&&todayTxs().length<TX_PER_DAY){
       [SK.d,SK.s,SK.tx].forEach(function(k){localStorage.removeItem(k);});
       document.getElementById('c369-miss').classList.add('on');setTimeout(positionAll,0);return;
     }
